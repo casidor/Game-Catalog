@@ -16,7 +16,8 @@
                            FontSize="20"
                            FontWeight="Bold"
                            VerticalAlignment="Center"/>
-                <Button Content="+ Додати гру"/>
+                <Button Content="+ Додати гру"
+                        Click="OnAddGameClick"/>
             </StackPanel>
         </Border>
         <ListBox Grid.Row="1"

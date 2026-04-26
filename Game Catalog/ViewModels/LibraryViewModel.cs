@@ -1,4 +1,5 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
+using CommunityToolkit.Mvvm.Input;
 using Game_Catalog.Models;
 using System;
 using System.Collections.Generic;
@@ -15,7 +16,11 @@ namespace Game_Catalog.ViewModels
         /// <summary>
         /// Collection of all games in the library.
         /// </summary>
-        public ObservableCollection<Game> Games { get; } = new();
+        public ObservableCollection<Game> Games => AppData.Instance.Games;
+        /// <summary>
+        /// Collection of available studios for game assignment.
+        /// </summary>
+        public ObservableCollection<Studio> Studios => AppData.Instance.Studios;
         /// <summary>
         /// Currently selected game in the list.
         /// </summary>
