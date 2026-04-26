@@ -3,18 +3,92 @@
         xmlns:vm="using:Game_Catalog.ViewModels"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-        mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
+        mc:Ignorable="d" d:DesignWidth="1100" d:DesignHeight="700"
         x:Class="Game_Catalog.Views.MainWindow"
         x:DataType="vm:MainWindowViewModel"
-        Icon="/Assets/avalonia-logo.ico"
-        Title="Game_Catalog">
+        Title="Game Catalog"
+        MinWidth="900"
+        MinHeight="600"
+        Background="#0f0f13">
 
     <Design.DataContext>
-        <!-- This only sets the DataContext for the previewer in an IDE,
-             to set the actual DataContext for runtime, set the DataContext property in code (look at App.axaml.cs) -->
         <vm:MainWindowViewModel/>
     </Design.DataContext>
 
-    <TextBlock Text="{Binding Greeting}" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+    <Grid ColumnDefinitions="220,*">
+
+        <!-- Sidebar -->
+        <Border Grid.Column="0"
+                Background="#16161d"
+                BorderBrush="#2a2a3a"
+                BorderThickness="0,0,1,0">
+            <DockPanel>
+
+                <!-- Logo -->
+                <Border DockPanel.Dock="Top"
+                        Padding="24,32,24,24">
+                    <StackPanel Spacing="4">
+                        <TextBlock Text="🎮"
+                                   FontSize="28"/>
+                        <TextBlock Text="Game Catalog"
+                                   FontSize="16"
+                                   FontWeight="Bold"
+                                   Foreground="#e0e0f0"/>
+                        <TextBlock Text="My Library"
+                                   FontSize="11"
+                                   Foreground="#6060a0"/>
+                    </StackPanel>
+                </Border>
+
+                <!-- Nav buttons -->
+                <StackPanel DockPanel.Dock="Top"
+                            Spacing="4"
+                            Margin="12,0">
+
+                    <Button Content="🎮  Бібліотека"
+                            Command="{Binding NavigateToCommand}"
+                            CommandParameter="{Binding LibraryPage}"
+                            HorizontalAlignment="Stretch"
+                            HorizontalContentAlignment="Left"
+                            Padding="16,12"
+                            FontSize="14"
+                            Background="Transparent"
+                            Foreground="#c0c0e0"
+                            CornerRadius="8"/>
+
+                    <Button Content="🏢  Студії"
+                            Command="{Binding NavigateToCommand}"
+                            CommandParameter="{Binding StudioPage}"
+                            HorizontalAlignment="Stretch"
+                            HorizontalContentAlignment="Left"
+                            Padding="16,12"
+                            FontSize="14"
+                            Background="Transparent"
+                            Foreground="#c0c0e0"
+                            CornerRadius="8"/>
+
+                    <Button Content="📦  Архів"
+                            Command="{Binding NavigateToCommand}"
+                            CommandParameter="{Binding ArchivePage}"
+                            HorizontalAlignment="Stretch"
+                            HorizontalContentAlignment="Left"
+                            Padding="16,12"
+                            FontSize="14"
+                            Background="Transparent"
+                            Foreground="#c0c0e0"
+                            CornerRadius="8"/>
+
+                </StackPanel>
+
+            </DockPanel>
+        </Border>
+
+        <!-- Main content -->
+        <Border Grid.Column="1"
+                Background="#0f0f13">
+            <ContentControl Content="{Binding CurrentPage}"/>
+        </Border>
+
+    </Grid>
 
 </Window>

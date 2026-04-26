@@ -1,7 +1,47 @@
-﻿namespace Game_Catalog.ViewModels
+﻿using CommunityToolkit.Mvvm.ComponentModel;
+using CommunityToolkit.Mvvm.Input;
+
+namespace Game_Catalog.ViewModels
 {
+    /// <summary>
+    /// Main window ViewModel that manages page navigation.
+    /// </summary>
     public partial class MainWindowViewModel : ViewModelBase
     {
-        public string Greeting { get; } = "Welcome to Avalonia!";
+        /// <summary>
+        /// Currently displayed page.
+        /// </summary>
+        [ObservableProperty]
+        private ViewModelBase _currentPage;
+
+        /// <summary>
+        /// The game library page.
+        /// </summary>
+        public LibraryViewModel LibraryPage { get; } = new();
+
+        /// <summary>
+        /// The studio management page.
+        /// </summary>
+        public StudioViewModel StudioPage { get; } = new();
+
+        /// <summary>
+        /// The archive page.
+        /// </summary>
+        public ArchiveViewModel ArchivePage { get; } = new();
+
+        public MainWindowViewModel()
+        {
+            _currentPage = LibraryPage;
+        }
+
+        /// <summary>
+        /// Navigates to the specified page.
+        /// </summary>
+        /// <param name="page">Target page ViewModel.</param>
+        [RelayCommand]
+        private void NavigateTo(ViewModelBase page)
+        {
+            CurrentPage = page;
+        }
     }
 }
