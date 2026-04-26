@@ -2,11 +2,11 @@ using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Markup.Xaml;
 
-namespace Game_Catalog;
+namespace Game_Catalog.Views;
 
-public partial class Library : UserControl
+public partial class LibraryView : UserControl
 {
-    public Library()
+    public LibraryView()
     {
         InitializeComponent();
     }
