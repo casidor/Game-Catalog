@@ -1,9 +1,11 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using Game_Catalog.Models;
+using Game_Catalog.Validation;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.ComponentModel.DataAnnotations;
 using System.Net.NetworkInformation;
 using System.Runtime.InteropServices;
 using System.Text;
@@ -18,36 +20,57 @@ namespace Game_Catalog.ViewModels
         /// <summary>
         /// Game title entered by the user.
         /// </summary>
+        [Required(ErrorMessage = "Назва не може бути порожньою")]
+        [MinLength(2, ErrorMessage = "Назва занадто короткая")]
+        [NotWhiteSpace(ErrorMessage = "Назва не може бути лише з пробілів")]
+        [MaxLength(100, ErrorMessage = "Назва не може перевищувати 100 символів")]
+        [NotifyDataErrorInfo]
         [ObservableProperty]
         private string _title = string.Empty;
 
         /// <summary>
         /// Selected developer studio.
         /// </summary>
+        [Required(ErrorMessage = "Оберіть студію-розробника")]
+        [NotifyDataErrorInfo]
         [ObservableProperty]
         private Studio? _selectedStudio;
 
         /// <summary>
         /// Game genre entered by the user.
         /// </summary>
+        [Required(ErrorMessage = "Жанр не може бути порожнім")]
+        [MinLength(2, ErrorMessage = "Жанр занадто короткий")]
+        [NotWhiteSpace(ErrorMessage = "Жанр не може бути лише з пробілів")]
+        [MaxLength(50, ErrorMessage = "Жанр не може перевищувати 50 символів")]
+        [NotifyDataErrorInfo]
         [ObservableProperty]
         private string _genre = string.Empty;
 
         /// <summary>
         /// Release year entered by the user.
         /// </summary>
+        [CurrentYearRange(1970, ErrorMessage = "Некоректний рік випуску")]
+        [NotifyDataErrorInfo]
         [ObservableProperty]
-        private int _releaseYear = 2024;
+        private int _releaseYear = DateTime.Now.Year;
 
         /// <summary>
         /// Platform entered by the user.
         /// </summary>
+        [Required(ErrorMessage = "Платформа не може бути порожньою")]
+        [MinLength(2, ErrorMessage = "Платформа занадто короткая")]
+        [NotWhiteSpace(ErrorMessage = "Платформа не може бути лише з пробілів")]
+        [MaxLength(50, ErrorMessage = "Платформа не може перевищувати 50 символів")]
+        [NotifyDataErrorInfo]
         [ObservableProperty]
         private string _platform = string.Empty;
 
         /// <summary>
         /// Disk size in GB entered by the user.
         /// </summary>
+        [Range(0.01, 1000.0, ErrorMessage = "Розмір має бути від 0.01 до 1000 ГБ")]
+        [NotifyDataErrorInfo]
         [ObservableProperty]
         private double _sizeGB;
 
@@ -60,12 +83,16 @@ namespace Game_Catalog.ViewModels
         /// <summary>
         /// Hours played entered by the user.
         /// </summary>
+        [Range(0.0, 100000.0, ErrorMessage = "Години не можуть бути від'ємними")]
+        [NotifyDataErrorInfo]
         [ObservableProperty]
         private double _hoursPlayed;
 
         /// <summary>
         /// Personal rating entered by the user (1 to 10).
         /// </summary>
+        [Range(1, 10, ErrorMessage = "Оцінка від 1 до 10")]
+        [NotifyDataErrorInfo]
         [ObservableProperty]
         private int _personalRating = 5;
 
@@ -141,6 +168,8 @@ namespace Game_Catalog.ViewModels
         [RelayCommand]
         private void Confirm()
         {
+            ValidateAllProperties();
+            if (HasErrors) return;
             Confirmed = true;
             CloseRequested?.Invoke();
         }
