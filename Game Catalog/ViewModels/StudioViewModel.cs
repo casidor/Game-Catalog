@@ -1,4 +1,5 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
+using CommunityToolkit.Mvvm.Input;
 using Game_Catalog.Models;
 using System;
 using System.Collections.Generic;
@@ -21,5 +22,20 @@ namespace Game_Catalog.ViewModels
         /// </summary>
         [ObservableProperty]
         private Studio? _selectedStudio;
+
+        /// <summary>
+        /// Raised when the user selects a studio to view details.
+        /// </summary>
+        public event Action<Studio>? StudioSelected;
+
+        /// <summary>
+        /// Navigates to the studio detail page.
+        /// </summary>
+        /// <param name="studio">The selected studio.</param>
+        [RelayCommand]
+        private void SelectStudio(Studio studio)
+        {
+            StudioSelected?.Invoke(studio);
+        }
     }
 }

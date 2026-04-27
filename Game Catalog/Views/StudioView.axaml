@@ -21,9 +21,10 @@
                         Click="OnAddStudioClick"/>
             </StackPanel>
         </Border>
-        <ListBox Grid.Row="1"
-                 ItemsSource="{Binding Studios}"
-                 SelectedItem="{Binding SelectedStudio}">
+	<ListBox Grid.Row="1"
+			 ItemsSource="{Binding Studios}"
+			 SelectedItem="{Binding SelectedStudio}"
+             SelectionChanged="OnSelectionChanged">
             <ListBox.ItemTemplate>
                 <DataTemplate x:DataType="models:Studio">
                     <Grid ColumnDefinitions="*,150,100" Width="600">

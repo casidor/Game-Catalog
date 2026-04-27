@@ -3,6 +3,9 @@ using CommunityToolkit.Mvvm.Input;
 using Game_Catalog.Models;
 using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
+using System.Net.NetworkInformation;
+using System.Runtime.InteropServices;
 using System.Text;
 
 namespace Game_Catalog.ViewModels
@@ -47,6 +50,15 @@ namespace Game_Catalog.ViewModels
         public event Action? CloseRequested;
 
         /// <summary>
+        /// Title displayed in the window header.
+        /// </summary>
+        public string WindowTitle { get; }
+
+        public AddStudioViewModel()
+        {
+            WindowTitle = "Додати студію";
+        }
+        /// <summary>
         /// Creates a new instance of the Studio class using the current property values.
         /// </summary>
         /// <returns>A Studio object initialized with the Name, Country, FoundationYear, and MainGenre properties of the current
@@ -60,6 +72,20 @@ namespace Game_Catalog.ViewModels
                 FoundationYear = this.FoundationYear,
                 MainGenre = this.MainGenre
             };
+        }
+
+        /// <summary>
+        /// Initializes the view model with an existing game for editing.
+        /// </summary>
+        /// <param name="game">The game to edit.</param>
+        /// <param name="studios">Available studios collection.</param>
+        public AddStudioViewModel(Studio studio, ObservableCollection<Studio> studios)
+        {
+            WindowTitle = "Редагувати студію";
+            Name = studio.Name;
+            Country = studio.Country;
+            FoundationYear = studio.FoundationYear;
+            MainGenre = studio.MainGenre;
         }
 
         /// <summary>

@@ -24,4 +24,12 @@ public partial class StudioView : UserControl
         if (vm.Confirmed)
             AppData.Instance.Studios.Add(vm.BuildStudio());
     }
+    private void OnSelectionChanged(object sender, SelectionChangedEventArgs e)
+    {
+        if (DataContext is StudioViewModel vm && vm.SelectedStudio != null)
+        {
+            vm.SelectStudioCommand.Execute(vm.SelectedStudio);
+            vm.SelectedStudio = null;
+        }
+    }
 }
