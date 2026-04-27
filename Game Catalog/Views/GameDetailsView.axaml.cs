@@ -50,12 +50,23 @@ public partial class GameDetailsView : UserControl
         AppData.Instance.ArchivedGames.Add(detailVm.Game);
         detailVm.GoBackCommand.Execute(null);
     }
+    private void OnRestoreClick(object sender, RoutedEventArgs e)
+    {
+        if (DataContext is not GameDetailsViewModel detailVm) return;
 
+        AppData.Instance.ArchivedGames.Remove(detailVm.Game);
+        AppData.Instance.Games.Add(detailVm.Game);
+        detailVm.GoBackCommand.Execute(null);
+    }
     private void OnDeleteClick(object sender, RoutedEventArgs e)
     {
         if (DataContext is not GameDetailsViewModel detailVm) return;
 
-        AppData.Instance.Games.Remove(detailVm.Game);
+        if (detailVm.IsArchived)
+            AppData.Instance.ArchivedGames.Remove(detailVm.Game);
+        else
+            AppData.Instance.Games.Remove(detailVm.Game);
+
         detailVm.GoBackCommand.Execute(null);
     }
 }

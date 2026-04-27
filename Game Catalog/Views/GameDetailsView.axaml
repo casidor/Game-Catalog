@@ -32,10 +32,18 @@
 						Margin="0,16,0,0"
 						Spacing="12">
 				<StackPanel Orientation="Horizontal" Spacing="8">
-					<Button Content="✏ Редагувати" Click="OnEditClick"/>
-					<Button Content="📦 В архів" Click="OnArchiveClick"/>
-					<Button Content="🗑 Видалити" Click="OnDeleteClick"/>
-				</StackPanel>
+    <Button Content="✏ Редагувати"
+            Click="OnEditClick"
+            IsVisible="{Binding !IsArchived}"/>
+    <Button Content="📦 В архів"
+            Click="OnArchiveClick"
+            IsVisible="{Binding !IsArchived}"/>
+    <Button Content="♻ Відновити"
+            Click="OnRestoreClick"
+            IsVisible="{Binding IsArchived}"/>
+    <Button Content="🗑 Видалити"
+            Click="OnDeleteClick"/>
+</StackPanel>
 
 				<StackPanel Spacing="2">
 					<TextBlock Text="Жанр" Opacity="0.6" FontSize="12"/>

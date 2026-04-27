@@ -33,7 +33,8 @@ namespace Game_Catalog.ViewModels
         public MainWindowViewModel()
         {
             _currentPage = LibraryPage;
-            LibraryPage.GameSelected += NavigateToGame;
+            LibraryPage.GameSelected += game => NavigateToGame(game, false);
+            ArchivePage.GameSelected += game => NavigateToGame(game, true);
         }
 
         /// <summary>
@@ -45,14 +46,14 @@ namespace Game_Catalog.ViewModels
         {
             CurrentPage = page;
         }
+
         /// <summary>
         /// Navigates to the game detail page.
         /// </summary>
-        /// <param name="game">The game to display.</param>
-        public void NavigateToGame(Game game)
+        public void NavigateToGame(Game game, bool isArchived)
         {
-            var detailVm = new GameDetailsViewModel(game);
-            detailVm.BackRequested += () => CurrentPage = LibraryPage;
+            var detailVm = new GameDetailsViewModel(game, isArchived);
+            detailVm.BackRequested += () => CurrentPage = isArchived ? ArchivePage : LibraryPage;
             CurrentPage = detailVm;
         }
     }

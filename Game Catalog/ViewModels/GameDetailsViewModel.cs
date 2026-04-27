@@ -22,6 +22,11 @@ namespace Game_Catalog.ViewModels
         /// </summary>
         public event Action? BackRequested;
 
+        /// <summary>
+        /// Indicates whether the game is in the archive.
+        /// </summary>
+        public bool IsArchived { get; }
+
         /// <summary> Game title. </summary>
         public string Title => Game.Title;
 
@@ -49,9 +54,10 @@ namespace Game_Catalog.ViewModels
         /// <summary> Developer studio name. </summary>
         public string DeveloperName => Game.Developer?.Name ?? "Невідомо";
 
-        public GameDetailsViewModel(Game game)
+        public GameDetailsViewModel(Game game, bool isArchived = false)
         {
             Game = game;
+            IsArchived = isArchived;
         }
 
         /// <summary>
