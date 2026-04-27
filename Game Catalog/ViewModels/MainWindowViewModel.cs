@@ -1,5 +1,6 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using Game_Catalog.Models;
 
 namespace Game_Catalog.ViewModels
 {
@@ -32,6 +33,7 @@ namespace Game_Catalog.ViewModels
         public MainWindowViewModel()
         {
             _currentPage = LibraryPage;
+            LibraryPage.GameSelected += NavigateToGame;
         }
 
         /// <summary>
@@ -42,6 +44,16 @@ namespace Game_Catalog.ViewModels
         private void NavigateTo(ViewModelBase page)
         {
             CurrentPage = page;
+        }
+        /// <summary>
+        /// Navigates to the game detail page.
+        /// </summary>
+        /// <param name="game">The game to display.</param>
+        public void NavigateToGame(Game game)
+        {
+            var detailVm = new GameDetailsViewModel(game);
+            detailVm.BackRequested += () => CurrentPage = LibraryPage;
+            CurrentPage = detailVm;
         }
     }
 }

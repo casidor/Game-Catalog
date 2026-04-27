@@ -24,4 +24,12 @@ public partial class LibraryView : UserControl
         if (vm.Confirmed)
             AppData.Instance.Games.Add(vm.BuildGame());
     }
+    private void OnSelectionChanged(object sender, SelectionChangedEventArgs e)
+    {
+        if (DataContext is LibraryViewModel vm && vm.SelectedGame != null)
+        {
+            vm.SelectGameCommand.Execute(vm.SelectedGame);
+            vm.SelectedGame = null;
+        }
+    }
 }

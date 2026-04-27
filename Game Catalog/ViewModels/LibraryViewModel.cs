@@ -17,14 +17,31 @@ namespace Game_Catalog.ViewModels
         /// Collection of all games in the library.
         /// </summary>
         public ObservableCollection<Game> Games => AppData.Instance.Games;
+
         /// <summary>
         /// Collection of available studios for game assignment.
         /// </summary>
         public ObservableCollection<Studio> Studios => AppData.Instance.Studios;
+
         /// <summary>
         /// Currently selected game in the list.
         /// </summary>
         [ObservableProperty]
         private Game? _selectedGame;
+
+        /// <summary>
+        /// Raised when the user selects a game to view details.
+        /// </summary>
+        public event Action<Game>? GameSelected;
+
+        /// <summary>
+        /// Navigates to the game detail page.
+        /// </summary>
+        /// <param name="game">The selected game.</param>
+        [RelayCommand]
+        private void SelectGame(Game game)
+        {
+            GameSelected?.Invoke(game);
+        }
     }
 }

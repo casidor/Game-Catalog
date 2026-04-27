@@ -22,7 +22,8 @@
         </Border>
         <ListBox Grid.Row="1"
                  ItemsSource="{Binding Games}"
-                 SelectedItem="{Binding SelectedGame}">
+                 SelectedItem="{Binding SelectedGame}"
+                 SelectionChanged="OnSelectionChanged">
             <ListBox.ItemTemplate>
                 <DataTemplate x:DataType="models:Game">
                     <Grid ColumnDefinitions="*,150,100" Width="600">
