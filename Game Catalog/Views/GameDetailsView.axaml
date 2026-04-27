@@ -11,7 +11,7 @@
 					Command="{Binding GoBackCommand}"
 					Padding="8,4"
 					Margin="0,0,16,0"/>
-			<TextBlock Text="{Binding Game.Title}"
+			<TextBlock Text="{Binding Title}"
 					   FontSize="24"
 					   FontWeight="Bold"
 					   Padding="0"
@@ -31,33 +31,39 @@
 			<StackPanel Grid.Column="1"
 						Margin="0,16,0,0"
 						Spacing="12">
+				<StackPanel Orientation="Horizontal" Spacing="8">
+					<Button Content="✏ Редагувати" Click="OnEditClick"/>
+					<Button Content="📦 В архів" Click="OnArchiveClick"/>
+					<Button Content="🗑 Видалити" Click="OnDeleteClick"/>
+				</StackPanel>
+
 				<StackPanel Spacing="2">
 					<TextBlock Text="Жанр" Opacity="0.6" FontSize="12"/>
-					<TextBlock Text="{Binding Game.Genre}" FontSize="16"/>
+					<TextBlock Text="{Binding Genre}" FontSize="16"/>
 				</StackPanel>
 				<StackPanel Spacing="2">
 					<TextBlock Text="Рік випуску" Opacity="0.6" FontSize="12"/>
-					<TextBlock Text="{Binding Game.ReleaseYear}" FontSize="16"/>
+					<TextBlock Text="{Binding ReleaseYear}" FontSize="16"/>
 				</StackPanel>
 				<StackPanel Spacing="2">
 					<TextBlock Text="Платформа" Opacity="0.6" FontSize="12"/>
-					<TextBlock Text="{Binding Game.Platform}" FontSize="16"/>
+					<TextBlock Text="{Binding Platform}" FontSize="16"/>
 				</StackPanel>
 				<StackPanel Spacing="2">
 					<TextBlock Text="Розмір на диску" Opacity="0.6" FontSize="12"/>
-					<TextBlock Text="{Binding Game.SizeGB, StringFormat='{}{0} ГБ'}" FontSize="16"/>
+					<TextBlock Text="{Binding SizeGB, StringFormat='{}{0} ГБ'}" FontSize="16"/>
 				</StackPanel>
 				<StackPanel Spacing="2">
 					<TextBlock Text="Статус" Opacity="0.6" FontSize="12"/>
-					<TextBlock Text="{Binding Game.Status}" FontSize="16"/>
+					<TextBlock Text="{Binding Status}" FontSize="16"/>
 				</StackPanel>
 				<StackPanel Spacing="2">
 					<TextBlock Text="Годин зіграно" Opacity="0.6" FontSize="12"/>
-					<TextBlock Text="{Binding Game.HoursPlayed, StringFormat='{}{0} год'}" FontSize="16"/>
+					<TextBlock Text="{Binding HoursPlayed, StringFormat='{}{0} год'}" FontSize="16"/>
 				</StackPanel>
 				<StackPanel Spacing="2">
 					<TextBlock Text="Оцінка" Opacity="0.6" FontSize="12"/>
-					<TextBlock Text="{Binding Game.PersonalRating, StringFormat='{}{0}/10'}" FontSize="16"/>
+					<TextBlock Text="{Binding PersonalRating, StringFormat='{}{0}/10'}" FontSize="16"/>
 				</StackPanel>
 			</StackPanel>
 		</Grid>

@@ -87,9 +87,16 @@ namespace Game_Catalog.ViewModels
         /// Event triggered when the dialog should be closed.
         /// </summary>
         public event Action? CloseRequested;
+
+        /// <summary>
+        /// Title displayed in the window header.
+        /// </summary>
+        public string WindowTitle { get; }
+
         public AddGameViewModel(ObservableCollection<Studio> studios)
         {
             Studios = studios;
+            WindowTitle = "Додати гру";
         }
 
         /// <summary>
@@ -107,6 +114,26 @@ namespace Game_Catalog.ViewModels
             HoursPlayed = HoursPlayed,
             PersonalRating = PersonalRating
         };
+
+        /// <summary>
+        /// Initializes the view model with an existing game for editing.
+        /// </summary>
+        /// <param name="game">The game to edit.</param>
+        /// <param name="studios">Available studios collection.</param>
+        public AddGameViewModel(Game game, ObservableCollection<Studio> studios)
+        {
+            WindowTitle = "Редагувати гру";
+            Studios = studios;
+            Title = game.Title;
+            SelectedStudio = game.Developer;
+            Genre = game.Genre;
+            ReleaseYear = game.ReleaseYear;
+            Platform = game.Platform;
+            SizeGB = game.SizeGB;
+            Status = game.Status;
+            HoursPlayed = game.HoursPlayed;
+            PersonalRating = game.PersonalRating;
+        }
 
         /// <summary>
         /// Confirms the dialog and signals the window to close.

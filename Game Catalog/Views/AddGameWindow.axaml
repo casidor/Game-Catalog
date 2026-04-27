@@ -3,7 +3,7 @@
         xmlns:vm="using:Game_Catalog.ViewModels"
         x:Class="Game_Catalog.Views.AddGameWindow"
         x:DataType="vm:AddGameViewModel"
-        Title="Додати гру"
+        Title="{Binding WindowTitle}"
         Width="450"
         SizeToContent="Height"
         WindowStartupLocation="CenterOwner"
