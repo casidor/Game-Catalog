@@ -8,35 +8,22 @@ using System.Text;
 
 namespace Game_Catalog.ViewModels
 {
-    /// <summary>
-    /// ViewModel for the archived games page.
-    /// </summary>
-    public partial class ArchiveViewModel : ViewModelBase
+    /// <summary> ViewModel for the archived games page. </summary>
+    public partial class ArchiveViewModel : FilterableGameViewModel
     {
-        /// <summary>
-        /// Collection of archived games.
-        /// </summary>
-        public ObservableCollection<Game> ArchivedGames => AppData.Instance.ArchivedGames;
+        /// <summary> Source collection for the filter base class. </summary>
+        protected override ObservableCollection<Game> SourceGames => AppData.Instance.ArchivedGames;
 
-        /// <summary>
-        /// Currently selected archived game.
-        /// </summary>
-        [ObservableProperty]
-        private Game? _selectedGame;
+        /// <summary> Currently selected archived game. </summary>
+        [ObservableProperty] private Game? _selectedGame;
 
-        /// <summary>
-        /// Raised when the user selects a game to view details.
-        /// </summary>
+        /// <summary> Raised when the user selects a game to view details. </summary>
         public event Action<Game>? GameSelected;
 
-        /// <summary>
-        /// Navigates to the game detail page.
-        /// </summary>
-        /// <param name="game">The selected game.</param>
+        public ArchiveViewModel() => InitializeCollection();
+
+        /// <summary> Navigates to the game detail page. </summary>
         [RelayCommand]
-        private void SelectGame(Game game)
-        {
-            GameSelected?.Invoke(game);
-        }
+        private void SelectGame(Game game) => GameSelected?.Invoke(game);
     }
 }
