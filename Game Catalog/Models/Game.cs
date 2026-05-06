@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
+using System.Text.Json.Serialization;
 
 namespace Game_Catalog.Models
 {
@@ -13,7 +14,11 @@ namespace Game_Catalog.Models
         /// <summary> Title of the video game. </summary>
         public string Title { get; set; } = string.Empty;
 
-        /// <summary> Reference to the studio that developed the game. </summary>
+        /// <summary> Identifier of the developer studio, used for JSON serialization. </summary>
+        public Guid? DeveloperId { get; set; }
+
+        /// <summary> Reference to the developer studio. Excluded from JSON serialization. </summary>
+        [JsonIgnore]
         public Studio? Developer { get; set; }
 
         /// <summary> Genre of the game. </summary>
