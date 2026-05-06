@@ -9,19 +9,66 @@
 
 	<Grid RowDefinitions="auto,*">
 
-		<Border Grid.Row="0"
-				Padding="16,12">
-			<StackPanel Orientation="Horizontal" Spacing="8">
-				<TextBlock Text="Моя бібліотека"
-						   FontSize="20"
-						   FontWeight="Bold"
-						   VerticalAlignment="Center"/>
-				<Button Content="+ Додати гру"
-						Click="OnAddGameClick"/>
-			</StackPanel>
+		<Border Grid.Row="0" Padding="16,12">
+			<Grid ColumnDefinitions="Auto,*">
+
+				<StackPanel Grid.Column="0" Orientation="Horizontal" Spacing="8" VerticalAlignment="Center">
+					<TextBlock Text="Моя бібліотека"
+							   FontSize="20"
+							   FontWeight="Bold"
+							   VerticalAlignment="Center"/>
+					<Button Content="+ Додати гру"
+							Click="OnAddGameClick"
+							VerticalAlignment="Center"/>
+				</StackPanel>
+
+				<StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="8"
+							HorizontalAlignment="Right" VerticalAlignment="Center">
+
+					<TextBox Text="{Binding SearchText}"
+							 Watermark="🔍  Пошук..."
+							 Width="180"
+							 VerticalAlignment="Center"/>
+
+					<ComboBox ItemsSource="{Binding AvailableGenres}"
+							  SelectedItem="{Binding SelectedGenre}"
+							  Width="120"
+							  VerticalAlignment="Center">
+						<ComboBox.ItemTemplate>
+							<DataTemplate>
+								<TextBlock Text="{Binding, TargetNullValue='Жанр'}"/>
+							</DataTemplate>
+						</ComboBox.ItemTemplate>
+					</ComboBox>
+
+					<ComboBox ItemsSource="{Binding AvailablePlatforms}"
+							  SelectedItem="{Binding SelectedPlatform}"
+							  Width="120"
+							  VerticalAlignment="Center">
+						<ComboBox.ItemTemplate>
+							<DataTemplate>
+								<TextBlock Text="{Binding, TargetNullValue='Платформа'}"/>
+							</DataTemplate>
+						</ComboBox.ItemTemplate>
+					</ComboBox>
+
+					<ComboBox ItemsSource="{Binding AvailableStatuses}"
+							  SelectedItem="{Binding SelectedStatusFilter}"
+							  Width="120"
+							  VerticalAlignment="Center">
+						<ComboBox.ItemTemplate>
+							<DataTemplate>
+								<TextBlock Text="{Binding, TargetNullValue='Статус'}"/>
+							</DataTemplate>
+						</ComboBox.ItemTemplate>
+					</ComboBox>
+
+				</StackPanel>
+
+			</Grid>
 		</Border>
 		<ListBox Grid.Row="1"
-				 ItemsSource="{Binding Games}"
+				 ItemsSource="{Binding FilteredGames}"
 				 SelectedItem="{Binding SelectedGame}"
 				 SelectionChanged="OnSelectionChanged">
 			<ListBox.ItemTemplate>
