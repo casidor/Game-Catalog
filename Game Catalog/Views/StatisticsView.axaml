@@ -1,0 +1,77 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+			 xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+			 xmlns:vm="using:Game_Catalog.ViewModels"
+			 x:Class="Game_Catalog.Views.StatisticsView"
+			 x:DataType="vm:StatisticsViewModel">
+
+	<StackPanel Margin="24" Spacing="24">
+
+		<TextBlock Text="Статистика"
+				   FontSize="20"
+				   FontWeight="Bold"/>
+
+		<WrapPanel Orientation="Horizontal">
+
+			<!-- Total games count -->
+			<Border Background="#1e1e28" CornerRadius="8"
+					Padding="24" Margin="0,0,12,12" MinWidth="160">
+				<StackPanel Spacing="6">
+					<TextBlock Text="Ігор у бібліотеці"
+							   FontSize="12" Opacity="0.6"/>
+					<TextBlock Text="{Binding TotalGames}"
+							   FontSize="36" FontWeight="Bold"/>
+				</StackPanel>
+			</Border>
+
+			<!-- Total hours played -->
+			<Border Background="#1e1e28" CornerRadius="8"
+					Padding="24" Margin="0,0,12,12" MinWidth="160">
+				<StackPanel Spacing="6">
+					<TextBlock Text="Годин зіграно"
+							   FontSize="12" Opacity="0.6"/>
+					<TextBlock Text="{Binding TotalHours, StringFormat='{}{0} год'}"
+							   FontSize="36" FontWeight="Bold"/>
+				</StackPanel>
+			</Border>
+
+			<!-- Disk usage with progress bar -->
+			<Border Background="#1e1e28" CornerRadius="8"
+					Padding="24" Margin="0,0,12,12" MinWidth="200">
+				<StackPanel Spacing="6">
+					<TextBlock Text="Зайнято на диску"
+							   FontSize="12" Opacity="0.6"/>
+					<TextBlock Text="{Binding TotalDiskGB, StringFormat='{}{0:0.0} ГБ'}"
+							   FontSize="36" FontWeight="Bold"/>
+					<!-- Progress bar with dynamic maximum -->
+					<ProgressBar Value="{Binding TotalDiskGB}"
+								 Maximum="{Binding DiskMax}"
+								 Height="6"
+								 CornerRadius="3"
+								 Margin="0,4,0,0"/>
+					<TextBlock Text="{Binding DiskMax, StringFormat='з {0:0} ГБ'}"
+							   FontSize="11" Opacity="0.4"/>
+				</StackPanel>
+			</Border>
+
+			<!-- Average personal rating displayed as stars -->
+			<Border Background="#1e1e28" CornerRadius="8"
+					Padding="24" Margin="0,0,12,12" MinWidth="160">
+				<StackPanel Spacing="6">
+					<TextBlock Text="Середня оцінка"
+							   FontSize="12" Opacity="0.6"/>
+					<TextBlock Text="{Binding AverageRating, StringFormat='{}{0}/10'}"
+							   FontSize="36" FontWeight="Bold"/>
+					<Grid>
+						<TextBlock Text="★★★★★" FontSize="22" Foreground="Gray"/>
+						<Border Width="{Binding StarFillWidth}" ClipToBounds="True" HorizontalAlignment="Left">
+							<TextBlock Text="★★★★★" FontSize="22" Foreground="#f0c040"/>
+						</Border>
+					</Grid>
+				</StackPanel>
+			</Border>
+
+		</WrapPanel>
+
+	</StackPanel>
+
+</UserControl>

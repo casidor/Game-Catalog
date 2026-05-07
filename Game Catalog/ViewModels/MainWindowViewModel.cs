@@ -30,6 +30,10 @@ namespace Game_Catalog.ViewModels
         /// </summary>
         public ArchiveViewModel ArchivePage { get; } = new();
 
+        /// <summary>
+        /// The statistics page.
+        /// </summary>
+        public StatisticsViewModel StatisticsPage { get; } = new();
         public MainWindowViewModel()
         {
             _currentPage = LibraryPage;
