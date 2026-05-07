@@ -20,11 +20,6 @@ namespace Game_Catalog.Views
         protected override void OnLoaded(RoutedEventArgs e)
         {
             base.OnLoaded(e);
-            SettingsService.Load();
-            Application.Current!.RequestedThemeVariant =
-                SettingsService.Current.Theme == "Light"
-                    ? ThemeVariant.Light
-                    : ThemeVariant.Dark;
             DataService.LoadDefault();
         }
 

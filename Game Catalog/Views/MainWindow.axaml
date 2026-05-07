@@ -19,90 +19,75 @@
 
 		<!-- Sidebar -->
 		<Border Grid.Column="0"
-				Background="#16161d"
-				BorderBrush="#2a2a3a"
-				BorderThickness="0,0,1,0">
-			<DockPanel>
+        Background="#16161d"
+        BorderBrush="#2a2a3a"
+        BorderThickness="0,0,1,0">
+    <Grid RowDefinitions="Auto,*,Auto">
 
-				<!-- Logo -->
-				<Border DockPanel.Dock="Top"
-						Padding="24,32,24,24">
-					<StackPanel Spacing="4">
-						<TextBlock Text="🎮"
-								   FontSize="28"/>
-						<TextBlock Text="Game Catalog"
-								   FontSize="16"
-								   FontWeight="Bold"
-								   Foreground="#e0e0f0"/>
-						<TextBlock Text="My Library"
-								   FontSize="11"
-								   Foreground="#6060a0"/>
-					</StackPanel>
-				</Border>
+        <!-- Logo -->
+        <Border Grid.Row="0" Padding="24,32,24,24">
+            <StackPanel Spacing="4">
+                <TextBlock Text="🎮" FontSize="28"/>
+                <TextBlock Text="Game Catalog"
+                           FontSize="16"
+                           FontWeight="Bold"
+                           Foreground="#e0e0f0"/>
+                <TextBlock Text="My Library"
+                           FontSize="11"
+                           Foreground="#6060a0"/>
+            </StackPanel>
+        </Border>
 
-				<!-- Nav buttons -->
-				<StackPanel DockPanel.Dock="Top"
-							Spacing="4"
-							Margin="12,0">
+        <!-- Nav buttons -->
+        <StackPanel Grid.Row="1" Spacing="4" Margin="12,0">
+            <Button Content="🎮  Бібліотека"
+                    Command="{Binding NavigateToCommand}"
+                    CommandParameter="{Binding LibraryPage}"
+                    HorizontalAlignment="Stretch"
+                    HorizontalContentAlignment="Left"
+                    Padding="16,12" FontSize="14"
+                    Background="Transparent"
+                    Foreground="#c0c0e0" CornerRadius="8"/>
+            <Button Content="🏢  Студії"
+                    Command="{Binding NavigateToCommand}"
+                    CommandParameter="{Binding StudioPage}"
+                    HorizontalAlignment="Stretch"
+                    HorizontalContentAlignment="Left"
+                    Padding="16,12" FontSize="14"
+                    Background="Transparent"
+                    Foreground="#c0c0e0" CornerRadius="8"/>
+            <Button Content="📦  Архів"
+                    Command="{Binding NavigateToCommand}"
+                    CommandParameter="{Binding ArchivePage}"
+                    HorizontalAlignment="Stretch"
+                    HorizontalContentAlignment="Left"
+                    Padding="16,12" FontSize="14"
+                    Background="Transparent"
+                    Foreground="#c0c0e0" CornerRadius="8"/>
+            <Button Content="📊  Статистика"
+                    Command="{Binding NavigateToCommand}"
+                    CommandParameter="{Binding StatisticsPage}"
+                    HorizontalAlignment="Stretch"
+                    HorizontalContentAlignment="Left"
+                    Padding="16,12" FontSize="14"
+                    Background="Transparent"
+                    Foreground="#c0c0e0" CornerRadius="8"/>
+        </StackPanel>
 
-					<Button Content="🎮  Бібліотека"
-							Command="{Binding NavigateToCommand}"
-							CommandParameter="{Binding LibraryPage}"
-							HorizontalAlignment="Stretch"
-							HorizontalContentAlignment="Left"
-							Padding="16,12"
-							FontSize="14"
-							Background="Transparent"
-							Foreground="#c0c0e0"
-							CornerRadius="8"/>
+        <!-- Settings pinned to bottom -->
+        <Border Grid.Row="2" Padding="12,12">
+            <Button Content="⚙  Налаштування"
+                    Command="{Binding NavigateToCommand}"
+                    CommandParameter="{Binding SettingsPage}"
+                    HorizontalAlignment="Stretch"
+                    HorizontalContentAlignment="Left"
+                    Padding="16,12" FontSize="14"
+                    Background="Transparent"
+                    Foreground="#c0c0e0" CornerRadius="8"/>
+        </Border>
 
-					<Button Content="🏢  Студії"
-							Command="{Binding NavigateToCommand}"
-							CommandParameter="{Binding StudioPage}"
-							HorizontalAlignment="Stretch"
-							HorizontalContentAlignment="Left"
-							Padding="16,12"
-							FontSize="14"
-							Background="Transparent"
-							Foreground="#c0c0e0"
-							CornerRadius="8"/>
-
-					<Button Content="📦  Архів"
-							Command="{Binding NavigateToCommand}"
-							CommandParameter="{Binding ArchivePage}"
-							HorizontalAlignment="Stretch"
-							HorizontalContentAlignment="Left"
-							Padding="16,12"
-							FontSize="14"
-							Background="Transparent"
-							Foreground="#c0c0e0"
-							CornerRadius="8"/>
-					<Button Content="📊  Статистика"
-							Command="{Binding NavigateToCommand}"
-							CommandParameter="{Binding StatisticsPage}"
-							HorizontalAlignment="Stretch"
-							HorizontalContentAlignment="Left"
-							Padding="16,12"
-							FontSize="14"
-							Background="Transparent"
-							Foreground="#c0c0e0"
-							CornerRadius="8"/>
-				</StackPanel>
-				<!-- Settings button pinned to bottom -->
-				<Border DockPanel.Dock="Bottom" Padding="12,12">
-					<Button Content="⚙  Налаштування"
-							Command="{Binding NavigateToCommand}"
-							CommandParameter="{Binding SettingsPage}"
-							HorizontalAlignment="Stretch"
-							HorizontalContentAlignment="Left"
-							Padding="16,12"
-							FontSize="14"
-							Background="Transparent"
-							Foreground="#c0c0e0"
-							CornerRadius="8"/>
-				</Border>
-			</DockPanel>
-		</Border>
+    </Grid>
+</Border>
 
 		<!-- Main content -->
 		<Border Grid.Column="1"
