@@ -1,5 +1,6 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
 using Game_Catalog.Models;
+using Game_Catalog.Services;
 using System;
 using System.Linq;
 
@@ -11,10 +12,8 @@ namespace Game_Catalog.ViewModels
     /// </summary>
     public partial class StatisticsViewModel : ViewModelBase
     {
-        /// <summary>
-        /// Dynamic disk capacity ceiling, rounded up to the nearest 500 GB above current usage.
-        /// </summary>
-        public double DiskMax => Math.Max(500, Math.Ceiling(TotalDiskGB / 500.0) * 500);
+        /// <summary>Disk capacity ceiling pulled from user settings.</summary>
+        public double DiskMax => SettingsService.Current.DiskCapacityGB;
 
         /// <summary>
         /// Total number of games in the active library.
@@ -64,6 +63,7 @@ namespace Game_Catalog.ViewModels
         public StatisticsViewModel()
         {
             AppData.Instance.Games.CollectionChanged += (_, _) => Refresh();
+            SettingsService.DiskCapacityChanged += () => OnPropertyChanged(nameof(DiskMax));
         }
 
         /// <summary>
@@ -78,7 +78,6 @@ namespace Game_Catalog.ViewModels
             OnPropertyChanged(nameof(StarRating));
             OnPropertyChanged(nameof(StarDisplay));
             OnPropertyChanged(nameof(StarFillWidth));
-            OnPropertyChanged(nameof(DiskMax));
         }
     }
 }

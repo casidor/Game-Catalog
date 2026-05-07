@@ -9,31 +9,24 @@ namespace Game_Catalog.ViewModels
     /// </summary>
     public partial class MainWindowViewModel : ViewModelBase
     {
-        /// <summary>
-        /// Currently displayed page.
-        /// </summary>
+        /// <summary> Currently displayed page. </summary>
         [ObservableProperty]
         private ViewModelBase _currentPage;
 
-        /// <summary>
-        /// The game library page.
-        /// </summary>
+        /// <summary> The game library page. </summary>
         public LibraryViewModel LibraryPage { get; } = new();
 
-        /// <summary>
-        /// The studio management page.
-        /// </summary>
+        /// <summary> The studio management page. </summary>
         public StudioViewModel StudioPage { get; } = new();
 
-        /// <summary>
-        /// The archive page.
-        /// </summary>
+        /// <summary> The archive page. </summary>
         public ArchiveViewModel ArchivePage { get; } = new();
 
-        /// <summary>
-        /// The statistics page.
-        /// </summary>
+        /// <summary> The statistics page. </summary>
         public StatisticsViewModel StatisticsPage { get; } = new();
+
+        /// <summary> The settings page. </summary>
+        public SettingsViewModel SettingsPage { get; } = new();
         public MainWindowViewModel()
         {
             _currentPage = LibraryPage;

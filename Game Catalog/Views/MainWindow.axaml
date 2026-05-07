@@ -88,7 +88,19 @@
 							Foreground="#c0c0e0"
 							CornerRadius="8"/>
 				</StackPanel>
-
+				<!-- Settings button pinned to bottom -->
+				<Border DockPanel.Dock="Bottom" Padding="12,12">
+					<Button Content="⚙  Налаштування"
+							Command="{Binding NavigateToCommand}"
+							CommandParameter="{Binding SettingsPage}"
+							HorizontalAlignment="Stretch"
+							HorizontalContentAlignment="Left"
+							Padding="16,12"
+							FontSize="14"
+							Background="Transparent"
+							Foreground="#c0c0e0"
+							CornerRadius="8"/>
+				</Border>
 			</DockPanel>
 		</Border>
 

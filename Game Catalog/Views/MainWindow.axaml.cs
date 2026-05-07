@@ -1,7 +1,9 @@
+using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Input;
 using Avalonia.Interactivity;
 using Avalonia.Platform.Storage;
+using Avalonia.Styling;
 using Game_Catalog.Services;
 using System.Threading.Tasks;
 
@@ -18,6 +20,11 @@ namespace Game_Catalog.Views
         protected override void OnLoaded(RoutedEventArgs e)
         {
             base.OnLoaded(e);
+            SettingsService.Load();
+            Application.Current!.RequestedThemeVariant =
+                SettingsService.Current.Theme == "Light"
+                    ? ThemeVariant.Light
+                    : ThemeVariant.Dark;
             DataService.LoadDefault();
         }
 
