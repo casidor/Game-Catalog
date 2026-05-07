@@ -13,5 +13,7 @@
 
         /// <summary>Total disk capacity in GB used for the statistics progress bar.</summary>
         public double DiskCapacityGB { get; set; } = 500;
+        /// <summary>Indicates whether the app is launching for the first time.</summary>
+        public bool IsFirstRun { get; set; } = true;
     }
 }

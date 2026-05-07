@@ -7,6 +7,7 @@ using Avalonia.Styling;
 using Game_Catalog.Services;
 using Game_Catalog.ViewModels;
 using Game_Catalog.Views;
+using System.IO;
 using System.Linq;
 
 namespace Game_Catalog
@@ -28,10 +29,27 @@ namespace Game_Catalog
                         ? ThemeVariant.Light
                         : ThemeVariant.Dark;
 
-                desktop.MainWindow = new MainWindow
+                if (SettingsService.Current.IsFirstRun && !File.Exists(DataService.DefaultPath))
                 {
-                    DataContext = new MainWindowViewModel(),
-                };
+                    var onboarding = new OnboardingWindow();
+                    desktop.MainWindow = onboarding;
+                    onboarding.Closed += (_, _) =>
+                    {
+                        var mainWindow = new MainWindow
+                        {
+                            DataContext = new MainWindowViewModel()
+                        };
+                        desktop.MainWindow = mainWindow;
+                        mainWindow.Show();
+                    };
+                }
+                else
+                {
+                    desktop.MainWindow = new MainWindow
+                    {
+                        DataContext = new MainWindowViewModel()
+                    };
+                }
             }
             base.OnFrameworkInitializationCompleted();
         }

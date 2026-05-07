@@ -1,0 +1,81 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:vm="using:Game_Catalog.ViewModels"
+        x:Class="Game_Catalog.Views.OnboardingWindow"
+        x:DataType="vm:OnboardingViewModel"
+        Title="Game Catalog"
+        Width="480" Height="320"
+        WindowStartupLocation="CenterScreen"
+        CanResize="False">
+
+    <Grid>
+
+        <!-- Step 1: Welcome -->
+        <StackPanel IsVisible="{Binding IsStep1}"
+                    HorizontalAlignment="Center"
+                    VerticalAlignment="Center"
+                    Spacing="16">
+            <TextBlock Text="🎮"
+                       FontSize="48"
+                       HorizontalAlignment="Center"/>
+            <TextBlock Text="Game Catalog"
+                       FontSize="28"
+                       FontWeight="Bold"
+                       HorizontalAlignment="Center"/>
+            <TextBlock Text="Твій персональний каталог ігор"
+                       FontSize="14"
+                       Opacity="0.6"
+                       HorizontalAlignment="Center"/>
+            <Button Content="Почати"
+                    Command="{Binding NextCommand}"
+                    HorizontalAlignment="Center"
+                    Padding="32,10"
+                    Margin="0,16,0,0"
+                    FontSize="14"/>
+        </StackPanel>
+
+        <!-- Step 2: Settings -->
+        <StackPanel IsVisible="{Binding IsStep2}"
+                    HorizontalAlignment="Center"
+                    VerticalAlignment="Center"
+                    Spacing="24"
+                    Width="320">
+
+            <StackPanel Spacing="12">
+                <TextBlock Text="Оберіть тему"
+                           FontSize="14"
+                           Opacity="0.6"/>
+                <StackPanel Orientation="Horizontal" Spacing="12">
+                    <Button Content="🌑  Dark"
+                            Command="{Binding SelectThemeCommand}"
+                            CommandParameter="Dark"
+                            Padding="24,8"
+                            FontSize="13"/>
+                    <Button Content="☀  Light"
+                            Command="{Binding SelectThemeCommand}"
+                            CommandParameter="Light"
+                            Padding="24,8"
+                            FontSize="13"/>
+                </StackPanel>
+            </StackPanel>
+
+            <StackPanel Spacing="12">
+                <TextBlock Text="Виділіть місце під ігри (ГБ)"
+                           FontSize="14"
+                           Opacity="0.6"/>
+                <NumericUpDown Value="{Binding DiskCapacityGB}"
+                               Minimum="100"
+                               Maximum="100000"
+                               Increment="100"
+                               FormatString="0"/>
+            </StackPanel>
+
+            <Button Content="Готово"
+                    Command="{Binding FinishCommand}"
+                    HorizontalAlignment="Right"
+                    Padding="24,8"
+                    FontSize="14"/>
+        </StackPanel>
+
+    </Grid>
+</Window>
