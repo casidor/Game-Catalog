@@ -13,7 +13,7 @@
 		<WrapPanel Orientation="Horizontal">
 
 			<!-- Total games count -->
-			<Border Background="#1e1e28" CornerRadius="8"
+			<Border Background="{DynamicResource CardBackground}" CornerRadius="8"
 					Padding="24" Margin="0,0,12,12" MinWidth="160">
 				<StackPanel Spacing="6">
 					<TextBlock Text="Ігор у бібліотеці"
@@ -24,7 +24,7 @@
 			</Border>
 
 			<!-- Total hours played -->
-			<Border Background="#1e1e28" CornerRadius="8"
+			<Border Background="{DynamicResource CardBackground}" CornerRadius="8"
 					Padding="24" Margin="0,0,12,12" MinWidth="160">
 				<StackPanel Spacing="6">
 					<TextBlock Text="Годин зіграно"
@@ -35,7 +35,7 @@
 			</Border>
 
 			<!-- Disk usage with progress bar -->
-			<Border Background="#1e1e28" CornerRadius="8"
+			<Border Background="{DynamicResource CardBackground}" CornerRadius="8"
 					Padding="24" Margin="0,0,12,12" MinWidth="200">
 				<StackPanel Spacing="6">
 					<TextBlock Text="Зайнято на диску"
@@ -54,7 +54,7 @@
 			</Border>
 
 			<!-- Average personal rating displayed as stars -->
-			<Border Background="#1e1e28" CornerRadius="8"
+			<Border Background="{DynamicResource CardBackground}" CornerRadius="8"
 					Padding="24" Margin="0,0,12,12" MinWidth="160">
 				<StackPanel Spacing="6">
 					<TextBlock Text="Середня оцінка"

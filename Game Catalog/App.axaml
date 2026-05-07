@@ -9,6 +9,34 @@
         <local:ViewLocator/>
     </Application.DataTemplates>
   
+    <Application.Resources>
+    <ResourceDictionary>
+        <ResourceDictionary.ThemeDictionaries>
+
+            <ResourceDictionary x:Key="Dark">
+                <SolidColorBrush x:Key="AppBackground"      Color="#0f0f13"/>
+                <SolidColorBrush x:Key="SidebarBackground"  Color="#16161d"/>
+                <SolidColorBrush x:Key="SidebarBorder"      Color="#2a2a3a"/>
+                <SolidColorBrush x:Key="CardBackground"     Color="#1e1e28"/>
+                <SolidColorBrush x:Key="LogoForeground"     Color="#e0e0f0"/>
+                <SolidColorBrush x:Key="SubtitleForeground" Color="#6060a0"/>
+                <SolidColorBrush x:Key="NavForeground"      Color="#c0c0e0"/>
+            </ResourceDictionary>
+
+            <ResourceDictionary x:Key="Light">
+                <SolidColorBrush x:Key="AppBackground"      Color="#ffffff"/>
+                <SolidColorBrush x:Key="SidebarBackground"  Color="#f0f0f8"/>
+                <SolidColorBrush x:Key="SidebarBorder"      Color="#e4e4f0"/>
+                <SolidColorBrush x:Key="CardBackground"     Color="#f5f5fb"/>
+                <SolidColorBrush x:Key="LogoForeground"     Color="#1a1a1a"/>
+                <SolidColorBrush x:Key="SubtitleForeground" Color="#888888"/>
+                <SolidColorBrush x:Key="NavForeground"      Color="#333333"/>
+            </ResourceDictionary>
+
+        </ResourceDictionary.ThemeDictionaries>
+    </ResourceDictionary>
+</Application.Resources>
+
     <Application.Styles>
         <FluentTheme />
     </Application.Styles>

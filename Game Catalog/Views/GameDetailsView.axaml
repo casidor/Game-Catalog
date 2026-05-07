@@ -22,7 +22,7 @@
 
 			<Border Grid.Column="0"
 					Margin="0,16,16,0"
-					Background="#1e1e28"
+					Background="{DynamicResource CardBackground}"
 					CornerRadius="8">
 				<Image Source="{Binding}"
 					   Stretch="UniformToFill"/>

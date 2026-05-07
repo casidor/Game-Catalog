@@ -9,7 +9,7 @@
 		Title="Game Catalog"
 		MinWidth="900"
 		MinHeight="600"
-		Background="#0f0f13">
+		Background="{DynamicResource AppBackground}">
 
 	<Design.DataContext>
 		<vm:MainWindowViewModel/>
@@ -19,8 +19,8 @@
 
 		<!-- Sidebar -->
 		<Border Grid.Column="0"
-        Background="#16161d"
-        BorderBrush="#2a2a3a"
+        Background="{DynamicResource SidebarBackground}"
+        BorderBrush="{DynamicResource SidebarBorder}"
         BorderThickness="0,0,1,0">
     <Grid RowDefinitions="Auto,*,Auto">
 
@@ -31,10 +31,10 @@
                 <TextBlock Text="Game Catalog"
                            FontSize="16"
                            FontWeight="Bold"
-                           Foreground="#e0e0f0"/>
+                           Foreground="{DynamicResource LogoForeground}"/>
                 <TextBlock Text="My Library"
                            FontSize="11"
-                           Foreground="#6060a0"/>
+                           Foreground="{DynamicResource SubtitleForeground}"/>
             </StackPanel>
         </Border>
 
@@ -47,7 +47,7 @@
                     HorizontalContentAlignment="Left"
                     Padding="16,12" FontSize="14"
                     Background="Transparent"
-                    Foreground="#c0c0e0" CornerRadius="8"/>
+                    Foreground="{DynamicResource NavForeground}" CornerRadius="8"/>
             <Button Content="🏢  Студії"
                     Command="{Binding NavigateToCommand}"
                     CommandParameter="{Binding StudioPage}"
@@ -55,7 +55,7 @@
                     HorizontalContentAlignment="Left"
                     Padding="16,12" FontSize="14"
                     Background="Transparent"
-                    Foreground="#c0c0e0" CornerRadius="8"/>
+                    Foreground="{DynamicResource NavForeground}" CornerRadius="8"/>
             <Button Content="📦  Архів"
                     Command="{Binding NavigateToCommand}"
                     CommandParameter="{Binding ArchivePage}"
@@ -63,7 +63,7 @@
                     HorizontalContentAlignment="Left"
                     Padding="16,12" FontSize="14"
                     Background="Transparent"
-                    Foreground="#c0c0e0" CornerRadius="8"/>
+                    Foreground="{DynamicResource NavForeground}" CornerRadius="8"/>
             <Button Content="📊  Статистика"
                     Command="{Binding NavigateToCommand}"
                     CommandParameter="{Binding StatisticsPage}"
@@ -71,7 +71,7 @@
                     HorizontalContentAlignment="Left"
                     Padding="16,12" FontSize="14"
                     Background="Transparent"
-                    Foreground="#c0c0e0" CornerRadius="8"/>
+                    Foreground="{DynamicResource NavForeground}" CornerRadius="8"/>
         </StackPanel>
 
         <!-- Settings pinned to bottom -->
@@ -83,7 +83,7 @@
                     HorizontalContentAlignment="Left"
                     Padding="16,12" FontSize="14"
                     Background="Transparent"
-                    Foreground="#c0c0e0" CornerRadius="8"/>
+                    Foreground="{DynamicResource NavForeground}" CornerRadius="8"/>
         </Border>
 
     </Grid>
@@ -91,7 +91,7 @@
 
 		<!-- Main content -->
 		<Border Grid.Column="1"
-				Background="#0f0f13">
+				Background="{DynamicResource AppBackground}">
 			<ContentControl Content="{Binding CurrentPage}"/>
 		</Border>
 
