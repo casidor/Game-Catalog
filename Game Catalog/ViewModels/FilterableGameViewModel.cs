@@ -1,4 +1,5 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
+using CommunityToolkit.Mvvm.Input;
 using Game_Catalog.Models;
 using System;
 using System.Collections.Generic;
@@ -23,6 +24,9 @@ namespace Game_Catalog.ViewModels
         /// <summary> Selected platform filter. Null means no filter applied. </summary>
         [ObservableProperty] private string? _selectedPlatform;
 
+        /// <summary> Selected developer studio filter. Null means no filter applied. </summary>
+        [ObservableProperty] private Studio? _selectedDeveloper;
+
         /// <summary> Selected status filter. Null means no filter applied. </summary>
         [ObservableProperty] private GameStatus? _selectedStatusFilter;
 
@@ -32,7 +36,16 @@ namespace Game_Catalog.ViewModels
                         g.Title.Contains(SearchText, StringComparison.OrdinalIgnoreCase))
             .Where(g => SelectedGenre == null || g.Genre == SelectedGenre)
             .Where(g => SelectedPlatform == null || g.Platform == SelectedPlatform)
-            .Where(g => SelectedStatusFilter == null || g.Status == SelectedStatusFilter);
+            .Where(g => SelectedStatusFilter == null || g.Status == SelectedStatusFilter)
+            .Where(g => SelectedDeveloper == null || g.Developer?.Id == SelectedDeveloper.Id);
+
+        /// <summary> Distinct developers derived from the source collection. </summary>
+        public IEnumerable<Studio?> AvailableDevelopers =>
+            new Studio?[] { null }.Concat(SourceGames
+                .Select(g => g.Developer)
+                .Where(d => d != null)
+                .DistinctBy(d => d!.Id)
+                .OrderBy(d => d!.Name));
 
         /// <summary> Distinct genres derived from the source collection. </summary>
         public IEnumerable<string?> AvailableGenres =>
@@ -46,6 +59,17 @@ namespace Game_Catalog.ViewModels
         public IEnumerable<GameStatus?> AvailableStatuses =>
             new GameStatus?[] { null }.Concat(Enum.GetValues<GameStatus>().Cast<GameStatus?>());
 
+        /// <summary> Resets all active filters and search text to their default values. </summary>
+        [RelayCommand]
+        private void ClearFilters()
+        {
+            SearchText = string.Empty;
+            SelectedGenre = null;
+            SelectedPlatform = null;
+            SelectedStatusFilter = null;
+            SelectedDeveloper = null;
+        }
+
         /// <summary> Subscribes to source collection changes to keep filters and options up to date. </summary>
         protected void InitializeCollection()
         {
@@ -53,6 +77,7 @@ namespace Game_Catalog.ViewModels
             {
                 OnPropertyChanged(nameof(AvailableGenres));
                 OnPropertyChanged(nameof(AvailablePlatforms));
+                OnPropertyChanged(nameof(AvailableDevelopers));
                 OnPropertyChanged(nameof(FilteredGames));
             };
         }
@@ -61,7 +86,7 @@ namespace Game_Catalog.ViewModels
         partial void OnSelectedGenreChanged(string? value) => RefreshFilters();
         partial void OnSelectedPlatformChanged(string? value) => RefreshFilters();
         partial void OnSelectedStatusFilterChanged(GameStatus? value) => RefreshFilters();
-
+        partial void OnSelectedDeveloperChanged(Studio? value) => RefreshFilters();
         private void RefreshFilters() => OnPropertyChanged(nameof(FilteredGames));
     }
 }

@@ -67,6 +67,15 @@ namespace Game_Catalog.ViewModels
         /// <summary> Refreshes the filtered list property. </summary>
         private void RefreshFilters() => OnPropertyChanged(nameof(FilteredStudios));
 
+        /// <summary> Resets all active filters and search text to their default values. </summary>
+        [RelayCommand]
+        private void ClearFilters()
+        {
+            SearchText = string.Empty;
+            SelectedCountry = null;
+            SelectedGenre = null;
+        }
+
         /// <summary> Navigates to the studio detail page. </summary>
         /// <param name="studio">The selected studio.</param>
         [RelayCommand]

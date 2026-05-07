@@ -52,6 +52,17 @@
 						</ComboBox.ItemTemplate>
 					</ComboBox>
 
+					<ComboBox ItemsSource="{Binding AvailableDevelopers}"
+							  SelectedItem="{Binding SelectedDeveloper}"
+							  Width="140"
+							  VerticalAlignment="Center">
+						<ComboBox.ItemTemplate>
+							<DataTemplate>
+								<TextBlock Text="{Binding Name, TargetNullValue='Розробник', FallbackValue='Розробник'}"/>
+							</DataTemplate>
+						</ComboBox.ItemTemplate>
+					</ComboBox>
+
 					<ComboBox ItemsSource="{Binding AvailableStatuses}"
 							  SelectedItem="{Binding SelectedStatusFilter}"
 							  Width="120"
@@ -62,6 +73,11 @@
 							</DataTemplate>
 						</ComboBox.ItemTemplate>
 					</ComboBox>
+
+					<Button Content="✕"
+							Command="{Binding ClearFiltersCommand}"
+							VerticalAlignment="Center"
+							ToolTip.Tip="Скинути фільтри"/>
 
 				</StackPanel>
 

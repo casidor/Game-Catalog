@@ -39,6 +39,11 @@
                             </DataTemplate>
                         </ComboBox.ItemTemplate>
                     </ComboBox>
+
+                    <Button Content="✕"
+							Command="{Binding ClearFiltersCommand}"
+							VerticalAlignment="Center"
+							ToolTip.Tip="Скинути фільтри"/>
                 </StackPanel>
             </Grid>
         </Border>
