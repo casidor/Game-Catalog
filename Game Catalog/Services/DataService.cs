@@ -46,6 +46,16 @@ namespace Game_Catalog.Services
         }
 
         /// <summary>
+        /// Subscribes to all data collections and automatically saves on any change.
+        /// </summary>
+        public static void EnableAutoSave()
+        {
+            AppData.Instance.Games.CollectionChanged += (_, _) => Save();
+            AppData.Instance.ArchivedGames.CollectionChanged += (_, _) => Save();
+            AppData.Instance.Studios.CollectionChanged += (_, _) => Save();
+        }
+
+        /// <summary>
         /// Loads application data from the specified JSON file into AppData.
         /// </summary>
         public static void Load(string path)

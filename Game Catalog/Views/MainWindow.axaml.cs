@@ -21,6 +21,7 @@ namespace Game_Catalog.Views
         {
             base.OnLoaded(e);
             DataService.LoadDefault();
+            DataService.EnableAutoSave();
         }
 
         /// <summary> Handles Ctrl+S and Ctrl+O keyboard shortcuts. </summary>
