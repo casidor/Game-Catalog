@@ -1,14 +1,19 @@
-﻿using CommunityToolkit.Mvvm.ComponentModel;
+﻿using Avalonia;
+using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using Game_Catalog.Models;
+using Game_Catalog.Services;
 using Game_Catalog.Validation;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel.DataAnnotations;
+using System.Linq;
 using System.Net.NetworkInformation;
 using System.Runtime.InteropServices;
 using System.Text;
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace Game_Catalog.ViewModels
 {
@@ -96,6 +101,25 @@ namespace Game_Catalog.ViewModels
         [ObservableProperty]
         private int _personalRating = 5;
 
+        /// <summary>Plain-text description fetched from RAWG.</summary>
+        [ObservableProperty]
+        private string _description = string.Empty;
+
+        /// <summary>Local file path of the downloaded cover image.</summary>
+        [ObservableProperty]
+        private string _coverImagePath = string.Empty;
+
+        /// <summary>Indicates whether the RAWG suggestion dropdown is visible.</summary>
+        [ObservableProperty]
+        private bool _isSuggestionsVisible;
+
+        /// <summary>Indicates whether a RAWG search is currently in progress.</summary>
+        [ObservableProperty]
+        private bool _isSearching;
+
+        /// <summary>List of game suggestions returned by RAWG search.</summary>
+        public ObservableCollection<RawgGameResult> Suggestions { get; } = new();
+
         /// <summary>
         /// List of available studios for selection.
         /// </summary>
@@ -120,15 +144,16 @@ namespace Game_Catalog.ViewModels
         /// </summary>
         public string WindowTitle { get; }
 
+        private bool _isInitializing;
+        private CancellationTokenSource? _searchCts;
+
         public AddGameViewModel(ObservableCollection<Studio> studios)
         {
             Studios = studios;
             WindowTitle = "Додати гру";
         }
 
-        /// <summary>
-        /// Builds and returns the game object from entered data.
-        /// </summary>
+        /// <summary>Builds and returns the game object from entered data.</summary>
         public Game BuildGame() => new Game
         {
             Title = Title,
@@ -139,7 +164,9 @@ namespace Game_Catalog.ViewModels
             SizeGB = SizeGB,
             Status = Status,
             HoursPlayed = HoursPlayed,
-            PersonalRating = PersonalRating
+            PersonalRating = PersonalRating,
+            Description = Description,
+            CoverImagePath = CoverImagePath
         };
 
         /// <summary>
@@ -150,6 +177,7 @@ namespace Game_Catalog.ViewModels
         public AddGameViewModel(Game game, ObservableCollection<Studio> studios)
         {
             WindowTitle = "Редагувати гру";
+            _isInitializing = true;
             Studios = studios;
             Title = game.Title;
             SelectedStudio = game.Developer;
@@ -160,6 +188,10 @@ namespace Game_Catalog.ViewModels
             Status = game.Status;
             HoursPlayed = game.HoursPlayed;
             PersonalRating = game.PersonalRating;
+            _isInitializing = true;
+            Description = game.Description;
+            CoverImagePath = game.CoverImagePath;
+            _isInitializing = false;
         }
 
         /// <summary>
@@ -182,6 +214,75 @@ namespace Game_Catalog.ViewModels
         {
             Confirmed = false;
             CloseRequested?.Invoke();
+        }
+
+        /// <summary>Triggers a debounced RAWG search when the title field changes.</summary>
+        partial void OnTitleChanged(string value)
+        {
+            if (_isInitializing) return;
+            _searchCts?.Cancel();
+            _searchCts = new CancellationTokenSource();
+            _ = SearchRawgAsync(value, _searchCts.Token);
+        }
+
+        /// <summary>Searches RAWG with a 400ms debounce and populates the suggestions list.</summary>
+        private async Task SearchRawgAsync(string query, CancellationToken ct)
+        {
+            if (!RawgService.IsAvailable) return;
+
+            try { await Task.Delay(400, ct); }
+            catch (TaskCanceledException) { return; }
+
+            IsSearching = true;
+            var results = await RawgService.SearchAsync(query, ct);
+            IsSearching = false;
+
+            if (ct.IsCancellationRequested) return;
+
+            Suggestions.Clear();
+            foreach (var r in results)
+                Suggestions.Add(r);
+
+            IsSuggestionsVisible = Suggestions.Count > 0;
+        }
+
+        /// <summary>Selects a suggestion, fills all available fields from RAWG detail endpoint, and downloads the cover.</summary>
+        [RelayCommand]
+        public async Task SelectSuggestionAsync(RawgGameResult result)
+        {
+            _searchCts?.Cancel();
+            _isInitializing = true;
+            Title = result.Name;
+            _isInitializing = false;
+
+            IsSuggestionsVisible = false;
+            Suggestions.Clear();
+
+            IsSearching = true;
+            var detail = await RawgService.GetDetailAsync(result.Id);
+            IsSearching = false;
+
+            if (detail == null) return;
+
+            if (detail.Genres.Count > 0)
+                Genre = string.Join(", ", detail.Genres.Select(g => g.Name));
+            if (detail.Platforms.Count > 0)
+                Platform = string.Join(", ", detail.Platforms.Select(p => p.Platform.Name));
+            if (detail.Developers.Count > 0) ; 
+            if (!string.IsNullOrWhiteSpace(detail.DescriptionRaw))
+                Description = detail.DescriptionRaw;
+            if (DateTime.TryParse(detail.Released, out var date))
+                ReleaseYear = date.Year;
+            if (!string.IsNullOrWhiteSpace(detail.BackgroundImage))
+                CoverImagePath = await RawgService.DownloadCoverAsync(detail.BackgroundImage, detail.Id);
+        }
+
+        /// <summary>Hides the suggestion dropdown without selecting anything.</summary>
+        [RelayCommand]
+        public void DismissSuggestions()
+        {
+            IsSuggestionsVisible = false;
+            Suggestions.Clear();
         }
     }
 }

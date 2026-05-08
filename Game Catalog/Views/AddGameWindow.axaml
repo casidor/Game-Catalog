@@ -2,6 +2,7 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:vm="using:Game_Catalog.ViewModels"
         x:Class="Game_Catalog.Views.AddGameWindow"
+        xmlns:models="using:Game_Catalog.Models"
         x:DataType="vm:AddGameViewModel"
         Title="{Binding WindowTitle}"
         Width="450"
@@ -12,9 +13,37 @@
     <StackPanel Spacing="12" Margin="24">
 
         <!-- Назва -->
-        <TextBlock Text="Назва гри"/>
-        <TextBox Text="{Binding Title}"
-                 Watermark="Введіть назву..."/>
+<TextBlock Text="Назва гри"/>
+<Panel>
+    <TextBox x:Name="TitleBox"
+             Text="{Binding Title}"
+             Watermark="Введіть назву..."/>
+    <Popup IsOpen="{Binding IsSuggestionsVisible}"
+           PlacementTarget="{Binding ElementName=TitleBox}"
+           Placement="Bottom"
+           MinWidth="400">
+        <Border Background="{DynamicResource CardBackground}"
+                BorderBrush="{DynamicResource SidebarBorder}"
+                BorderThickness="1"
+                CornerRadius="0,0,4,4"
+                MaxHeight="220">
+            <ListBox x:Name="SuggestionsList"
+                     ItemsSource="{Binding Suggestions}"
+                     Background="Transparent"
+                     SelectionChanged="OnSuggestionSelected">
+                <ListBox.ItemTemplate>
+                    <DataTemplate x:DataType="models:RawgGameResult">
+                        <TextBlock Text="{Binding Name}" Padding="4,2"/>
+                    </DataTemplate>
+                </ListBox.ItemTemplate>
+            </ListBox>
+        </Border>
+    </Popup>
+</Panel>
+<TextBlock Text="🔍 Пошук у RAWG..."
+           FontSize="11"
+           Opacity="0.5"
+           IsVisible="{Binding IsSearching}"/>
 
         <!-- Студія -->
         <TextBlock Text="Студія-розробник"/>
