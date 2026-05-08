@@ -41,5 +41,11 @@ namespace Game_Catalog.Models
 
         /// <summary> Personal rating given by the user (1 to 10). </summary>
         public int PersonalRating { get; set; }
+
+        /// <summary> Short description of the game fetched from RAWG. </summary>
+        public string Description { get; set; } = string.Empty;
+
+        /// <summary> Local file path to the downloaded cover image. </summary>
+        public string CoverImagePath { get; set; } = string.Empty;
     }
 }
