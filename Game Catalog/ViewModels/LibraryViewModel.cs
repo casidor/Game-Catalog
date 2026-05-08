@@ -24,7 +24,14 @@ namespace Game_Catalog.ViewModels
         /// <summary> Raised when the user selects a game to view details. </summary>
         public event Action<Game>? GameSelected;
 
-        public LibraryViewModel() => InitializeCollection();
+        /// <summary>Indicates whether the game library is empty.</summary>
+        public bool IsEmpty => AppData.Instance.Games.Count == 0;
+
+        public LibraryViewModel()
+        {
+            InitializeCollection();
+            AppData.Instance.Games.CollectionChanged += (_, _) => OnPropertyChanged(nameof(IsEmpty));
+        }
 
         /// <summary> Navigates to the game detail page. </summary>
         [RelayCommand]

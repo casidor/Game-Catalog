@@ -83,32 +83,51 @@
 
 			</Grid>
 		</Border>
-		<ListBox Grid.Row="1"
-				 ItemsSource="{Binding FilteredGames}"
-				 SelectedItem="{Binding SelectedGame}"
-				 SelectionChanged="OnSelectionChanged">
-			<ListBox.ItemTemplate>
-				<DataTemplate x:DataType="models:Game">
-					<Grid ColumnDefinitions="*,150,100" Width="600">
-						<StackPanel Grid.Column="0" Spacing="2">
-							<TextBlock Text="{Binding Title}"
-									   FontWeight="SemiBold"/>
-							<TextBlock Text="{Binding Developer.Name}"
-									   FontSize="12"
-									   Opacity="0.6"/>
-						</StackPanel>
-						<TextBlock Grid.Column="1"
-								   Text="{Binding Platform}"
-								   VerticalAlignment="Center"/>
-						<TextBlock Grid.Column="2"
-								   Text="{Binding Status}"
-								   VerticalAlignment="Center"/>
+		<Grid Grid.Row="1">
 
-					</Grid>
-				</DataTemplate>
-			</ListBox.ItemTemplate>
-		</ListBox>
+			<ListBox ItemsSource="{Binding FilteredGames}"
+					 SelectedItem="{Binding SelectedGame}"
+					 SelectionChanged="OnSelectionChanged"
+					 IsVisible="{Binding !IsEmpty}">
+				<ListBox.ItemTemplate>
+					<DataTemplate x:DataType="models:Game">
+						<Grid ColumnDefinitions="*,150,100" Width="600">
+							<StackPanel Grid.Column="0" Spacing="2">
+								<TextBlock Text="{Binding Title}" FontWeight="SemiBold"/>
+								<TextBlock Text="{Binding Developer.Name}"
+										   FontSize="12" Opacity="0.6"/>
+							</StackPanel>
+							<TextBlock Grid.Column="1" Text="{Binding Platform}"
+									   VerticalAlignment="Center"/>
+							<TextBlock Grid.Column="2" Text="{Binding Status}"
+									   VerticalAlignment="Center"/>
+						</Grid>
+					</DataTemplate>
+				</ListBox.ItemTemplate>
+			</ListBox>
 
+			<StackPanel IsVisible="{Binding IsEmpty}"
+						HorizontalAlignment="Center"
+						VerticalAlignment="Center"
+						Spacing="16">
+				<TextBlock Text="🎮"
+						   FontSize="48"
+						   HorizontalAlignment="Center"/>
+				<TextBlock Text="Бібліотека порожня"
+						   FontSize="18"
+						   FontWeight="SemiBold"
+						   HorizontalAlignment="Center"/>
+				<TextBlock Text="Додай свою першу гру щоб почати"
+						   Opacity="0.6"
+						   HorizontalAlignment="Center"/>
+				<Button Content="+ Додати гру"
+						Click="OnAddGameClick"
+						HorizontalAlignment="Center"
+						Padding="24,10"
+						FontSize="14"/>
+			</StackPanel>
+
+		</Grid>
 	</Grid>
 
 </UserControl>
