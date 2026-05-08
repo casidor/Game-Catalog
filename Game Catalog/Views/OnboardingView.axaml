@@ -1,81 +1,129 @@
 <Window xmlns="https://github.com/avaloniaui"
-        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-        xmlns:vm="using:Game_Catalog.ViewModels"
-        x:Class="Game_Catalog.Views.OnboardingWindow"
-        x:DataType="vm:OnboardingViewModel"
-        Title="Game Catalog"
-        Width="480" Height="320"
-        WindowStartupLocation="CenterScreen"
-        CanResize="False">
+		xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+		xmlns:vm="using:Game_Catalog.ViewModels"
+		x:Class="Game_Catalog.Views.OnboardingWindow"
+		x:DataType="vm:OnboardingViewModel"
+		Title="Game Catalog"
+		Width="480" Height="320"
+		WindowStartupLocation="CenterScreen"
+		CanResize="False">
 
-    <Grid>
+	<Grid>
 
-        <!-- Step 1: Welcome -->
-        <StackPanel IsVisible="{Binding IsStep1}"
-                    HorizontalAlignment="Center"
-                    VerticalAlignment="Center"
-                    Spacing="16">
-            <TextBlock Text="🎮"
-                       FontSize="48"
-                       HorizontalAlignment="Center"/>
-            <TextBlock Text="Game Catalog"
-                       FontSize="28"
-                       FontWeight="Bold"
-                       HorizontalAlignment="Center"/>
-            <TextBlock Text="Твій персональний каталог ігор"
-                       FontSize="14"
-                       Opacity="0.6"
-                       HorizontalAlignment="Center"/>
-            <Button Content="Почати"
-                    Command="{Binding NextCommand}"
-                    HorizontalAlignment="Center"
-                    Padding="32,10"
-                    Margin="0,16,0,0"
-                    FontSize="14"/>
-        </StackPanel>
+		<!-- Step 1: Welcome -->
+		<StackPanel IsVisible="{Binding IsStep1}"
+					HorizontalAlignment="Center"
+					VerticalAlignment="Center"
+					Spacing="16">
+			<TextBlock Text="🎮"
+					   FontSize="48"
+					   HorizontalAlignment="Center"/>
+			<TextBlock Text="Game Catalog"
+					   FontSize="28"
+					   FontWeight="Bold"
+					   HorizontalAlignment="Center"/>
+			<TextBlock Text="Твій персональний каталог ігор"
+					   FontSize="14"
+					   Opacity="0.6"
+					   HorizontalAlignment="Center"/>
+			<Button Content="Почати"
+					Command="{Binding NextCommand}"
+					HorizontalAlignment="Center"
+					Padding="32,10"
+					Margin="0,16,0,0"
+					FontSize="14"/>
+		</StackPanel>
 
-        <!-- Step 2: Settings -->
-        <StackPanel IsVisible="{Binding IsStep2}"
-                    HorizontalAlignment="Center"
-                    VerticalAlignment="Center"
-                    Spacing="24"
-                    Width="320">
+		<!-- Step 2: Settings -->
+		<StackPanel IsVisible="{Binding IsStep2}"
+					HorizontalAlignment="Center"
+					VerticalAlignment="Center"
+					Spacing="24"
+					Width="320">
 
-            <StackPanel Spacing="12">
-                <TextBlock Text="Оберіть тему"
-                           FontSize="14"
-                           Opacity="0.6"/>
-                <StackPanel Orientation="Horizontal" Spacing="12">
-                    <Button Content="🌑  Dark"
-                            Command="{Binding SelectThemeCommand}"
-                            CommandParameter="Dark"
-                            Padding="24,8"
-                            FontSize="13"/>
-                    <Button Content="☀  Light"
-                            Command="{Binding SelectThemeCommand}"
-                            CommandParameter="Light"
-                            Padding="24,8"
-                            FontSize="13"/>
-                </StackPanel>
-            </StackPanel>
+			<StackPanel Spacing="12">
+				<TextBlock Text="Оберіть тему"
+						   FontSize="14"
+						   Opacity="0.6"/>
+				<StackPanel Orientation="Horizontal" Spacing="12">
+					<Button Content="🌑  Dark"
+							Command="{Binding SelectThemeCommand}"
+							CommandParameter="Dark"
+							Padding="24,8"
+							FontSize="13"/>
+					<Button Content="☀  Light"
+							Command="{Binding SelectThemeCommand}"
+							CommandParameter="Light"
+							Padding="24,8"
+							FontSize="13"/>
+				</StackPanel>
+			</StackPanel>
 
-            <StackPanel Spacing="12">
-                <TextBlock Text="Виділіть місце під ігри (ГБ)"
-                           FontSize="14"
-                           Opacity="0.6"/>
-                <NumericUpDown Value="{Binding DiskCapacityGB}"
-                               Minimum="100"
-                               Maximum="100000"
-                               Increment="100"
-                               FormatString="0"/>
-            </StackPanel>
+			<StackPanel Spacing="12">
+				<TextBlock Text="Виділіть місце під ігри (ГБ)"
+						   FontSize="14"
+						   Opacity="0.6"/>
+				<NumericUpDown Value="{Binding DiskCapacityGB}"
+							   Minimum="100"
+							   Maximum="100000"
+							   Increment="100"
+							   FormatString="0"/>
+			</StackPanel>
 
-            <Button Content="Готово"
-                    Command="{Binding FinishCommand}"
-                    HorizontalAlignment="Right"
-                    Padding="24,8"
-                    FontSize="14"/>
-        </StackPanel>
+			<Button Content="Далі"
+					Command="{Binding NextCommand}"
+					HorizontalAlignment="Right"
+					Padding="24,8"
+					FontSize="14"/>
+		</StackPanel>
 
-    </Grid>
+
+		<!-- Step 3: RAWG API Key -->
+		<StackPanel IsVisible="{Binding IsStep3}"
+					HorizontalAlignment="Center"
+					VerticalAlignment="Center"
+					Spacing="20"
+					Width="340">
+
+			<StackPanel Spacing="6">
+				<TextBlock Text="🌐  RAWG інтеграція"
+						   FontSize="20"
+						   FontWeight="Bold"
+						   HorizontalAlignment="Center"/>
+				<TextBlock TextWrapping="Wrap"
+						   Opacity="0.6"
+						   FontSize="13"
+						   TextAlignment="Center"
+						   Text="RAWG — база даних ігор. З API ключем каталог автоматично підтягує жанр, рік, платформу, опис та обкладинку під час додавання гри."/>
+			</StackPanel>
+
+			<StackPanel Spacing="8">
+				<TextBlock Text="Отримати ключ: rawg.io/apidocs"
+						   FontSize="12"
+						   Opacity="0.5"
+						   HorizontalAlignment="Center"/>
+				<TextBox Text="{Binding RawgApiKey}"
+						 Watermark="Вставте API ключ..."
+						 HorizontalAlignment="Stretch"/>
+			</StackPanel>
+
+			<StackPanel Orientation="Horizontal"
+						Spacing="12"
+						HorizontalAlignment="Right">
+				<Button Content="Назад"
+						Command="{Binding BackCommand}"
+						Padding="24,8"
+						FontSize="14"/>
+				<Button Content="Пропустити"
+						Command="{Binding SkipCommand}"
+						Padding="24,8"
+						FontSize="14"/>
+				<Button Content="Готово"
+						Command="{Binding FinishCommand}"
+						Padding="24,8"
+						FontSize="14"/>
+			</StackPanel>
+
+		</StackPanel>
+	</Grid>
 </Window>
