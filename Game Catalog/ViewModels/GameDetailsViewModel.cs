@@ -1,8 +1,10 @@
-﻿using CommunityToolkit.Mvvm.ComponentModel;
+﻿using Avalonia.Media.Imaging;
+using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using Game_Catalog.Models;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Text;
 
 namespace Game_Catalog.ViewModels
@@ -54,6 +56,20 @@ namespace Game_Catalog.ViewModels
         /// <summary> Developer studio name. </summary>
         public string DeveloperName => Game.Developer?.Name ?? "Невідомо";
 
+        /// <summary>Loaded bitmap of the game cover, or null if no cover is available.</summary>
+        public Bitmap? CoverImage => File.Exists(Game.CoverImagePath)
+            ? new Bitmap(Game.CoverImagePath)
+            : null;
+
+        /// <summary>Indicates whether a cover image is available for this game.</summary>
+        public bool HasCover => File.Exists(Game.CoverImagePath);
+
+        /// <summary>Plain-text description of the game.</summary>
+        public string Description => Game.Description;
+
+        /// <summary>Indicates whether a description is available for this game.</summary>
+        public bool HasDescription => !string.IsNullOrWhiteSpace(Game.Description);
+
         public GameDetailsViewModel(Game game, bool isArchived = false)
         {
             Game = game;
@@ -74,6 +90,10 @@ namespace Game_Catalog.ViewModels
             OnPropertyChanged(nameof(HoursPlayed));
             OnPropertyChanged(nameof(PersonalRating));
             OnPropertyChanged(nameof(DeveloperName));
+            OnPropertyChanged(nameof(CoverImage));
+            OnPropertyChanged(nameof(HasCover));
+            OnPropertyChanged(nameof(Description));
+            OnPropertyChanged(nameof(HasDescription));
         }
 
         /// <summary>

@@ -28,7 +28,7 @@ namespace Game_Catalog.ViewModels
         [Required(ErrorMessage = "Назва не може бути порожньою")]
         [MinLength(2, ErrorMessage = "Назва занадто короткая")]
         [NotWhiteSpace(ErrorMessage = "Назва не може бути лише з пробілів")]
-        [MaxLength(100, ErrorMessage = "Назва не може перевищувати 100 символів")]
+        [MaxLength(200, ErrorMessage = "Назва не може перевищувати 200 символів")]
         [NotifyDataErrorInfo]
         [ObservableProperty]
         private string _title = string.Empty;
@@ -47,7 +47,7 @@ namespace Game_Catalog.ViewModels
         [Required(ErrorMessage = "Жанр не може бути порожнім")]
         [MinLength(2, ErrorMessage = "Жанр занадто короткий")]
         [NotWhiteSpace(ErrorMessage = "Жанр не може бути лише з пробілів")]
-        [MaxLength(50, ErrorMessage = "Жанр не може перевищувати 50 символів")]
+        [MaxLength(100, ErrorMessage = "Жанр не може перевищувати 100 символів")]
         [NotifyDataErrorInfo]
         [ObservableProperty]
         private string _genre = string.Empty;
@@ -66,7 +66,7 @@ namespace Game_Catalog.ViewModels
         [Required(ErrorMessage = "Платформа не може бути порожньою")]
         [MinLength(2, ErrorMessage = "Платформа занадто короткая")]
         [NotWhiteSpace(ErrorMessage = "Платформа не може бути лише з пробілів")]
-        [MaxLength(50, ErrorMessage = "Платформа не може перевищувати 50 символів")]
+        [MaxLength(200, ErrorMessage = "Платформа не може перевищувати 200 символів")]
         [NotifyDataErrorInfo]
         [ObservableProperty]
         private string _platform = string.Empty;
