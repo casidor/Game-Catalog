@@ -29,6 +29,20 @@ namespace Game_Catalog.ViewModels
         [ObservableProperty]
         private double _diskCapacityGB = SettingsService.Current.DiskCapacityGB;
 
+        /// <summary>RAWG API key used for game metadata fetch. Empty string disables RAWG features.</summary>
+        [ObservableProperty]
+        private string _rawgApiKey = SettingsService.Current.RawgApiKey;
+
+        /// <summary>Returns true if a non-empty RAWG API key is configured.</summary>
+        public bool HasRawgKey => !string.IsNullOrWhiteSpace(RawgApiKey);
+
+        partial void OnRawgApiKeyChanged(string value)
+        {
+            SettingsService.Current.RawgApiKey = value;
+            SettingsService.Save();
+            OnPropertyChanged(nameof(HasRawgKey));
+        }
+
         partial void OnSelectedThemeChanged(string value)
         {
             Application.Current!.RequestedThemeVariant =

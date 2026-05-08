@@ -1,38 +1,67 @@
 <UserControl xmlns="https://github.com/avaloniaui"
-             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-             xmlns:vm="using:Game_Catalog.ViewModels"
-             x:Class="Game_Catalog.Views.SettingsView"
-             x:DataType="vm:SettingsViewModel">
+			 xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+			 xmlns:vm="using:Game_Catalog.ViewModels"
+			 x:Class="Game_Catalog.Views.SettingsView"
+			 x:DataType="vm:SettingsViewModel">
 
-    <StackPanel Margin="24" Spacing="24" MaxWidth="400">
+	<StackPanel Margin="24" Spacing="24" MaxWidth="400">
 
-        <TextBlock Text="Налаштування"
-                   FontSize="20"
-                   FontWeight="Bold"/>
+		<TextBlock Text="Налаштування"
+				   FontSize="20"
+				   FontWeight="Bold"/>
 
-        <StackPanel Spacing="8">
-            <TextBlock Text="Тема" FontSize="14" Opacity="0.6"/>
-            <ComboBox ItemsSource="{Binding Themes}"
-                      SelectedItem="{Binding SelectedTheme}"
-                      HorizontalAlignment="Stretch"/>
-        </StackPanel>
+		<StackPanel Spacing="8">
+			<TextBlock Text="Тема" FontSize="14" Opacity="0.6"/>
+			<ComboBox ItemsSource="{Binding Themes}"
+					  SelectedItem="{Binding SelectedTheme}"
+					  HorizontalAlignment="Stretch"/>
+		</StackPanel>
 
-        <StackPanel Spacing="8">
-            <TextBlock Text="Мова" FontSize="14" Opacity="0.6"/>
-            <ComboBox ItemsSource="{Binding Languages}"
-                      SelectedItem="{Binding SelectedLanguage}"
-                      HorizontalAlignment="Stretch"/>
-        </StackPanel>
+		<StackPanel Spacing="8">
+			<TextBlock Text="Мова" FontSize="14" Opacity="0.6"/>
+			<ComboBox ItemsSource="{Binding Languages}"
+					  SelectedItem="{Binding SelectedLanguage}"
+					  HorizontalAlignment="Stretch"/>
+		</StackPanel>
 
-        <StackPanel Spacing="8">
-            <TextBlock Text="Розмір диску (ГБ)"
-                       FontSize="14" Opacity="0.6"/>
-            <NumericUpDown Value="{Binding DiskCapacityGB}"
-                           Minimum="100"
-                           Maximum="100000"
-                           Increment="100"
-                           FormatString="0"/>
-        </StackPanel>
+		<StackPanel Spacing="8">
+			<TextBlock Text="RAWG API Key"
+					   FontSize="14" Opacity="0.6"/>
+			<TextBlock Text="Отримати ключ: rawg.io/apidocs"
+					   FontSize="11" Opacity="0.4"/>
+			<TextBox Text="{Binding RawgApiKey}"
+					 Watermark="Вставте API ключ або залиште порожнім..."/>
+			<StackPanel Orientation="Horizontal" Spacing="6">
+				<TextBlock Text="●"
+						   FontSize="10"
+						   Foreground="#4caf50"
+						   VerticalAlignment="Center"
+						   IsVisible="{Binding HasRawgKey}"/>
+				<TextBlock Text="●"
+						   FontSize="10"
+						   Foreground="#888"
+						   VerticalAlignment="Center"
+						   IsVisible="{Binding !HasRawgKey}"/>
+				<TextBlock Text="RAWG підключено"
+						   FontSize="12" Opacity="0.6"
+						   VerticalAlignment="Center"
+						   IsVisible="{Binding HasRawgKey}"/>
+				<TextBlock Text="Офлайн режим"
+						   FontSize="12" Opacity="0.6"
+						   VerticalAlignment="Center"
+						   IsVisible="{Binding !HasRawgKey}"/>
+			</StackPanel>
+		</StackPanel>
 
-    </StackPanel>
+		<StackPanel Spacing="8">
+			<TextBlock Text="Розмір диску (ГБ)"
+					   FontSize="14" Opacity="0.6"/>
+			<NumericUpDown Value="{Binding DiskCapacityGB}"
+						   Minimum="100"
+						   Maximum="100000"
+						   Increment="100"
+						   FormatString="0"/>
+		</StackPanel>
+
+	</StackPanel>
 </UserControl>
