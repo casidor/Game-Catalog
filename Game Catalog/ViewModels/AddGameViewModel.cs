@@ -271,9 +271,7 @@ namespace Game_Catalog.ViewModels
             if (detail == null) return;
 
             if (detail.Genres.Count > 0)
-                Genre = string.Join(", ", detail.Genres.Select(g => g.Name));
-            if (detail.Platforms.Count > 0)
-                Platform = string.Join(", ", detail.Platforms.Select(p => p.Platform.Name));
+                Genre = string.Join(", ", detail.Genres.Take(3).Select(g => g.Name));
             if (detail.Developers.Count > 0)
             {
                 SuggestedDeveloperNames.Clear();
