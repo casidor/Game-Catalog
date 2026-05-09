@@ -75,6 +75,12 @@ namespace Game_Catalog.ViewModels
             SelectedCountry = null;
             SelectedGenre = null;
         }
+        /// <summary> Indicates whether the filter panel is currently visible. </summary>
+        [ObservableProperty] private bool _isFiltersVisible;
+
+        /// <summary> Toggles the visibility of the filter panel. </summary>
+        [RelayCommand]
+        private void ToggleFilters() => IsFiltersVisible = !IsFiltersVisible;
 
         /// <summary> Navigates to the studio detail page. </summary>
         /// <param name="studio">The selected studio.</param>

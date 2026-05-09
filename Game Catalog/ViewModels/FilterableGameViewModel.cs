@@ -69,6 +69,11 @@ namespace Game_Catalog.ViewModels
             SelectedStatusFilter = null;
             SelectedDeveloper = null;
         }
+        /// <summary> Indicates whether the filter panel is visible. </summary>
+        [ObservableProperty] private bool _isFiltersVisible;
+
+        [RelayCommand]
+        private void ToggleFilters() => IsFiltersVisible = !IsFiltersVisible;
 
         /// <summary> Subscribes to source collection changes to keep filters and options up to date. </summary>
         protected void InitializeCollection()
