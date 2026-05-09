@@ -47,30 +47,41 @@
 
 		<!-- Студія -->
 		<TextBlock Text="Студія-розробник"/>
-		<ComboBox ItemsSource="{Binding Studios}"
-				  SelectedItem="{Binding SelectedStudio}"
-				  HorizontalAlignment="Stretch">
-			<ComboBox.ItemTemplate>
+		<Grid ColumnDefinitions="*,Auto">
+			<ComboBox Grid.Column="0"
+					  ItemsSource="{Binding Studios}"
+					  SelectedItem="{Binding SelectedStudio}"
+					  HorizontalAlignment="Stretch">
+				<ComboBox.ItemTemplate>
+					<DataTemplate>
+						<TextBlock Text="{Binding Name}"/>
+					</DataTemplate>
+				</ComboBox.ItemTemplate>
+			</ComboBox>
+			<Button Grid.Column="1"
+					Content="+"
+					Click="OnAddStudioClick"
+					Margin="8,0,0,0"
+					Padding="10,0"
+					FontSize="16"
+					VerticalAlignment="Stretch"
+					ToolTip.Tip="Додати студію"/>
+		</Grid>
+		<ItemsControl ItemsSource="{Binding SuggestedDeveloperNames}"
+					  IsVisible="{Binding HasSuggestedDevelopers}">
+			<ItemsControl.ItemTemplate>
 				<DataTemplate>
-					<TextBlock Text="{Binding Name}"/>
+					<Button Content="{Binding StringFormat='+ Додати &quot;{0}&quot; до бази?'}"
+							Tag="{Binding}"
+							Click="OnSuggestStudioClick"
+							Background="Transparent"
+							Foreground="#4a9eff"
+							Padding="0,2"
+							Cursor="Hand"
+							HorizontalAlignment="Left"/>
 				</DataTemplate>
-			</ComboBox.ItemTemplate>
-		</ComboBox>
-					<ItemsControl ItemsSource="{Binding SuggestedDeveloperNames}"
-              IsVisible="{Binding HasSuggestedDevelopers}">
-    <ItemsControl.ItemTemplate>
-        <DataTemplate>
-            <Button Content="{Binding StringFormat='+ Додати &quot;{0}&quot; до бази?'}"
-                    Tag="{Binding}"
-                    Click="OnSuggestStudioClick"
-                    Background="Transparent"
-                    Foreground="#4a9eff"
-                    Padding="0,2"
-                    Cursor="Hand"
-                    HorizontalAlignment="Left"/>
-        </DataTemplate>
-    </ItemsControl.ItemTemplate>
-</ItemsControl>
+			</ItemsControl.ItemTemplate>
+		</ItemsControl>
 
 		<!-- Жанр -->
 		<TextBlock Text="Жанр"/>

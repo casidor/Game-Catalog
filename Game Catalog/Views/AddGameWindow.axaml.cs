@@ -49,4 +49,19 @@ public partial class AddGameWindow : Window
             vm.SuggestedDeveloperNames.Remove(devName);
         }
     }
+    private async void OnAddStudioClick(object sender, RoutedEventArgs e)
+    {
+        if (DataContext is not AddGameViewModel vm) return;
+
+        var studioVm = new AddStudioViewModel();
+        var window = new AddStudioWindow { DataContext = studioVm };
+        await window.ShowDialog(this);
+
+        if (studioVm.Confirmed)
+        {
+            var studio = studioVm.BuildStudio();
+            AppData.Instance.Studios.Add(studio);
+            vm.SelectedStudio = studio;
+        }
+    }
 }
