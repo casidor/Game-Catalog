@@ -109,6 +109,10 @@ namespace Game_Catalog.ViewModels
         [ObservableProperty]
         private string _coverImagePath = string.Empty;
 
+        /// <summary>Developer names from RAWG that have no matching studio in the catalog.</summary>
+        public ObservableCollection<string> SuggestedDeveloperNames { get; } = new();
+        public bool HasSuggestedDevelopers => SuggestedDeveloperNames.Count > 0;
+
         /// <summary>Indicates whether the RAWG suggestion dropdown is visible.</summary>
         [ObservableProperty]
         private bool _isSuggestionsVisible;
@@ -150,6 +154,7 @@ namespace Game_Catalog.ViewModels
         public AddGameViewModel(ObservableCollection<Studio> studios)
         {
             Studios = studios;
+            SuggestedDeveloperNames.CollectionChanged += (_, _) => OnPropertyChanged(nameof(HasSuggestedDevelopers));
             WindowTitle = "Додати гру";
         }
 
@@ -179,6 +184,7 @@ namespace Game_Catalog.ViewModels
             WindowTitle = "Редагувати гру";
             _isInitializing = true;
             Studios = studios;
+            SuggestedDeveloperNames.CollectionChanged += (_, _) => OnPropertyChanged(nameof(HasSuggestedDevelopers));
             Title = game.Title;
             SelectedStudio = game.Developer;
             Genre = game.Genre;
@@ -268,7 +274,25 @@ namespace Game_Catalog.ViewModels
                 Genre = string.Join(", ", detail.Genres.Select(g => g.Name));
             if (detail.Platforms.Count > 0)
                 Platform = string.Join(", ", detail.Platforms.Select(p => p.Platform.Name));
-            if (detail.Developers.Count > 0) ; 
+            if (detail.Developers.Count > 0)
+            {
+                SuggestedDeveloperNames.Clear();
+                var studioSelected = false;
+                foreach (var dev in detail.Developers)
+                {
+                    var existing = Studios.FirstOrDefault(s =>
+                        s.Name.Equals(dev.Name, StringComparison.OrdinalIgnoreCase));
+                    if (existing != null && !studioSelected)
+                    {
+                        SelectedStudio = existing;
+                        studioSelected = true;
+                    }
+                    else if (existing == null)
+                    {
+                        SuggestedDeveloperNames.Add(dev.Name);
+                    }
+                }
+            }
             if (!string.IsNullOrWhiteSpace(detail.DescriptionRaw))
                 Description = detail.DescriptionRaw;
             if (DateTime.TryParse(detail.Released, out var date))
