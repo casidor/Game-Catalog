@@ -31,10 +31,7 @@ namespace Game_Catalog.ViewModels
         /// <summary>
         /// Country where the studio is based, entered by the user.
         /// </summary>
-        [Required(ErrorMessage = "Країна не може бути порожньою")]
-        [MinLength(2, ErrorMessage = "Назва країни занадто коротка")]
         [MaxLength(50, ErrorMessage = "Назва країни не може перевищувати 50 символів")]
-        [NotWhiteSpace(ErrorMessage = "Назва країни не може бути лише з пробілів")]
         [NotifyDataErrorInfo]
         [ObservableProperty]
         private string _country = string.Empty;
@@ -50,10 +47,7 @@ namespace Game_Catalog.ViewModels
         /// <summary>
         /// Main genre the studio is known for, entered by the user.
         /// </summary>
-        [Required(ErrorMessage = "Жанр не може бути порожнім")]
-        [MinLength(2, ErrorMessage = "Жанр занадто короткий")]
         [MaxLength(50, ErrorMessage = "Жанр не може перевищувати 50 символів")]
-        [NotWhiteSpace(ErrorMessage = "Жанр не може бути лише з пробілів")]
         [NotifyDataErrorInfo]
         [ObservableProperty]
         private string _mainGenre = string.Empty;
