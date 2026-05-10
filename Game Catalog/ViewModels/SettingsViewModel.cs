@@ -36,6 +36,15 @@ namespace Game_Catalog.ViewModels
 
         /// <summary> Indicates whether the key validation is in progress. </summary>
         [ObservableProperty] private bool _isValidatingKey;
+        [ObservableProperty]
+        [NotifyPropertyChangedFor(nameof(ConnectionStatus))]
+        [NotifyPropertyChangedFor(nameof(IsOnline))]
+        private bool _isKeyValidated = false;
+
+        /// <summary> Current RAWG connection status based on saved API key. </summary>
+        public string ConnectionStatus => IsKeyValidated ? "RAWG підключено" : "Офлайн режим";
+
+        public bool IsOnline => IsKeyValidated;
 
         [RelayCommand]
         private async Task ValidateRawgKeyAsync()
@@ -48,19 +57,25 @@ namespace Game_Catalog.ViewModels
 
             if (valid)
             {
+                IsKeyValidated = true;
                 RawgKeyStatusMessage = "✓ Ключ дійсний";
                 SettingsService.Current.RawgApiKey = RawgApiKey;
                 SettingsService.Save();
                 OnPropertyChanged(nameof(HasRawgKey));
+
+                await Task.Delay(3000);
+                RawgKeyStatusMessage = string.Empty;
             }
             else
             {
+                IsKeyValidated = false;
                 RawgKeyStatusMessage = "✗ Невірний ключ — не збережено";
             }
         }
 
         partial void OnRawgApiKeyChanged(string value)
         {
+            IsKeyValidated = false;
             RawgKeyStatusMessage = string.Empty;
             OnPropertyChanged(nameof(HasRawgKey));
         }
