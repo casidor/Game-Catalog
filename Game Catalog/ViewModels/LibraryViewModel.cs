@@ -27,6 +27,14 @@ namespace Game_Catalog.ViewModels
         /// <summary>Indicates whether the game library is empty.</summary>
         public bool IsEmpty => AppData.Instance.Games.Count == 0;
 
+        public string[] ViewModes { get; } = { "Сітка", "Список" };
+
+        [ObservableProperty]
+        [NotifyPropertyChangedFor(nameof(IsGridView))]
+        private string _selectedViewMode = "Сітка";
+
+        public bool IsGridView => SelectedViewMode == "Сітка";
+
         public LibraryViewModel()
         {
             InitializeCollection();

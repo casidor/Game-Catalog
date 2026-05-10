@@ -4,154 +4,193 @@
 			 xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
 			 xmlns:vm="using:Game_Catalog.ViewModels"
 			 xmlns:models="using:Game_Catalog.Models"
-             xmlns:conv="using:Game_Catalog.Converters"
+			 xmlns:conv="using:Game_Catalog.Converters"
 			 x:Class="Game_Catalog.Views.LibraryView"
 			 x:DataType="vm:LibraryViewModel">
 
 	<Grid RowDefinitions="auto,auto,*">
 
-    <!-- Тулбар -->
-    <Border Grid.Row="0" Padding="16,12">
-        <Grid ColumnDefinitions="Auto,*">
-            <StackPanel Grid.Column="0" Orientation="Horizontal" Spacing="8" VerticalAlignment="Center">
-                <TextBlock Text="Моя бібліотека"
-                           FontSize="20" FontWeight="Bold"
-                           VerticalAlignment="Center"/>
-                <Button Content="+ Додати гру"
-                        Click="OnAddGameClick"
-                        VerticalAlignment="Center"/>
-            </StackPanel>
-            <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="8"
-                        HorizontalAlignment="Right" VerticalAlignment="Center">
-                <TextBox Text="{Binding SearchText}"
-                         Watermark="🔍  Пошук..."
-                         Width="180"
-                         VerticalAlignment="Center"/>
-                <Button Content="⚙ Фільтри"
-                        Command="{Binding ToggleFiltersCommand}"
-                        VerticalAlignment="Center"/>
-            </StackPanel>
-        </Grid>
-    </Border>
+		<!-- Тулбар -->
+		<Border Grid.Row="0" Padding="16,12">
+			<Grid ColumnDefinitions="Auto,*">
+				<StackPanel Grid.Column="0" Orientation="Horizontal" Spacing="8" VerticalAlignment="Center">
+					<TextBlock Text="Моя бібліотека"
+							   FontSize="20" FontWeight="Bold"
+							   VerticalAlignment="Center"/>
+					<Button Content="+ Додати гру"
+							Click="OnAddGameClick"
+							VerticalAlignment="Center"/>
+				</StackPanel>
+				<StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="8"
+							HorizontalAlignment="Right" VerticalAlignment="Center">
+					<TextBox Text="{Binding SearchText}"
+							 Watermark="🔍  Пошук..."
+							 Width="180"
+							 VerticalAlignment="Center"/>
+					<Button Content="⚙ Фільтри"
+							Command="{Binding ToggleFiltersCommand}"
+							VerticalAlignment="Center"/>
+					<ComboBox ItemsSource="{Binding ViewModes}"
+							  SelectedItem="{Binding SelectedViewMode}"
+							  VerticalAlignment="Center"
+							  Width="100"/>
+				</StackPanel>
+			</Grid>
+		</Border>
 
-    <!-- Панель фільтрів -->
-    <Border Grid.Row="1"
-            Padding="16,10"
-            IsVisible="{Binding IsFiltersVisible}"
-            Background="{DynamicResource CardBackground}"
-            BorderBrush="{DynamicResource SidebarBorder}"
-            BorderThickness="0,1,0,1">
-        <WrapPanel Orientation="Horizontal" ItemWidth="">
-            <ComboBox ItemsSource="{Binding AvailableGenres}"
-                      SelectedItem="{Binding SelectedGenre}"
-                      Width="140" Margin="0,0,8,8">
-                <ComboBox.ItemTemplate>
-                    <DataTemplate>
-                        <TextBlock Text="{Binding, TargetNullValue='Жанр'}"/>
-                    </DataTemplate>
-                </ComboBox.ItemTemplate>
-            </ComboBox>
-            <ComboBox ItemsSource="{Binding AvailablePlatforms}"
-                      SelectedItem="{Binding SelectedPlatform}"
-                      Width="140" Margin="0,0,8,8">
-                <ComboBox.ItemTemplate>
-                    <DataTemplate>
-                        <TextBlock Text="{Binding, TargetNullValue='Платформа'}"/>
-                    </DataTemplate>
-                </ComboBox.ItemTemplate>
-            </ComboBox>
-            <ComboBox ItemsSource="{Binding AvailableDevelopers}"
-                      SelectedItem="{Binding SelectedDeveloper}"
-                      Width="160" Margin="0,0,8,8">
-                <ComboBox.ItemTemplate>
-                    <DataTemplate>
-                        <TextBlock Text="{Binding Name, TargetNullValue='Розробник', FallbackValue='Розробник'}"/>
-                    </DataTemplate>
-                </ComboBox.ItemTemplate>
-            </ComboBox>
-            <ComboBox ItemsSource="{Binding AvailableStatuses}"
-                      SelectedItem="{Binding SelectedStatusFilter}"
-                      Width="140" Margin="0,0,8,8">
-                <ComboBox.ItemTemplate>
-                    <DataTemplate>
-                        <TextBlock Text="{Binding, TargetNullValue='Статус'}"/>
-                    </DataTemplate>
-                </ComboBox.ItemTemplate>
-            </ComboBox>
-            <Button Content="✕ Скинути"
-                    Command="{Binding ClearFiltersCommand}"
-                    Margin="0,0,0,8"/>
-        </WrapPanel>
-    </Border>
+		<!-- Панель фільтрів -->
+		<Border Grid.Row="1"
+				Padding="16,10"
+				IsVisible="{Binding IsFiltersVisible}"
+				Background="{DynamicResource CardBackground}"
+				BorderBrush="{DynamicResource SidebarBorder}"
+				BorderThickness="0,1,0,1">
+			<WrapPanel Orientation="Horizontal" ItemWidth="">
+				<ComboBox ItemsSource="{Binding AvailableGenres}"
+						  SelectedItem="{Binding SelectedGenre}"
+						  Width="140" Margin="0,0,8,8">
+					<ComboBox.ItemTemplate>
+						<DataTemplate>
+							<TextBlock Text="{Binding, TargetNullValue='Жанр'}"/>
+						</DataTemplate>
+					</ComboBox.ItemTemplate>
+				</ComboBox>
+				<ComboBox ItemsSource="{Binding AvailablePlatforms}"
+						  SelectedItem="{Binding SelectedPlatform}"
+						  Width="140" Margin="0,0,8,8">
+					<ComboBox.ItemTemplate>
+						<DataTemplate>
+							<TextBlock Text="{Binding, TargetNullValue='Платформа'}"/>
+						</DataTemplate>
+					</ComboBox.ItemTemplate>
+				</ComboBox>
+				<ComboBox ItemsSource="{Binding AvailableDevelopers}"
+						  SelectedItem="{Binding SelectedDeveloper}"
+						  Width="160" Margin="0,0,8,8">
+					<ComboBox.ItemTemplate>
+						<DataTemplate>
+							<TextBlock Text="{Binding Name, TargetNullValue='Розробник', FallbackValue='Розробник'}"/>
+						</DataTemplate>
+					</ComboBox.ItemTemplate>
+				</ComboBox>
+				<ComboBox ItemsSource="{Binding AvailableStatuses}"
+						  SelectedItem="{Binding SelectedStatusFilter}"
+						  Width="140" Margin="0,0,8,8">
+					<ComboBox.ItemTemplate>
+						<DataTemplate>
+							<TextBlock Text="{Binding, TargetNullValue='Статус'}"/>
+						</DataTemplate>
+					</ComboBox.ItemTemplate>
+				</ComboBox>
+				<Button Content="✕ Скинути"
+						Command="{Binding ClearFiltersCommand}"
+						Margin="0,0,0,8"/>
+			</WrapPanel>
+		</Border>
 
-    <!-- Контент -->
-    <Grid Grid.Row="2">
-    <ScrollViewer IsVisible="{Binding !IsEmpty}">
-        <ItemsControl ItemsSource="{Binding FilteredGames}">
-            <ItemsControl.ItemsPanel>
-                <ItemsPanelTemplate>
-                    <WrapPanel Orientation="Horizontal" Margin="16"/>
-                </ItemsPanelTemplate>
-            </ItemsControl.ItemsPanel>
-            <ItemsControl.ItemTemplate>
-                <DataTemplate x:DataType="models:Game">
-                    <Button Padding="0"
-        Margin="0,0,12,12"
-        Background="Transparent"
-        Command="{Binding $parent[ItemsControl].((vm:LibraryViewModel)DataContext).SelectGameCommand}"
-        CommandParameter="{Binding}">
-    <Border Width="160" Height="220"
-            CornerRadius="8"
-            ClipToBounds="True"
-            Background="{DynamicResource CardBackground}">
-        <Grid RowDefinitions="*,Auto">
+		<!-- Контент -->
+		<Grid Grid.Row="2" RowDefinitions="Auto,*">
 
-            <!-- Обкладинка або плейсхолдер -->
-            <Panel Grid.Row="0">
-                <Image Source="{Binding CoverImagePath, Converter={x:Static conv:PathToBitmapConverter.Instance}}"
-                       Stretch="UniformToFill"
-                       IsVisible="{Binding CoverImagePath, Converter={x:Static StringConverters.IsNotNullOrEmpty}}"/>
-                <TextBlock Text="🎮"
-                           FontSize="48"
-                           HorizontalAlignment="Center"
-                           VerticalAlignment="Center"
-                           IsVisible="{Binding CoverImagePath, Converter={x:Static StringConverters.IsNullOrEmpty}}"/>
-            </Panel>
+			<!-- Заголовки таблиці -->
+			<Border Grid.Row="0"
+					Padding="16,8"
+					IsVisible="{Binding !IsGridView}"
+					BorderBrush="{DynamicResource SidebarBorder}"
+					BorderThickness="0,0,0,1">
+				<Grid ColumnDefinitions="*,150,100,80">
+					<TextBlock Grid.Column="0" Text="Назва"     FontSize="12" Opacity="0.5"/>
+					<TextBlock Grid.Column="1" Text="Платформа" FontSize="12" Opacity="0.5"/>
+					<TextBlock Grid.Column="2" Text="Статус"    FontSize="12" Opacity="0.5"/>
+					<TextBlock Grid.Column="3" Text="Оцінка"    FontSize="12" Opacity="0.5"/>
+				</Grid>
+			</Border>
 
-            <!-- Назва -->
-            <Border Grid.Row="1"
-                    Background="{DynamicResource CardBackground}"
-                    Padding="8,6">
-                <TextBlock Text="{Binding Title}"
-                           FontWeight="SemiBold"
-                           FontSize="12"
-                           TextWrapping="Wrap"
-                           MaxLines="2"
-                           TextTrimming="CharacterEllipsis"/>
-            </Border>
+			<!-- Сітка карток -->
+			<ScrollViewer Grid.Row="1"
+						  IsVisible="{Binding IsGridView}">
+				<ItemsControl ItemsSource="{Binding FilteredGames}">
+					<ItemsControl.ItemsPanel>
+						<ItemsPanelTemplate>
+							<WrapPanel Orientation="Horizontal" Margin="16"/>
+						</ItemsPanelTemplate>
+					</ItemsControl.ItemsPanel>
+					<ItemsControl.ItemTemplate>
+						<DataTemplate x:DataType="models:Game">
+							<Button Padding="0"
+									Margin="0,0,12,12"
+									Background="Transparent"
+									Command="{Binding $parent[ItemsControl].((vm:LibraryViewModel)DataContext).SelectGameCommand}"
+									CommandParameter="{Binding}">
+								<Border Width="160" Height="220"
+										CornerRadius="8"
+										ClipToBounds="True"
+										Background="{DynamicResource CardBackground}">
+									<Grid RowDefinitions="*,Auto">
+										<Panel Grid.Row="0">
+											<Image Source="{Binding CoverImagePath, Converter={x:Static conv:PathToBitmapConverter.Instance}}"
+												   Stretch="UniformToFill"
+												   IsVisible="{Binding CoverImagePath, Converter={x:Static StringConverters.IsNotNullOrEmpty}}"/>
+											<TextBlock Text="🎮"
+													   FontSize="48"
+													   HorizontalAlignment="Center"
+													   VerticalAlignment="Center"
+													   IsVisible="{Binding CoverImagePath, Converter={x:Static StringConverters.IsNullOrEmpty}}"/>
+										</Panel>
+										<Border Grid.Row="1"
+												Background="{DynamicResource CardBackground}"
+												Padding="8,6">
+											<TextBlock Text="{Binding Title}"
+													   FontWeight="SemiBold"
+													   FontSize="12"
+													   TextWrapping="Wrap"
+													   MaxLines="2"
+													   TextTrimming="CharacterEllipsis"/>
+										</Border>
+									</Grid>
+								</Border>
+							</Button>
+						</DataTemplate>
+					</ItemsControl.ItemTemplate>
+				</ItemsControl>
+			</ScrollViewer>
 
-        </Grid>
-    </Border>
-</Button>
-                </DataTemplate>
-            </ItemsControl.ItemTemplate>
-        </ItemsControl>
-    </ScrollViewer>
+			<!-- Таблиця -->
+			<ListBox Grid.Row="1"
+					 ItemsSource="{Binding FilteredGames}"
+					 SelectedItem="{Binding SelectedGame}"
+					 SelectionChanged="OnSelectionChanged"
+					 IsVisible="{Binding !IsGridView}">
+				<ListBox.ItemTemplate>
+					<DataTemplate x:DataType="models:Game">
+						<Grid ColumnDefinitions="*,150,100,80">
+							<StackPanel Grid.Column="0" Spacing="2">
+								<TextBlock Text="{Binding Title}" FontWeight="SemiBold"/>
+								<TextBlock Text="{Binding Developer.Name}" FontSize="12" Opacity="0.6"/>
+							</StackPanel>
+							<TextBlock Grid.Column="1" Text="{Binding Platform}" VerticalAlignment="Center"/>
+							<TextBlock Grid.Column="2" Text="{Binding Status}"   VerticalAlignment="Center"/>
+							<TextBlock Grid.Column="3" Text="{Binding PersonalRating, StringFormat='{}{0}/10'}" VerticalAlignment="Center"/>
+						</Grid>
+					</DataTemplate>
+				</ListBox.ItemTemplate>
+			</ListBox>
 
-    <StackPanel IsVisible="{Binding IsEmpty}"
-                HorizontalAlignment="Center"
-                VerticalAlignment="Center"
-                Spacing="16">
-        <TextBlock Text="🎮" FontSize="48" HorizontalAlignment="Center"/>
-        <TextBlock Text="Бібліотека порожня" FontSize="18" FontWeight="SemiBold" HorizontalAlignment="Center"/>
-        <TextBlock Text="Додай свою першу гру щоб почати" Opacity="0.6" HorizontalAlignment="Center"/>
-        <Button Content="+ Додати гру"
-                Click="OnAddGameClick"
-                HorizontalAlignment="Center"
-                Padding="24,10" FontSize="14"/>
-    </StackPanel>
-</Grid>
+			<!-- Порожня бібліотека -->
+			<StackPanel Grid.Row="1"
+						IsVisible="{Binding IsEmpty}"
+						HorizontalAlignment="Center"
+						VerticalAlignment="Center"
+						Spacing="16">
+				<TextBlock Text="🎮" FontSize="48" HorizontalAlignment="Center"/>
+				<TextBlock Text="Бібліотека порожня" FontSize="18" FontWeight="SemiBold" HorizontalAlignment="Center"/>
+				<TextBlock Text="Додай свою першу гру щоб почати" Opacity="0.6" HorizontalAlignment="Center"/>
+				<Button Content="+ Додати гру"
+						Click="OnAddGameClick"
+						HorizontalAlignment="Center"
+						Padding="24,10" FontSize="14"/>
+			</StackPanel>
+		</Grid>
 
-</Grid>
+	</Grid>
 
 </UserControl>
