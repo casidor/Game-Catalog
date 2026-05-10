@@ -4,6 +4,7 @@
 			 xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
 			 xmlns:vm="using:Game_Catalog.ViewModels"
 			 xmlns:models="using:Game_Catalog.Models"
+             xmlns:conv="using:Game_Catalog.Converters"
 			 x:Class="Game_Catalog.Views.LibraryView"
 			 x:DataType="vm:LibraryViewModel">
 
@@ -85,37 +86,71 @@
 
     <!-- Контент -->
     <Grid Grid.Row="2">
-        <ListBox ItemsSource="{Binding FilteredGames}"
-                 SelectedItem="{Binding SelectedGame}"
-                 SelectionChanged="OnSelectionChanged"
-                 IsVisible="{Binding !IsEmpty}">
-            <ListBox.ItemTemplate>
+    <ScrollViewer IsVisible="{Binding !IsEmpty}">
+        <ItemsControl ItemsSource="{Binding FilteredGames}">
+            <ItemsControl.ItemsPanel>
+                <ItemsPanelTemplate>
+                    <WrapPanel Orientation="Horizontal" Margin="16"/>
+                </ItemsPanelTemplate>
+            </ItemsControl.ItemsPanel>
+            <ItemsControl.ItemTemplate>
                 <DataTemplate x:DataType="models:Game">
-                    <Grid ColumnDefinitions="*,150,100" Width="600">
-                        <StackPanel Grid.Column="0" Spacing="2">
-                            <TextBlock Text="{Binding Title}" FontWeight="SemiBold"/>
-                            <TextBlock Text="{Binding Developer.Name}" FontSize="12" Opacity="0.6"/>
-                        </StackPanel>
-                        <TextBlock Grid.Column="1" Text="{Binding Platform}" VerticalAlignment="Center"/>
-                        <TextBlock Grid.Column="2" Text="{Binding Status}" VerticalAlignment="Center"/>
-                    </Grid>
-                </DataTemplate>
-            </ListBox.ItemTemplate>
-        </ListBox>
+                    <Button Padding="0"
+        Margin="0,0,12,12"
+        Background="Transparent"
+        Command="{Binding $parent[ItemsControl].((vm:LibraryViewModel)DataContext).SelectGameCommand}"
+        CommandParameter="{Binding}">
+    <Border Width="160" Height="220"
+            CornerRadius="8"
+            ClipToBounds="True"
+            Background="{DynamicResource CardBackground}">
+        <Grid RowDefinitions="*,Auto">
 
-        <StackPanel IsVisible="{Binding IsEmpty}"
-                    HorizontalAlignment="Center"
-                    VerticalAlignment="Center"
-                    Spacing="16">
-            <TextBlock Text="🎮" FontSize="48" HorizontalAlignment="Center"/>
-            <TextBlock Text="Бібліотека порожня" FontSize="18" FontWeight="SemiBold" HorizontalAlignment="Center"/>
-            <TextBlock Text="Додай свою першу гру щоб почати" Opacity="0.6" HorizontalAlignment="Center"/>
-            <Button Content="+ Додати гру"
-                    Click="OnAddGameClick"
-                    HorizontalAlignment="Center"
-                    Padding="24,10" FontSize="14"/>
-        </StackPanel>
-    </Grid>
+            <!-- Обкладинка або плейсхолдер -->
+            <Panel Grid.Row="0">
+                <Image Source="{Binding CoverImagePath, Converter={x:Static conv:PathToBitmapConverter.Instance}}"
+                       Stretch="UniformToFill"
+                       IsVisible="{Binding CoverImagePath, Converter={x:Static StringConverters.IsNotNullOrEmpty}}"/>
+                <TextBlock Text="🎮"
+                           FontSize="48"
+                           HorizontalAlignment="Center"
+                           VerticalAlignment="Center"
+                           IsVisible="{Binding CoverImagePath, Converter={x:Static StringConverters.IsNullOrEmpty}}"/>
+            </Panel>
+
+            <!-- Назва -->
+            <Border Grid.Row="1"
+                    Background="{DynamicResource CardBackground}"
+                    Padding="8,6">
+                <TextBlock Text="{Binding Title}"
+                           FontWeight="SemiBold"
+                           FontSize="12"
+                           TextWrapping="Wrap"
+                           MaxLines="2"
+                           TextTrimming="CharacterEllipsis"/>
+            </Border>
+
+        </Grid>
+    </Border>
+</Button>
+                </DataTemplate>
+            </ItemsControl.ItemTemplate>
+        </ItemsControl>
+    </ScrollViewer>
+
+    <StackPanel IsVisible="{Binding IsEmpty}"
+                HorizontalAlignment="Center"
+                VerticalAlignment="Center"
+                Spacing="16">
+        <TextBlock Text="🎮" FontSize="48" HorizontalAlignment="Center"/>
+        <TextBlock Text="Бібліотека порожня" FontSize="18" FontWeight="SemiBold" HorizontalAlignment="Center"/>
+        <TextBlock Text="Додай свою першу гру щоб почати" Opacity="0.6" HorizontalAlignment="Center"/>
+        <Button Content="+ Додати гру"
+                Click="OnAddGameClick"
+                HorizontalAlignment="Center"
+                Padding="24,10" FontSize="14"/>
+    </StackPanel>
+</Grid>
 
 </Grid>
 
