@@ -34,10 +34,12 @@ namespace Game_Catalog.ViewModels
         public IEnumerable<Game> FilteredGames => SourceGames
             .Where(g => string.IsNullOrWhiteSpace(SearchText) ||
                         g.Title.Contains(SearchText, StringComparison.OrdinalIgnoreCase))
-            .Where(g => SelectedGenre == null || g.Genre == SelectedGenre)
+            .Where(g => SelectedGenre == null ||
+            g.Genre.Split(',', StringSplitOptions.TrimEntries).Contains(SelectedGenre))
             .Where(g => SelectedPlatform == null || g.Platform == SelectedPlatform)
             .Where(g => SelectedStatusFilter == null || g.Status == SelectedStatusFilter)
-            .Where(g => SelectedDeveloper == null || g.Developer?.Id == SelectedDeveloper.Id);
+            .Where(g => SelectedDeveloper == null || g.Developer?.Id == SelectedDeveloper.Id)
+            .OrderBy(g => g.Title);
 
         /// <summary> Distinct developers derived from the source collection. </summary>
         public IEnumerable<Studio?> AvailableDevelopers =>
@@ -48,8 +50,11 @@ namespace Game_Catalog.ViewModels
                 .OrderBy(d => d!.Name));
 
         /// <summary> Distinct genres derived from the source collection. </summary>
-        public IEnumerable<string?> AvailableGenres =>
-            new string?[] { null }.Concat(SourceGames.Select(g => g.Genre).Distinct().OrderBy(g => g));
+        public IEnumerable<string?> AvailableGenres => new string?[] { null }.Concat(
+        SourceGames
+            .SelectMany(g => g.Genre.Split(',', StringSplitOptions.TrimEntries | StringSplitOptions.RemoveEmptyEntries))
+            .Distinct()
+            .OrderBy(g => g));
 
         /// <summary> Distinct platforms derived from the source collection. </summary>
         public IEnumerable<string?> AvailablePlatforms =>
