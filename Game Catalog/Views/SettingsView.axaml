@@ -18,13 +18,6 @@
 		</StackPanel>
 
 		<StackPanel Spacing="8">
-			<TextBlock Text="Мова" FontSize="14" Opacity="0.6"/>
-			<ComboBox ItemsSource="{Binding Languages}"
-					  SelectedItem="{Binding SelectedLanguage}"
-					  HorizontalAlignment="Stretch"/>
-		</StackPanel>
-
-		<StackPanel Spacing="8">
 			<TextBlock Text="RAWG API Key"
 					   FontSize="14" Opacity="0.6"/>
 			<TextBlock Text="Отримати ключ: rawg.io/apidocs"
