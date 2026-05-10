@@ -91,5 +91,17 @@ namespace Game_Catalog.Services
                 return string.Empty;
             }
         }
+        /// <summary> Validates the given API key by making a test request to RAWG. </summary>
+        public static async Task<bool> ValidateKeyAsync(string key)
+        {
+            if (string.IsNullOrWhiteSpace(key)) return false;
+            try
+            {
+                var url = $"{BaseUrl}/games?key={key}&page_size=1";
+                var response = await Http.GetAsync(url);
+                return response.IsSuccessStatusCode;
+            }
+            catch { return false; }
+        }
     }
 }

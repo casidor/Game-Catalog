@@ -105,6 +105,13 @@
 				<TextBox Text="{Binding RawgApiKey}"
 						 Watermark="Вставте API ключ..."
 						 HorizontalAlignment="Stretch"/>
+				<Button Content="Перевірити ключ"
+						Command="{Binding ValidateRawgKeyCommand}"
+						IsEnabled="{Binding !IsValidatingKey}"
+						HorizontalAlignment="Left"/>
+				<TextBlock Text="{Binding RawgKeyStatusMessage}"
+						   FontSize="12"
+						   IsVisible="{Binding RawgKeyStatusMessage, Converter={x:Static StringConverters.IsNotNullOrEmpty}}"/>
 			</StackPanel>
 
 			<StackPanel Orientation="Horizontal"
@@ -116,10 +123,12 @@
 						FontSize="14"/>
 				<Button Content="Пропустити"
 						Command="{Binding SkipCommand}"
+						IsEnabled="{Binding CanSkip}"
 						Padding="24,8"
 						FontSize="14"/>
 				<Button Content="Готово"
 						Command="{Binding FinishCommand}"
+						IsEnabled="{Binding CanFinish}"
 						Padding="24,8"
 						FontSize="14"/>
 			</StackPanel>

@@ -4,6 +4,7 @@ using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using Game_Catalog.Services;
 using System;
+using System.Threading.Tasks;
 
 namespace Game_Catalog.ViewModels
 {
@@ -51,6 +52,51 @@ namespace Game_Catalog.ViewModels
         /// <summary> Moves to the previous step in the sequence. </summary>
         [RelayCommand]
         private void Back() => Step--;
+
+        /// <summary> Indicates whether the entered RAWG key has been successfully validated. </summary>
+        [ObservableProperty]
+        [NotifyPropertyChangedFor(nameof(CanFinish))]
+        [NotifyPropertyChangedFor(nameof(CanSkip))]
+        private bool _isRawgKeyValidated;
+
+        /// <summary> Status message shown after API key validation. </summary>
+        [ObservableProperty] private string _rawgKeyStatusMessage = string.Empty;
+
+        /// <summary> Indicates whether the key validation is in progress. </summary>
+        [ObservableProperty] private bool _isValidatingKey;
+
+        /// <summary> Finish button is active only when key is validated. </summary>
+        public bool CanFinish => IsRawgKeyValidated;
+
+        /// <summary> Skip button is active only when key is not validated. </summary>
+        public bool CanSkip => !IsRawgKeyValidated;
+
+        [RelayCommand]
+        private async Task ValidateRawgKeyAsync()
+        {
+            if (string.IsNullOrWhiteSpace(RawgApiKey)) return;
+            IsValidatingKey = true;
+            RawgKeyStatusMessage = "Перевірка...";
+            var valid = await RawgService.ValidateKeyAsync(RawgApiKey);
+            IsValidatingKey = false;
+
+            if (valid)
+            {
+                IsRawgKeyValidated = true;
+                RawgKeyStatusMessage = "✓ Ключ дійсний";
+            }
+            else
+            {
+                IsRawgKeyValidated = false;
+                RawgKeyStatusMessage = "✗ Невірний ключ";
+            }
+        }
+
+        partial void OnRawgApiKeyChanged(string value)
+        {
+            IsRawgKeyValidated = false;
+            RawgKeyStatusMessage = string.Empty;
+        }
 
         /// <summary>Selects the given theme and applies it immediately.</summary>
         [RelayCommand]
