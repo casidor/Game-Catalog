@@ -4,6 +4,7 @@ using Avalonia.Interactivity;
 using Avalonia.Markup.Xaml;
 using Game_Catalog.Models;
 using Game_Catalog.ViewModels;
+using System.Threading.Tasks;
 
 namespace Game_Catalog.Views;
 
@@ -45,9 +46,32 @@ public partial class GameDetailsView : UserControl
     private void OnArchiveClick(object sender, RoutedEventArgs e)
     {
         if (DataContext is not GameDetailsViewModel detailVm) return;
-
         AppData.Instance.Games.Remove(detailVm.Game);
         AppData.Instance.ArchivedGames.Add(detailVm.Game);
+        detailVm.GoBackCommand.Execute(null);
+    }
+
+    private void OnDeleteClick(object sender, RoutedEventArgs e)
+    {
+        if (DataContext is not GameDetailsViewModel detailVm) return;
+        var parent = TopLevel.GetTopLevel(this) as Window;
+        _ = DeleteGameAsync(detailVm, parent!);
+    }
+
+    private async Task DeleteGameAsync(GameDetailsViewModel detailVm, Window parent)
+    {
+        var confirmed = await ConfirmationWindow.ShowAsync(
+            parent,
+            title: "Видалення гри",
+            message: $"Видалити «{detailVm.Title}»? Цю дію не можна скасувати.",
+            confirmText: "Видалити",
+            cancelText: "Скасувати");
+
+        if (!confirmed) return;
+        if (detailVm.IsArchived)
+            AppData.Instance.ArchivedGames.Remove(detailVm.Game);
+        else
+            AppData.Instance.Games.Remove(detailVm.Game);
         detailVm.GoBackCommand.Execute(null);
     }
     private void OnRestoreClick(object sender, RoutedEventArgs e)
@@ -56,17 +80,6 @@ public partial class GameDetailsView : UserControl
 
         AppData.Instance.ArchivedGames.Remove(detailVm.Game);
         AppData.Instance.Games.Add(detailVm.Game);
-        detailVm.GoBackCommand.Execute(null);
-    }
-    private void OnDeleteClick(object sender, RoutedEventArgs e)
-    {
-        if (DataContext is not GameDetailsViewModel detailVm) return;
-
-        if (detailVm.IsArchived)
-            AppData.Instance.ArchivedGames.Remove(detailVm.Game);
-        else
-            AppData.Instance.Games.Remove(detailVm.Game);
-
         detailVm.GoBackCommand.Execute(null);
     }
 }
