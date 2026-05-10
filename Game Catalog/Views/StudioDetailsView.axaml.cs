@@ -57,4 +57,11 @@ public partial class StudioDetailsView : UserControl
         AppData.Instance.Studios.Remove(detailVm.Studio);
         detailVm.GoBackCommand.Execute(null);
     }
+    private void OnGameSelectionChanged(object sender, SelectionChangedEventArgs e)
+    {
+        if (DataContext is not StudioDetailsViewModel vm) return;
+        if (sender is not ListBox lb || lb.SelectedItem is not Game game) return;
+        lb.SelectedItem = null;
+        vm.SelectGameCommand.Execute(game);
+    }
 }

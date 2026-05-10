@@ -3,6 +3,7 @@ using CommunityToolkit.Mvvm.Input;
 using Game_Catalog.Models;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Net.NetworkInformation;
 using System.Runtime.InteropServices;
 using System.Text;
@@ -24,25 +25,13 @@ namespace Game_Catalog.ViewModels
         /// </summary>
         public event Action? BackRequested;
 
+        /// <summary> Raised when the user selects a game to view details. </summary>
+        public event Action<Game>? GameSelected;
+
         /// <summary>
         /// Name of the studio.
         /// </summary>
         public string Name => Studio.Name;
-
-        /// <summary>
-        /// Country where the studio is based.
-        /// </summary>
-        public string Country => Studio.Country;
-
-        /// <summary>
-        /// The year the studio was founded.
-        /// </summary>
-        public int FoundationYear => Studio.FoundationYear;
-
-        /// <summary>
-        /// Genre the studio is known for.
-        /// </summary>
-        public string MainGenre => Studio.MainGenre;
 
         /// <summary>Country name or "Невідомо" if not specified.</summary>
         public string DisplayCountry => string.IsNullOrWhiteSpace(Studio.Country) ? "Невідомо" : Studio.Country;
@@ -53,9 +42,21 @@ namespace Game_Catalog.ViewModels
         /// <summary>Foundation year or "Невідомо" if the value is zero.</summary>
         public string DisplayFoundationYear => Studio.FoundationYear == 0 ? "Невідомо" : Studio.FoundationYear.ToString();
 
+        /// <summary> Games developed by this studio. </summary>
+        public IEnumerable<Game> StudioGames =>
+            AppData.Instance.Games.Where(g => g.Developer?.Id == Studio.Id);
+
+        /// <summary> Indicates whether this studio has any games in the library. </summary>
+        public bool HasGames => StudioGames.Any();
+
         public StudioDetailsViewModel(Studio studio)
         {
             Studio = studio;
+            AppData.Instance.Games.CollectionChanged += (_, _) =>
+            {
+                OnPropertyChanged(nameof(StudioGames));
+                OnPropertyChanged(nameof(HasGames));
+            };
         }
 
         /// <summary>
@@ -64,9 +65,6 @@ namespace Game_Catalog.ViewModels
         public void RefreshStudio()
         {
             OnPropertyChanged(nameof(Name));
-            OnPropertyChanged(nameof(Country));
-            OnPropertyChanged(nameof(FoundationYear));
-            OnPropertyChanged(nameof(MainGenre));
             OnPropertyChanged(nameof(DisplayCountry));
             OnPropertyChanged(nameof(DisplayMainGenre));
             OnPropertyChanged(nameof(DisplayFoundationYear));
@@ -80,5 +78,8 @@ namespace Game_Catalog.ViewModels
         {
             BackRequested?.Invoke();
         }
+
+        [RelayCommand]
+        private void SelectGame(Game game) => GameSelected?.Invoke(game);
     }
 }

@@ -58,6 +58,7 @@ namespace Game_Catalog.ViewModels
         {
             var detailVm = new StudioDetailsViewModel(studio);
             detailVm.BackRequested += () => CurrentPage = StudioPage;
+            detailVm.GameSelected += game => NavigateToGame(game, false);
             CurrentPage = detailVm;
         }
     }
