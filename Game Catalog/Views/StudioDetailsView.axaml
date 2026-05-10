@@ -44,15 +44,15 @@
 				</StackPanel>
 				<StackPanel Spacing="2">
 					<TextBlock Text="Країна" Opacity="0.6" FontSize="12"/>
-					<TextBlock Text="{Binding Country}" FontSize="16"/>
+					<TextBlock Text="{Binding DisplayCountry}" FontSize="16"/>
 				</StackPanel>
 				<StackPanel Spacing="2">
 					<TextBlock Text="Рік заснування" Opacity="0.6" FontSize="12"/>
-					<TextBlock Text="{Binding FoundationYear}" FontSize="16"/>
+					<TextBlock Text="{Binding DisplayFoundationYear}" FontSize="16"/>
 				</StackPanel>
 				<StackPanel Spacing="2">
 					<TextBlock Text="Головний жанр" Opacity="0.6" FontSize="12"/>
-					<TextBlock Text="{Binding MainGenre}" FontSize="16"/>
+					<TextBlock Text="{Binding DisplayMainGenre}" FontSize="16"/>
 				</StackPanel>
 			</StackPanel>
 		</Grid>

@@ -43,6 +43,16 @@ namespace Game_Catalog.ViewModels
         /// Genre the studio is known for.
         /// </summary>
         public string MainGenre => Studio.MainGenre;
+
+        /// <summary>Country name or "Невідомо" if not specified.</summary>
+        public string DisplayCountry => string.IsNullOrWhiteSpace(Studio.Country) ? "Невідомо" : Studio.Country;
+
+        /// <summary>Main genre or "Невідомо" if not specified.</summary>
+        public string DisplayMainGenre => string.IsNullOrWhiteSpace(Studio.MainGenre) ? "Невідомо" : Studio.MainGenre;
+
+        /// <summary>Foundation year or "Невідомо" if the value is zero.</summary>
+        public string DisplayFoundationYear => Studio.FoundationYear == 0 ? "Невідомо" : Studio.FoundationYear.ToString();
+
         public StudioDetailsViewModel(Studio studio)
         {
             Studio = studio;
@@ -57,6 +67,9 @@ namespace Game_Catalog.ViewModels
             OnPropertyChanged(nameof(Country));
             OnPropertyChanged(nameof(FoundationYear));
             OnPropertyChanged(nameof(MainGenre));
+            OnPropertyChanged(nameof(DisplayCountry));
+            OnPropertyChanged(nameof(DisplayMainGenre));
+            OnPropertyChanged(nameof(DisplayFoundationYear));
         }
 
         /// <summary>

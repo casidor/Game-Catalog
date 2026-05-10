@@ -194,7 +194,6 @@ namespace Game_Catalog.ViewModels
             Status = game.Status;
             HoursPlayed = game.HoursPlayed;
             PersonalRating = game.PersonalRating;
-            _isInitializing = true;
             Description = game.Description;
             CoverImagePath = game.CoverImagePath;
             _isInitializing = false;
@@ -231,12 +230,12 @@ namespace Game_Catalog.ViewModels
             _ = SearchRawgAsync(value, _searchCts.Token);
         }
 
-        /// <summary>Searches RAWG with a 400ms debounce and populates the suggestions list.</summary>
+        /// <summary>Searches RAWG with a 600ms debounce and populates the suggestions list.</summary>
         private async Task SearchRawgAsync(string query, CancellationToken ct)
         {
             if (!RawgService.IsAvailable) return;
 
-            try { await Task.Delay(400, ct); }
+            try { await Task.Delay(600, ct); }
             catch (TaskCanceledException) { return; }
 
             IsSearching = true;
