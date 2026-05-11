@@ -2,6 +2,7 @@ using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Interactivity;
 using Avalonia.Markup.Xaml;
+using Avalonia.Platform.Storage;
 using Game_Catalog.Models;
 using Game_Catalog.ViewModels;
 using System;
@@ -63,5 +64,25 @@ public partial class AddGameWindow : Window
             AppData.Instance.Studios.Add(studio);
             vm.SelectedStudio = studio;
         }
+    }
+    private async void OnPickCoverClick(object sender, RoutedEventArgs e)
+    {
+        if (DataContext is not AddGameViewModel vm) return;
+
+        var files = await StorageProvider.OpenFilePickerAsync(new FilePickerOpenOptions
+        {
+            Title = "Оберіть обкладинку",
+            AllowMultiple = false,
+            FileTypeFilter = [new("Зображення") { Patterns = ["*.jpg", "*.jpeg", "*.png", "*.webp"] }]
+        });
+
+        if (files.Count > 0)
+            vm.CoverImagePath = files[0].Path.LocalPath;
+    }
+
+    private void OnClearCoverClick(object sender, RoutedEventArgs e)
+    {
+        if (DataContext is AddGameViewModel vm)
+            vm.CoverImagePath = string.Empty;
     }
 }

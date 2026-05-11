@@ -101,7 +101,9 @@ namespace Game_Catalog.ViewModels
         [ObservableProperty]
         private int _personalRating = 5;
 
-        /// <summary>Plain-text description fetched from RAWG.</summary>
+        /// <summary>Plain-text description fetched from RAWG or entered manually.</summary>
+        [MaxLength(1000, ErrorMessage = "Опис не може перевищувати 1000 символів")]
+        [NotifyDataErrorInfo]
         [ObservableProperty]
         private string _description = string.Empty;
 
@@ -291,7 +293,11 @@ namespace Game_Catalog.ViewModels
                 }
             }
             if (!string.IsNullOrWhiteSpace(detail.DescriptionRaw))
-                Description = detail.DescriptionRaw;
+            {
+                Description = detail.DescriptionRaw.Length > 1000
+                ? detail.DescriptionRaw.Substring(0, 997) + "..."
+                : detail.DescriptionRaw;
+            }
             if (DateTime.TryParse(detail.Released, out var date))
                 ReleaseYear = date.Year;
             if (!string.IsNullOrWhiteSpace(detail.BackgroundImage))

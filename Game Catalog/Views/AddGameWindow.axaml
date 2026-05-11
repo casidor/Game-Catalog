@@ -1,11 +1,12 @@
 <Window xmlns="https://github.com/avaloniaui"
+        xmlns:conv="using:Game_Catalog.Converters"
 		xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
 		xmlns:vm="using:Game_Catalog.ViewModels"
 		x:Class="Game_Catalog.Views.AddGameWindow"
 		xmlns:models="using:Game_Catalog.Models"
 		x:DataType="vm:AddGameViewModel"
 		Title="{Binding WindowTitle}"
-		Width="450"
+		Width="700"
 		MaxHeight="750"
 		SizeToContent="Height"
 		WindowStartupLocation="CenterOwner"
@@ -13,128 +14,165 @@
 
 	<Grid RowDefinitions="*,Auto">
 
-		<ScrollViewer Grid.Row="0">
-			<StackPanel Spacing="12" Margin="24">
+		<Grid Grid.Row="0" ColumnDefinitions="300,*">
 
-				<!-- Назва -->
-				<TextBlock Text="Назва гри"/>
-				<Panel>
-					<TextBox x:Name="TitleBox"
-							 Text="{Binding Title}"
-							 Watermark="Введіть назву..."/>
-					<Popup IsOpen="{Binding IsSuggestionsVisible}"
-						   PlacementTarget="{Binding ElementName=TitleBox}"
-						   Placement="Bottom"
-						   MinWidth="400">
-						<Border Background="{DynamicResource CardBackground}"
-								BorderBrush="{DynamicResource SidebarBorder}"
-								BorderThickness="1"
-								CornerRadius="0,0,4,4"
-								MaxHeight="220">
-							<ListBox x:Name="SuggestionsList"
-									 ItemsSource="{Binding Suggestions}"
-									 Background="Transparent"
-									 SelectionChanged="OnSuggestionSelected">
-								<ListBox.ItemTemplate>
-									<DataTemplate x:DataType="models:RawgGameResult">
-										<TextBlock Text="{Binding Name}" Padding="4,2"/>
-									</DataTemplate>
-								</ListBox.ItemTemplate>
-							</ListBox>
-						</Border>
-					</Popup>
-				</Panel>
-				<TextBlock Text="🔍 Пошук у RAWG..."
-						   FontSize="11"
-						   Opacity="0.5"
-						   IsVisible="{Binding IsSearching}"/>
+			<Grid Grid.Column="0" Margin="24,24,12,24" RowDefinitions="Auto,Auto,*">
+				
+				<Border Grid.Row="0" Height="360" CornerRadius="8" ClipToBounds="True"
+						Background="{DynamicResource CardBackground}">
+					<Panel>
+						<StackPanel VerticalAlignment="Center" HorizontalAlignment="Center"
+									IsVisible="{Binding CoverImagePath, Converter={x:Static StringConverters.IsNullOrEmpty}}">
+							<TextBlock Text="🎮" FontSize="36" HorizontalAlignment="Center"/>
+							<TextBlock Text="Обрати обкладинку" FontSize="11" Opacity="0.5"
+									   TextAlignment="Center" TextWrapping="Wrap" Margin="8,6,8,0"/>
+						</StackPanel>
+						<Image Source="{Binding CoverImagePath, Converter={x:Static conv:PathToBitmapConverter.Instance}}"
+							   Stretch="UniformToFill"
+							   IsVisible="{Binding CoverImagePath, Converter={x:Static StringConverters.IsNotNullOrEmpty}}"/>
+					</Panel>
+				</Border>
+				
+				<StackPanel Grid.Row="1" Spacing="4" Margin="0,8,0,0">
+					<Button Content="📁 Обрати файл"
+							Click="OnPickCoverClick"
+							HorizontalAlignment="Stretch"
+							HorizontalContentAlignment="Center"/>
+					<Button Content="✕ Очистити"
+							Click="OnClearCoverClick"
+							HorizontalAlignment="Stretch"
+							HorizontalContentAlignment="Center"
+							IsVisible="{Binding CoverImagePath, Converter={x:Static StringConverters.IsNotNullOrEmpty}}"/>
+				</StackPanel>
 
-				<!-- Студія -->
-				<TextBlock Text="Студія-розробник"/>
-				<Grid ColumnDefinitions="*,Auto">
-					<ComboBox Grid.Column="0"
-							  ItemsSource="{Binding Studios}"
-							  SelectedItem="{Binding SelectedStudio}"
-							  HorizontalAlignment="Stretch">
-						<ComboBox.ItemTemplate>
-							<DataTemplate>
-								<TextBlock Text="{Binding Name}"/>
-							</DataTemplate>
-						</ComboBox.ItemTemplate>
-					</ComboBox>
-					<Button Grid.Column="1"
-							Content="+"
-							Click="OnAddStudioClick"
-							Margin="8,0,0,0"
-							Padding="10,0"
-							FontSize="16"
-							VerticalAlignment="Stretch"
-							ToolTip.Tip="Додати студію"/>
+				<Grid Grid.Row="2" RowDefinitions="Auto,*" Margin="0,16,0,0">
+					<TextBlock Grid.Row="0" Text="Опис"/>
+					<TextBox Grid.Row="1" 
+							 Margin="0,4,0,0"
+							 Text="{Binding Description}"
+							 Watermark="Додайте опис або нотатки (до 1000 символів)..."
+							 TextWrapping="Wrap"
+							 AcceptsReturn="True"
+							 MaxLength="1000"
+							 VerticalAlignment="Stretch"/>
 				</Grid>
-				<ItemsControl ItemsSource="{Binding SuggestedDeveloperNames}"
-							  IsVisible="{Binding HasSuggestedDevelopers}">
-					<ItemsControl.ItemTemplate>
-						<DataTemplate>
-							<Button Content="{Binding StringFormat='+ Додати &quot;{0}&quot; до бази?'}"
-									Tag="{Binding}"
-									Click="OnSuggestStudioClick"
-									Background="Transparent"
-									Foreground="#4a9eff"
-									Padding="0,2"
-									Cursor="Hand"
-									HorizontalAlignment="Left"/>
-						</DataTemplate>
-					</ItemsControl.ItemTemplate>
-				</ItemsControl>
+			</Grid>
 
-				<!-- Жанр -->
-				<TextBlock Text="Жанр"/>
-				<TextBox Text="{Binding Genre}"
-						 Watermark="Введіть жанр..."/>
+			<ScrollViewer Grid.Column="1">
+				<StackPanel Spacing="12" Margin="12,24,24,24">
 
-				<!-- Рік випуску -->
-				<TextBlock Text="Рік випуску"/>
-				<NumericUpDown Value="{Binding ReleaseYear}"
-							   Minimum="1970"
-							   Maximum="2030"
-							   FormatString="0"/>
+					<TextBlock Text="Назва гри"/>
+					<Panel>
+						<TextBox x:Name="TitleBox"
+								 Text="{Binding Title}"
+								 Watermark="Введіть назву..."/>
+						<Popup IsOpen="{Binding IsSuggestionsVisible}"
+							   PlacementTarget="{Binding ElementName=TitleBox}"
+							   Placement="Bottom"
+							   MinWidth="400">
+							<Border Background="{DynamicResource CardBackground}"
+									BorderBrush="{DynamicResource SidebarBorder}"
+									BorderThickness="1"
+									CornerRadius="0,0,4,4"
+									MaxHeight="220">
+								<ListBox x:Name="SuggestionsList"
+										 ItemsSource="{Binding Suggestions}"
+										 Background="Transparent"
+										 SelectionChanged="OnSuggestionSelected">
+									<ListBox.ItemTemplate>
+										<DataTemplate x:DataType="models:RawgGameResult">
+											<TextBlock Text="{Binding Name}" Padding="4,2"/>
+										</DataTemplate>
+									</ListBox.ItemTemplate>
+								</ListBox>
+							</Border>
+						</Popup>
+					</Panel>
+					<TextBlock Text="🔍 Пошук у RAWG..."
+							   FontSize="11"
+							   Opacity="0.5"
+							   IsVisible="{Binding IsSearching}"/>
 
-				<!-- Платформа -->
-				<TextBlock Text="Платформа"/>
-				<TextBox Text="{Binding Platform}"
-						 Watermark="PC, PlayStation, Xbox..."/>
+					<TextBlock Text="Студія-розробник"/>
+					<Grid ColumnDefinitions="*,Auto">
+						<ComboBox Grid.Column="0"
+								  ItemsSource="{Binding Studios}"
+								  SelectedItem="{Binding SelectedStudio}"
+								  HorizontalAlignment="Stretch">
+							<ComboBox.ItemTemplate>
+								<DataTemplate>
+									<TextBlock Text="{Binding Name}"/>
+								</DataTemplate>
+							</ComboBox.ItemTemplate>
+						</ComboBox>
+						<Button Grid.Column="1"
+								Content="+"
+								Click="OnAddStudioClick"
+								Margin="8,0,0,0"
+								Padding="10,0"
+								FontSize="16"
+								VerticalAlignment="Stretch"
+								ToolTip.Tip="Додати студію"/>
+					</Grid>
+					<ItemsControl ItemsSource="{Binding SuggestedDeveloperNames}"
+								  IsVisible="{Binding HasSuggestedDevelopers}">
+						<ItemsControl.ItemTemplate>
+							<DataTemplate>
+								<Button Content="{Binding StringFormat='+ Додати &quot;{0}&quot; до бази?'}"
+										Tag="{Binding}"
+										Click="OnSuggestStudioClick"
+										Background="Transparent"
+										Foreground="#4a9eff"
+										Padding="0,2"
+										Cursor="Hand"
+										HorizontalAlignment="Left"/>
+							</DataTemplate>
+						</ItemsControl.ItemTemplate>
+					</ItemsControl>
 
-				<!-- Розмір -->
-				<TextBlock Text="Розмір на диску (ГБ)"/>
-				<NumericUpDown Value="{Binding SizeGB}"
-							   Minimum="0"
-							   Maximum="1000"
-							   Increment="0.5"
-							   FormatString="0.0"/>
+					<TextBlock Text="Жанр"/>
+					<TextBox Text="{Binding Genre}"
+							 Watermark="Введіть жанр..."/>
 
-				<!-- Статус -->
-				<TextBlock Text="Статус"/>
-				<ComboBox ItemsSource="{Binding Statuses}"
-						  SelectedItem="{Binding Status}"
-						  HorizontalAlignment="Stretch"/>
+					<TextBlock Text="Рік випуску"/>
+					<NumericUpDown Value="{Binding ReleaseYear}"
+								   Minimum="1970"
+								   Maximum="2030"
+								   FormatString="0"/>
 
-				<!-- Години -->
-				<TextBlock Text="Години в грі"/>
-				<NumericUpDown Value="{Binding HoursPlayed}"
-							   Minimum="0"
-							   Maximum="10000"
-							   Increment="0.5"
-							   FormatString="0.0"/>
+					<TextBlock Text="Платформа"/>
+					<TextBox Text="{Binding Platform}"
+							 Watermark="PC, PlayStation, Xbox..."/>
 
-				<!-- Оцінка -->
-				<TextBlock Text="Особиста оцінка (1-10)"/>
-				<NumericUpDown Value="{Binding PersonalRating}"
-							   Minimum="1"
-							   Maximum="10"
-							   FormatString="0"/>
+					<TextBlock Text="Розмір на диску (ГБ)"/>
+					<NumericUpDown Value="{Binding SizeGB}"
+								   Minimum="0"
+								   Maximum="1000"
+								   Increment="0.5"
+								   FormatString="0.0"/>
 
-			</StackPanel>
-		</ScrollViewer>
+					<TextBlock Text="Статус"/>
+					<ComboBox ItemsSource="{Binding Statuses}"
+							  SelectedItem="{Binding Status}"
+							  HorizontalAlignment="Stretch"/>
+
+					<TextBlock Text="Години в грі"/>
+					<NumericUpDown Value="{Binding HoursPlayed}"
+								   Minimum="0"
+								   Maximum="10000"
+								   Increment="0.5"
+								   FormatString="0.0"/>
+
+					<TextBlock Text="Особиста оцінка (1-10)"/>
+					<NumericUpDown Value="{Binding PersonalRating}"
+								   Minimum="1"
+								   Maximum="10"
+								   FormatString="0"/>
+
+				</StackPanel>
+			</ScrollViewer>
+		</Grid>
+		
 		<Border Grid.Row="1"
 				Padding="24,12"
 				BorderBrush="{DynamicResource SidebarBorder}"
