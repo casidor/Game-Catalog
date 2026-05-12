@@ -1,30 +1,62 @@
-using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Input;
 using Avalonia.Interactivity;
 using Avalonia.Platform.Storage;
-using Avalonia.Styling;
 using Game_Catalog.Services;
 using System.Threading.Tasks;
 
 namespace Game_Catalog.Views
 {
+    /// <summary>
+    /// Main application window. Manages data lifecycle, keyboard shortcuts,
+    /// and surfaces storage errors to the user via alert dialogs.
+    /// </summary>
     public partial class MainWindow : Window
     {
+        /// <summary>Prevents stacking multiple simultaneous save-error dialogs.</summary>
+        private bool _saveErrorShown;
+
+        /// <summary>Initializes the window and loads XAML.</summary>
         public MainWindow()
         {
             InitializeComponent();
         }
 
-        /// <summary> Loads saved data when the window is first shown. </summary>
+        /// <summary>Loads saved data and enables auto-save when the window first appears.</summary>
         protected override void OnLoaded(RoutedEventArgs e)
         {
             base.OnLoaded(e);
-            DataService.LoadDefault();
+
+            DataService.SaveFailed += OnSaveFailed;
+
+            var loaded = DataService.LoadDefault();
+            if (!loaded)
+                _ = ConfirmationWindow.ShowAlertAsync(this,
+                    "Помилка завантаження",
+                    "Файл каталогу пошкоджений або недоступний.\nКаталог завантажено порожнім.");
+
             DataService.EnableAutoSave();
         }
 
-        /// <summary> Handles Ctrl+S and Ctrl+O keyboard shortcuts. </summary>
+        /// <summary>Unsubscribes from DataService events when the window is closed.</summary>
+        protected override void OnUnloaded(RoutedEventArgs e)
+        {
+            base.OnUnloaded(e);
+            DataService.SaveFailed -= OnSaveFailed;
+        }
+
+        /// <summary>Displays a single alert when a save operation fails.</summary>
+        private async void OnSaveFailed(string message)
+        {
+            if (_saveErrorShown) return;
+            _saveErrorShown = true;
+            await ConfirmationWindow.ShowAlertAsync(this,
+                "Помилка збереження",
+                $"Не вдалося зберегти дані каталогу.\n{message}");
+            _saveErrorShown = false;
+        }
+
+        /// <summary>Handles Ctrl+S and Ctrl+O keyboard shortcuts.</summary>
         protected override void OnKeyDown(KeyEventArgs e)
         {
             if (e.KeyModifiers == KeyModifiers.Control)
@@ -35,7 +67,7 @@ namespace Game_Catalog.Views
             base.OnKeyDown(e);
         }
 
-        /// <summary> Opens a file picker dialog and loads the selected JSON file. </summary>
+        /// <summary>Opens a file picker and loads the selected JSON catalog file.</summary>
         private async Task OpenFileAsync()
         {
             var files = await StorageProvider.OpenFilePickerAsync(new FilePickerOpenOptions
@@ -45,8 +77,13 @@ namespace Game_Catalog.Views
                 FileTypeFilter = [new("Game Catalog JSON") { Patterns = ["*.json"] }]
             });
 
-            if (files.Count > 0)
-                DataService.Load(files[0].Path.LocalPath);
+            if (files.Count == 0) return;
+
+            var ok = DataService.Load(files[0].Path.LocalPath);
+            if (!ok)
+                await ConfirmationWindow.ShowAlertAsync(this,
+                    "Помилка завантаження",
+                    "Обраний файл пошкоджений або має невірний формат.");
         }
     }
 }
