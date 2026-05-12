@@ -14,6 +14,8 @@ public partial class GameDetailsView : UserControl
     {
         InitializeComponent();
     }
+
+    /// <summary>Opens the edit dialog and applies changes to the game on confirmation.</summary>
     private async void OnEditClick(object sender, RoutedEventArgs e)
     {
         if (DataContext is not GameDetailsViewModel detailVm) return;
@@ -35,6 +37,8 @@ public partial class GameDetailsView : UserControl
             detailVm.Game.Status = vm.Status;
             detailVm.Game.HoursPlayed = vm.HoursPlayed;
             detailVm.Game.PersonalRating = vm.PersonalRating;
+            detailVm.Game.Description = vm.Description;
+            detailVm.Game.CoverImagePath = vm.CoverImagePath;
 
             var index = AppData.Instance.Games.IndexOf(detailVm.Game);
             if (index >= 0)
@@ -43,6 +47,8 @@ public partial class GameDetailsView : UserControl
             detailVm.RefreshGame();
         }
     }
+
+    /// <summary>Moves the game to the archive and removes it from the main list.</summary>
     private void OnArchiveClick(object sender, RoutedEventArgs e)
     {
         if (DataContext is not GameDetailsViewModel detailVm) return;
@@ -51,6 +57,7 @@ public partial class GameDetailsView : UserControl
         detailVm.GoBackCommand.Execute(null);
     }
 
+    /// <summary>Shows a confirmation dialog and permanently deletes the game if confirmed.</summary>
     private void OnDeleteClick(object sender, RoutedEventArgs e)
     {
         if (DataContext is not GameDetailsViewModel detailVm) return;
@@ -58,6 +65,7 @@ public partial class GameDetailsView : UserControl
         _ = DeleteGameAsync(detailVm, parent!);
     }
 
+    /// <summary>Shows a confirmation dialog and permanently deletes the game if confirmed.</summary>
     private async Task DeleteGameAsync(GameDetailsViewModel detailVm, Window parent)
     {
         var confirmed = await ConfirmationWindow.ShowAsync(
@@ -74,6 +82,8 @@ public partial class GameDetailsView : UserControl
             AppData.Instance.Games.Remove(detailVm.Game);
         detailVm.GoBackCommand.Execute(null);
     }
+
+    /// <summary>Restores the game from the archive and adds it back to the main list.</summary>
     private void OnRestoreClick(object sender, RoutedEventArgs e)
     {
         if (DataContext is not GameDetailsViewModel detailVm) return;
