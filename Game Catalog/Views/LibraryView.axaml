@@ -78,7 +78,7 @@
 						  Width="140" Margin="0,0,8,8">
 					<ComboBox.ItemTemplate>
 						<DataTemplate>
-							<TextBlock Text="{Binding, TargetNullValue='Статус'}"/>
+							<TextBlock Text="{Binding, Converter={x:Static conv:GameStatusConverter.Instance}, TargetNullValue='Статус'}"/>
 						</DataTemplate>
 					</ComboBox.ItemTemplate>
 				</ComboBox>
@@ -168,7 +168,7 @@
 								<TextBlock Text="{Binding Developer.Name}" FontSize="12" Opacity="0.6"/>
 							</StackPanel>
 							<TextBlock Grid.Column="1" Text="{Binding Platform}" VerticalAlignment="Center"/>
-							<TextBlock Grid.Column="2" Text="{Binding Status}"   VerticalAlignment="Center"/>
+							<TextBlock Grid.Column="2" Text="{Binding Status, Converter={x:Static conv:GameStatusConverter.Instance}}" VerticalAlignment="Center"/>
 							<TextBlock Grid.Column="3" Text="{Binding PersonalRating, StringFormat='{}{0}/10'}" VerticalAlignment="Center"/>
 						</Grid>
 					</DataTemplate>

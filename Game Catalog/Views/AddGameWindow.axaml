@@ -1,5 +1,5 @@
 <Window xmlns="https://github.com/avaloniaui"
-        xmlns:conv="using:Game_Catalog.Converters"
+		xmlns:conv="using:Game_Catalog.Converters"
 		xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
 		xmlns:vm="using:Game_Catalog.ViewModels"
 		x:Class="Game_Catalog.Views.AddGameWindow"
@@ -17,7 +17,7 @@
 		<Grid Grid.Row="0" ColumnDefinitions="300,*">
 
 			<Grid Grid.Column="0" Margin="24,24,12,24" RowDefinitions="Auto,Auto,*">
-				
+
 				<Border Grid.Row="0" Height="360" CornerRadius="8" ClipToBounds="True"
 						Background="{DynamicResource CardBackground}">
 					<Panel>
@@ -32,7 +32,7 @@
 							   IsVisible="{Binding CoverImagePath, Converter={x:Static StringConverters.IsNotNullOrEmpty}}"/>
 					</Panel>
 				</Border>
-				
+
 				<StackPanel Grid.Row="1" Spacing="4" Margin="0,8,0,0">
 					<Button Content="📁 Обрати файл"
 							Click="OnPickCoverClick"
@@ -47,7 +47,7 @@
 
 				<Grid Grid.Row="2" RowDefinitions="Auto,*" Margin="0,16,0,0">
 					<TextBlock Grid.Row="0" Text="Опис"/>
-					<TextBox Grid.Row="1" 
+					<TextBox Grid.Row="1"
 							 Margin="0,4,0,0"
 							 Text="{Binding Description}"
 							 Watermark="Додайте опис або нотатки (до 1000 символів)..."
@@ -154,7 +154,13 @@
 					<TextBlock Text="Статус"/>
 					<ComboBox ItemsSource="{Binding Statuses}"
 							  SelectedItem="{Binding Status}"
-							  HorizontalAlignment="Stretch"/>
+							  HorizontalAlignment="Stretch">
+						<ComboBox.ItemTemplate>
+							<DataTemplate>
+								<TextBlock Text="{Binding, Converter={x:Static conv:GameStatusConverter.Instance}}"/>
+							</DataTemplate>
+						</ComboBox.ItemTemplate>
+					</ComboBox>
 
 					<TextBlock Text="Години в грі"/>
 					<NumericUpDown Value="{Binding HoursPlayed}"
@@ -172,7 +178,7 @@
 				</StackPanel>
 			</ScrollViewer>
 		</Grid>
-		
+
 		<Border Grid.Row="1"
 				Padding="24,12"
 				BorderBrush="{DynamicResource SidebarBorder}"

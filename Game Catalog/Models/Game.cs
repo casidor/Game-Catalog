@@ -34,7 +34,7 @@ namespace Game_Catalog.Models
         public double SizeGB { get; set; }
 
         /// <summary> Current completion status of the game. </summary>
-        public GameStatus Status { get; set; } = GameStatus.NotInstalled;
+        public GameStatus Status { get; set; } = GameStatus.Planned;
 
         /// <summary> Number of hours the user has played the game. </summary>
         public double HoursPlayed { get; set; }

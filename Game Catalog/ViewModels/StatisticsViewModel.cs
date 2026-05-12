@@ -26,9 +26,11 @@ namespace Game_Catalog.ViewModels
         public double TotalHours => AppData.Instance.Games.Sum(g => g.HoursPlayed);
 
         /// <summary>
-        /// Sum of disk space occupied by all games in the library, in gigabytes.
+        /// Total disk space occupied by games currently being played, in gigabytes.
         /// </summary>
-        public double TotalDiskGB => AppData.Instance.Games.Sum(g => g.SizeGB);
+        public double TotalDiskGB => AppData.Instance.Games
+            .Where(g => g.Status == GameStatus.Playing)
+            .Sum(g => g.SizeGB);
 
         /// <summary>
         /// Average personal rating across all games, rounded to one decimal place.

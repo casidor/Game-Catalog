@@ -83,7 +83,7 @@ namespace Game_Catalog.ViewModels
         /// Current game status selected by the user.
         /// </summary>
         [ObservableProperty]
-        private GameStatus _status = GameStatus.NotInstalled;
+        private GameStatus _status = GameStatus.Planned;
 
         /// <summary>
         /// Hours played entered by the user.
