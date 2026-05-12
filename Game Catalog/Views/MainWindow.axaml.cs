@@ -27,7 +27,13 @@ namespace Game_Catalog.Views
         {
             base.OnLoaded(e);
 
-            DataService.SaveFailed += OnSaveFailed;
+            DataService.SaveFailed += OnDataSaveFailed;
+            SettingsService.SaveFailed += OnSettingsSaveFailed;
+
+            if (!SettingsService.LoadSucceeded)
+                _ = ConfirmationWindow.ShowAlertAsync(this,
+                    "Помилка налаштувань",
+                    "Файл налаштувань пошкоджений. Застосовано стандартні налаштування.");
 
             var loaded = DataService.LoadDefault();
             if (!loaded)
@@ -38,21 +44,33 @@ namespace Game_Catalog.Views
             DataService.EnableAutoSave();
         }
 
-        /// <summary>Unsubscribes from DataService events when the window is closed.</summary>
+        /// <summary>Unsubscribes from service events when the window is closed.</summary>
         protected override void OnUnloaded(RoutedEventArgs e)
         {
             base.OnUnloaded(e);
-            DataService.SaveFailed -= OnSaveFailed;
+            DataService.SaveFailed -= OnDataSaveFailed;
+            SettingsService.SaveFailed -= OnSettingsSaveFailed;
         }
 
-        /// <summary>Displays a single alert when a save operation fails.</summary>
-        private async void OnSaveFailed(string message)
+        /// <summary>Displays an alert when a catalog save operation fails.</summary>
+        private async void OnDataSaveFailed(string message)
         {
             if (_saveErrorShown) return;
             _saveErrorShown = true;
             await ConfirmationWindow.ShowAlertAsync(this,
                 "Помилка збереження",
                 $"Не вдалося зберегти дані каталогу.\n{message}");
+            _saveErrorShown = false;
+        }
+
+        /// <summary>Displays an alert when a settings save operation fails.</summary>
+        private async void OnSettingsSaveFailed(string message)
+        {
+            if (_saveErrorShown) return;
+            _saveErrorShown = true;
+            await ConfirmationWindow.ShowAlertAsync(this,
+                "Помилка збереження налаштувань",
+                $"Не вдалося зберегти налаштування.\n{message}");
             _saveErrorShown = false;
         }
 
