@@ -265,43 +265,61 @@ namespace Game_Catalog.ViewModels
             IsSuggestionsVisible = false;
             Suggestions.Clear();
 
-            IsSearching = true;
-            var detail = await RawgService.GetDetailAsync(result.Id);
-            IsSearching = false;
-
-            if (detail == null) return;
-
-            if (detail.Genres.Count > 0)
-                Genre = string.Join(", ", detail.Genres.Take(3).Select(g => g.Name));
-            if (detail.Developers.Count > 0)
+            try
             {
-                SuggestedDeveloperNames.Clear();
-                var studioSelected = false;
-                foreach (var dev in detail.Developers)
+                IsSearching = true;
+                var detail = await RawgService.GetDetailAsync(result.Id);
+                if (detail == null) return;
+
+                if (detail.Genres?.Count > 0)
                 {
-                    var existing = Studios.FirstOrDefault(s =>
-                        s.Name.Equals(dev.Name, StringComparison.OrdinalIgnoreCase));
-                    if (existing != null && !studioSelected)
+                    var joinedGenres = string.Join(", ", detail.Genres.Take(3).Select(g => g?.Name).Where(n => n != null));
+                    Genre = joinedGenres.Length > 100 ? joinedGenres.Substring(0, 100) : joinedGenres;
+                }
+
+                if (detail.Developers?.Count > 0)
+                {
+                    SuggestedDeveloperNames.Clear();
+                    var studioSelected = false;
+                    foreach (var dev in detail.Developers)
                     {
-                        SelectedStudio = existing;
-                        studioSelected = true;
-                    }
-                    else if (existing == null)
-                    {
-                        SuggestedDeveloperNames.Add(dev.Name);
+                        if (string.IsNullOrWhiteSpace(dev?.Name)) continue;
+
+                        var existing = Studios.FirstOrDefault(s =>
+                            string.Equals(s.Name, dev.Name, StringComparison.OrdinalIgnoreCase));
+
+                        if (existing != null && !studioSelected)
+                        {
+                            SelectedStudio = existing;
+                            studioSelected = true;
+                        }
+                        else if (existing == null)
+                        {
+                            SuggestedDeveloperNames.Add(dev.Name);
+                        }
                     }
                 }
+
+                if (!string.IsNullOrWhiteSpace(detail.DescriptionRaw))
+                {
+                    Description = detail.DescriptionRaw.Length > 1000
+                        ? detail.DescriptionRaw.Substring(0, 997) + "..."
+                        : detail.DescriptionRaw;
+                }
+
+                if (DateTime.TryParse(detail.Released, out var date))
+                    ReleaseYear = date.Year;
+
+                if (!string.IsNullOrWhiteSpace(detail.BackgroundImage))
+                    CoverImagePath = await RawgService.DownloadCoverAsync(detail.BackgroundImage, detail.Id);
             }
-            if (!string.IsNullOrWhiteSpace(detail.DescriptionRaw))
+            catch
             {
-                Description = detail.DescriptionRaw.Length > 1000
-                ? detail.DescriptionRaw.Substring(0, 997) + "..."
-                : detail.DescriptionRaw;
             }
-            if (DateTime.TryParse(detail.Released, out var date))
-                ReleaseYear = date.Year;
-            if (!string.IsNullOrWhiteSpace(detail.BackgroundImage))
-                CoverImagePath = await RawgService.DownloadCoverAsync(detail.BackgroundImage, detail.Id);
+            finally
+            {
+                IsSearching = false;
+            }
         }
 
         /// <summary>Hides the suggestion dropdown without selecting anything.</summary>
