@@ -34,14 +34,17 @@ namespace Game_Catalog.ViewModels
         /// <summary> Raised when the user selects a studio to view details. </summary>
         public event Action<Studio>? StudioSelected;
 
+        /// <summary> Indicates whether the studios collection is empty. </summary>
+        public bool IsEmpty => AppData.Instance.Studios.Count == 0;
+
         public StudioViewModel()
         {
-            // Subscribe to collection changes to keep filters and options up to date
             Studios.CollectionChanged += (_, _) =>
             {
                 OnPropertyChanged(nameof(AvailableCountries));
                 OnPropertyChanged(nameof(AvailableGenres));
                 OnPropertyChanged(nameof(FilteredStudios));
+                OnPropertyChanged(nameof(IsEmpty));
             };
         }
 

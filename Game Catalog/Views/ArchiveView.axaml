@@ -74,23 +74,51 @@
 			</WrapPanel>
 		</Border>
 
-		<ListBox Grid.Row="2"
-				 ItemsSource="{Binding FilteredGames}"
-				 SelectedItem="{Binding SelectedGame}"
-				 SelectionChanged="OnSelectionChanged">
-			<ListBox.ItemTemplate>
-				<DataTemplate x:DataType="models:Game">
-					<Grid ColumnDefinitions="*,150,100" Width="600">
-						<StackPanel Grid.Column="0" Spacing="2">
-							<TextBlock Text="{Binding Title}" FontWeight="SemiBold"/>
-							<TextBlock Text="{Binding Developer.Name}" FontSize="12" Opacity="0.6"/>
-						</StackPanel>
-						<TextBlock Grid.Column="1" Text="{Binding Platform}" VerticalAlignment="Center"/>
-						<TextBlock Grid.Column="2" Text="{Binding Status, Converter={x:Static conv:GameStatusConverter.Instance}}" VerticalAlignment="Center"/>
-					</Grid>
-				</DataTemplate>
-			</ListBox.ItemTemplate>
-		</ListBox>
+		<Grid Grid.Row="2" RowDefinitions="Auto,*">
+
+			<Border Grid.Row="0"
+					Padding="16,8"
+					BorderBrush="{DynamicResource SidebarBorder}"
+					BorderThickness="0,0,0,1">
+				<Grid ColumnDefinitions="*,150,100">
+					<TextBlock Grid.Column="0" Text="Назва"     FontSize="12" Opacity="0.5"/>
+					<TextBlock Grid.Column="1" Text="Платформа" FontSize="12" Opacity="0.5"/>
+					<TextBlock Grid.Column="2" Text="Статус"    FontSize="12" Opacity="0.5"/>
+				</Grid>
+			</Border>
+
+			<ListBox Grid.Row="1"
+					 ItemsSource="{Binding FilteredGames}"
+					 SelectedItem="{Binding SelectedGame}"
+					 SelectionChanged="OnSelectionChanged"
+					 IsVisible="{Binding !IsEmpty}">
+				<ListBox.ItemTemplate>
+					<DataTemplate x:DataType="models:Game">
+						<Grid ColumnDefinitions="*,150,100" Width="600">
+							<StackPanel Grid.Column="0" Spacing="2">
+								<TextBlock Text="{Binding Title}" FontWeight="SemiBold"/>
+								<TextBlock Text="{Binding Developer.Name}" FontSize="12" Opacity="0.6"/>
+							</StackPanel>
+							<TextBlock Grid.Column="1" Text="{Binding Platform}" VerticalAlignment="Center"/>
+							<TextBlock Grid.Column="2"
+									   Text="{Binding Status, Converter={x:Static conv:GameStatusConverter.Instance}}"
+									   VerticalAlignment="Center"/>
+						</Grid>
+					</DataTemplate>
+				</ListBox.ItemTemplate>
+			</ListBox>
+
+			<StackPanel Grid.Row="1"
+						IsVisible="{Binding IsEmpty}"
+						HorizontalAlignment="Center"
+						VerticalAlignment="Center"
+						Spacing="16">
+				<TextBlock Text="📦" FontSize="48" HorizontalAlignment="Center"/>
+				<TextBlock Text="Архів порожній" FontSize="18" FontWeight="SemiBold" HorizontalAlignment="Center"/>
+				<TextBlock Text="Перенесені ігри з'являться тут" Opacity="0.6" HorizontalAlignment="Center"/>
+			</StackPanel>
+
+		</Grid>
 
 	</Grid>
 </UserControl>
