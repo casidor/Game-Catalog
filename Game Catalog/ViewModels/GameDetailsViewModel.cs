@@ -56,10 +56,22 @@ namespace Game_Catalog.ViewModels
         /// <summary> Developer studio name. </summary>
         public string DeveloperName => Game.Developer?.Name ?? "Невідомо";
 
-        /// <summary>Loaded bitmap of the game cover, or null if no cover is available.</summary>
-        public Bitmap? CoverImage => File.Exists(Game.CoverImagePath)
-            ? new Bitmap(Game.CoverImagePath)
-            : null;
+        /// <summary>Loaded bitmap of the game cover, or null if the cover is unavailable or corrupted.</summary>
+        public Bitmap? CoverImage
+        {
+            get
+            {
+                if (!File.Exists(Game.CoverImagePath)) return null;
+                try
+                {
+                    return new Bitmap(Game.CoverImagePath);
+                }
+                catch
+                {
+                    return null;
+                }
+            }
+        }
 
         /// <summary>Indicates whether a cover image is available for this game.</summary>
         public bool HasCover => File.Exists(Game.CoverImagePath);
