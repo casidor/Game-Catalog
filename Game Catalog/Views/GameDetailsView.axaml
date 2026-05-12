@@ -140,7 +140,7 @@
 							CornerRadius="8" Padding="16" Margin="0,0,8,8" MinWidth="140">
 						<StackPanel Spacing="4">
 							<TextBlock Text="Розмір на диску" FontSize="11" Opacity="0.5"/>
-							<TextBlock Text="{Binding SizeGB, StringFormat='{}{0} ГБ'}"
+							<TextBlock Text="{Binding DisplaySizeGB}"
 									   FontSize="14" FontWeight="SemiBold"/>
 						</StackPanel>
 					</Border>

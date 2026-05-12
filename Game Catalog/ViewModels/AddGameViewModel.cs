@@ -72,9 +72,9 @@ namespace Game_Catalog.ViewModels
         private string _platform = string.Empty;
 
         /// <summary>
-        /// Disk size in GB entered by the user.
+        /// Disk size in GB entered by the user. Zero means unknown.
         /// </summary>
-        [Range(0.01, 1000.0, ErrorMessage = "Розмір має бути від 0.01 до 1000 ГБ")]
+        [Range(0.0, 1000.0, ErrorMessage = "Розмір має бути від 0 до 1000 ГБ")]
         [NotifyDataErrorInfo]
         [ObservableProperty]
         private double _sizeGB;

@@ -82,6 +82,9 @@ namespace Game_Catalog.ViewModels
         /// <summary>Indicates whether a description is available for this game.</summary>
         public bool HasDescription => !string.IsNullOrWhiteSpace(Game.Description);
 
+        /// <summary>Formatted disk size string, or "Невідомо" if size is not set.</summary>
+        public string DisplaySizeGB => Game.SizeGB == 0 ? "Невідомо" : $"{Game.SizeGB} ГБ";
+
         public GameDetailsViewModel(Game game, bool isArchived = false)
         {
             Game = game;
@@ -106,6 +109,7 @@ namespace Game_Catalog.ViewModels
             OnPropertyChanged(nameof(HasCover));
             OnPropertyChanged(nameof(Description));
             OnPropertyChanged(nameof(HasDescription));
+            OnPropertyChanged(nameof(DisplaySizeGB));
         }
 
         /// <summary>
