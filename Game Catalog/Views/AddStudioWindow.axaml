@@ -1,47 +1,46 @@
 <Window xmlns="https://github.com/avaloniaui"
-        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-        xmlns:vm="using:Game_Catalog.ViewModels"
-        x:Class="Game_Catalog.Views.AddStudioWindow"
-        x:DataType="vm:AddStudioViewModel"
-        Title="Додати студію"
-        Width="450"
-        SizeToContent="Height"
-        WindowStartupLocation="CenterOwner"
-        CanResize="False">
-    <StackPanel Spacing="12" Margin="24">
+		xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+		xmlns:vm="using:Game_Catalog.ViewModels"
+		xmlns:conv="using:Game_Catalog.Converters"
+		x:Class="Game_Catalog.Views.AddStudioWindow"
+		x:DataType="vm:AddStudioViewModel"
+		Title="Додати студію"
+		Width="450"
+		SizeToContent="Height"
+		WindowStartupLocation="CenterOwner"
+		CanResize="False">
+	<StackPanel Spacing="12" Margin="24">
 
-        <!-- Name of studio -->
-        <TextBlock Text="Назва студії"/>
-        <TextBox Text="{Binding Name}"
-                 Watermark="Введіть назву..."/>
+		<!-- Name of studio -->
+		<TextBlock Text="Назва студії"/>
+		<TextBox Text="{Binding Name}"
+				 Watermark="Введіть назву..."/>
 
-        <!-- Country -->
-        <TextBlock Text="Країна студії"/>
-        <TextBox Text="{Binding Country}"
-                 Watermark="Введіть країну..."/>
+		<!-- Country -->
+		<TextBlock Text="Країна студії"/>
+		<TextBox Text="{Binding Country}"
+				 Watermark="Введіть країну..."/>
 
-        <!-- Foundation year -->
-        <TextBlock Text="Рік заснування"/>
-        <NumericUpDown Value="{Binding FoundationYear}"
-                       Minimum="1900"
-                       Maximum="2030"
-                       FormatString="0"/>
+		<!-- Foundation year -->
+		<TextBlock Text="Рік заснування"/>
+		<NumericUpDown Value="{Binding FoundationYear, Converter={x:Static conv:DecimalToIntConverter.Instance}}"
+					   Minimum="1900" Maximum="2030" FormatString="0"/>
 
-        <!-- Main genre of studio -->
-        <TextBlock Text="Основний жанр студії"/>
-        <TextBox Text="{Binding MainGenre}"
-        Watermark="Введіть жанр студії..."/>
+		<!-- Main genre of studio -->
+		<TextBlock Text="Основний жанр студії"/>
+		<TextBox Text="{Binding MainGenre}"
+				 Watermark="Введіть жанр студії..."/>
 
-        <!-- Buttons -->
-        <StackPanel Orientation="Horizontal"
-                    Spacing="8"
-                    HorizontalAlignment="Right"
-                    Margin="0,8,0,0">
-            <Button Content="Скасувати"
-                    Command="{Binding CancelCommand}"/>
-            <Button Content="Зберегти"
-                    Command="{Binding ConfirmCommand}"/>
-        </StackPanel>
+		<!-- Buttons -->
+		<StackPanel Orientation="Horizontal"
+					Spacing="8"
+					HorizontalAlignment="Right"
+					Margin="0,8,0,0">
+			<Button Content="Скасувати"
+					Command="{Binding CancelCommand}"/>
+			<Button Content="Зберегти"
+					Command="{Binding ConfirmCommand}"/>
+		</StackPanel>
 
-    </StackPanel>
+	</StackPanel>
 </Window>

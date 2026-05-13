@@ -135,21 +135,16 @@
 							 Watermark="Введіть жанр..."/>
 
 					<TextBlock Text="Рік випуску"/>
-					<NumericUpDown Value="{Binding ReleaseYear}"
-								   Minimum="1970"
-								   Maximum="2030"
-								   FormatString="0"/>
+					<NumericUpDown Value="{Binding ReleaseYear, Converter={x:Static conv:DecimalToIntConverter.Instance}}"
+								   Minimum="1970" Maximum="2030" FormatString="0"/>
 
 					<TextBlock Text="Платформа"/>
 					<TextBox Text="{Binding Platform}"
 							 Watermark="PC, PlayStation, Xbox..."/>
 
 					<TextBlock Text="Розмір на диску (ГБ)"/>
-					<NumericUpDown Value="{Binding SizeGB}"
-								   Minimum="0"
-								   Maximum="1000"
-								   Increment="0.5"
-								   FormatString="0.0"/>
+					<NumericUpDown Value="{Binding SizeGB, Converter={x:Static conv:DecimalToDoubleConverter.Instance}}"
+								   Minimum="0" Maximum="1000" Increment="0.5" FormatString="0.0"/>
 
 					<TextBlock Text="Статус"/>
 					<ComboBox ItemsSource="{Binding Statuses}"
@@ -163,17 +158,12 @@
 					</ComboBox>
 
 					<TextBlock Text="Години в грі"/>
-					<NumericUpDown Value="{Binding HoursPlayed}"
-								   Minimum="0"
-								   Maximum="10000"
-								   Increment="0.5"
-								   FormatString="0.0"/>
+					<NumericUpDown Value="{Binding HoursPlayed, Converter={x:Static conv:DecimalToDoubleConverter.Instance}}"
+								   Minimum="0" Maximum="10000" Increment="0.5" FormatString="0.0"/>
 
 					<TextBlock Text="Особиста оцінка (1-10)"/>
-					<NumericUpDown Value="{Binding PersonalRating}"
-								   Minimum="1"
-								   Maximum="10"
-								   FormatString="0"/>
+					<NumericUpDown Value="{Binding PersonalRating, Converter={x:Static conv:DecimalToIntConverter.Instance}}"
+								   Minimum="1" Maximum="10" FormatString="0"/>
 
 				</StackPanel>
 			</ScrollViewer>
