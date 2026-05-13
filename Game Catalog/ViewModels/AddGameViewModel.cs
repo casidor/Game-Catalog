@@ -26,7 +26,7 @@ namespace Game_Catalog.ViewModels
         /// Game title entered by the user.
         /// </summary>
         [Required(ErrorMessage = "Назва не може бути порожньою")]
-        [MinLength(2, ErrorMessage = "Назва занадто короткая")]
+        [MinLength(2, ErrorMessage = "Назва занадто коротка")]
         [NotWhiteSpace(ErrorMessage = "Назва не може бути лише з пробілів")]
         [MaxLength(200, ErrorMessage = "Назва не може перевищувати 200 символів")]
         [NotifyDataErrorInfo]
@@ -55,7 +55,7 @@ namespace Game_Catalog.ViewModels
         /// <summary>
         /// Release year entered by the user.
         /// </summary>
-        [CurrentYearRange(1970, ErrorMessage = "Некоректний рік випуску")]
+        [CurrentYearRange(1970, 5, ErrorMessage = "Рік випуску має бути між 1970 і поточним роком + 5")]
         [NotifyDataErrorInfo]
         [ObservableProperty]
         private int _releaseYear = DateTime.Now.Year;
@@ -64,7 +64,7 @@ namespace Game_Catalog.ViewModels
         /// Platform entered by the user.
         /// </summary>
         [Required(ErrorMessage = "Платформа не може бути порожньою")]
-        [MinLength(2, ErrorMessage = "Платформа занадто короткая")]
+        [MinLength(2, ErrorMessage = "Платформа занадто коротка")]
         [NotWhiteSpace(ErrorMessage = "Платформа не може бути лише з пробілів")]
         [MaxLength(200, ErrorMessage = "Платформа не може перевищувати 200 символів")]
         [NotifyDataErrorInfo]
@@ -88,7 +88,7 @@ namespace Game_Catalog.ViewModels
         /// <summary>
         /// Hours played entered by the user.
         /// </summary>
-        [Range(0.0, 100000.0, ErrorMessage = "Години не можуть бути від'ємними")]
+        [Range(0.0, 100000.0, ErrorMessage = "Кількість годин має бути від 0 до 100 000")]
         [NotifyDataErrorInfo]
         [ObservableProperty]
         private double _hoursPlayed;

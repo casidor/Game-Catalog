@@ -7,20 +7,22 @@ namespace Game_Catalog.Validation
     public sealed class CurrentYearRangeAttribute : ValidationAttribute
     {
         public int MinYear { get; }
+        public int MaxYearOffset { get; }
 
-        public CurrentYearRangeAttribute(int minYear)
+        public CurrentYearRangeAttribute(int minYear, int maxYearOffset = 0)
         {
             MinYear = minYear;
+            MaxYearOffset = maxYearOffset;
         }
 
         protected override ValidationResult? IsValid(object? value, ValidationContext validationContext)
         {
             if (value is not int year)
-                return new ValidationResult("Некоректний тип року.");
+                return new ValidationResult("Вкажіть коректний рік");
 
-            int currentYear = DateTime.Now.Year;
-            if (year < MinYear || year > currentYear)
-                return new ValidationResult(ErrorMessage ?? $"Рік має бути між {MinYear} і {currentYear}");
+            int maxYear = DateTime.Now.Year + MaxYearOffset;
+            if (year < MinYear || year > maxYear)
+                return new ValidationResult(ErrorMessage ?? $"Рік має бути між {MinYear} і {maxYear}");
 
             return ValidationResult.Success;
         }

@@ -67,6 +67,7 @@
 								 Text="{Binding Title}"
 								 Watermark="Введіть назву..."/>
 						<Popup IsOpen="{Binding IsSuggestionsVisible}"
+							   IsLightDismissEnabled="True"
 							   PlacementTarget="{Binding ElementName=TitleBox}"
 							   Placement="Bottom"
 							   MinWidth="400">

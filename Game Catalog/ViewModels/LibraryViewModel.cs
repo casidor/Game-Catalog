@@ -31,14 +31,23 @@ namespace Game_Catalog.ViewModels
 
         [ObservableProperty]
         [NotifyPropertyChangedFor(nameof(IsGridView))]
+        [NotifyPropertyChangedFor(nameof(ShowGrid))]
+        [NotifyPropertyChangedFor(nameof(ShowList))]
         private string _selectedViewMode = "Сітка";
 
         public bool IsGridView => SelectedViewMode == "Сітка";
+        public bool ShowGrid => IsGridView && !IsEmpty;
+        public bool ShowList => !IsGridView && !IsEmpty;
 
         public LibraryViewModel()
         {
             InitializeCollection();
-            AppData.Instance.Games.CollectionChanged += (_, _) => OnPropertyChanged(nameof(IsEmpty));
+            AppData.Instance.Games.CollectionChanged += (_, _) =>
+            {
+                OnPropertyChanged(nameof(IsEmpty));
+                OnPropertyChanged(nameof(ShowGrid));
+                OnPropertyChanged(nameof(ShowList));
+            };
         }
 
         /// <summary> Navigates to the game detail page. </summary>

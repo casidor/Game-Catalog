@@ -38,7 +38,7 @@
 			<Border Background="{DynamicResource CardBackground}" CornerRadius="8"
 					Padding="24" Margin="0,0,12,12" MinWidth="200">
 				<StackPanel Spacing="6">
-					<TextBlock Text="Зайнято на диску"
+					<TextBlock Text="Зайнято на диску (ігри в процесі)"
 							   FontSize="12" Opacity="0.6"/>
 					<TextBlock Text="{Binding TotalDiskGB, StringFormat='{}{0:0.0} ГБ'}"
 							   FontSize="36" FontWeight="Bold"/>

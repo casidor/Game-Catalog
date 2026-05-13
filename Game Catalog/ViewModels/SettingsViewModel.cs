@@ -3,6 +3,7 @@ using Avalonia.Styling;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using Game_Catalog.Services;
+using System.ComponentModel.DataAnnotations;
 using System.Threading.Tasks;
 
 namespace Game_Catalog.ViewModels
@@ -21,6 +22,8 @@ namespace Game_Catalog.ViewModels
         private string _selectedTheme = SettingsService.Current.Theme;
 
         /// <summary>Disk capacity in GB for the statistics progress bar.</summary>
+        [Range(100, 100000, ErrorMessage = "Розмір диску має бути від 100 до 100 000 ГБ")]
+        [NotifyDataErrorInfo]
         [ObservableProperty]
         private double _diskCapacityGB = SettingsService.Current.DiskCapacityGB;
 
@@ -71,7 +74,11 @@ namespace Game_Catalog.ViewModels
         [RelayCommand]
         private async Task ValidateRawgKeyAsync()
         {
-            if (string.IsNullOrWhiteSpace(RawgApiKey)) return;
+            if (string.IsNullOrWhiteSpace(RawgApiKey))
+            {
+                RawgKeyStatusMessage = "Введіть API ключ";
+                return;
+            }
             IsValidatingKey = true;
             RawgKeyStatusMessage = "Перевірка...";
             var valid = await RawgService.ValidateKeyAsync(RawgApiKey);
@@ -111,6 +118,9 @@ namespace Game_Catalog.ViewModels
         }
 
         partial void OnDiskCapacityGBChanged(double value)
-            => SettingsService.UpdateDiskCapacity(value);
+        {
+            if (value <= 0) return;
+            SettingsService.UpdateDiskCapacity(value);
+        }
     }
 }

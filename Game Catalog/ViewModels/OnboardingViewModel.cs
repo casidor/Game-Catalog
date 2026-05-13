@@ -4,6 +4,7 @@ using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using Game_Catalog.Services;
 using System;
+using System.ComponentModel.DataAnnotations;
 using System.Threading.Tasks;
 
 namespace Game_Catalog.ViewModels
@@ -26,6 +27,8 @@ namespace Game_Catalog.ViewModels
         private string _selectedTheme = "Dark";
 
         /// <summary>Disk capacity in GB for the statistics progress bar.</summary>
+        [Range(100, 100000, ErrorMessage = "Розмір диску має бути від 100 до 100 000 ГБ")]
+        [NotifyDataErrorInfo]
         [ObservableProperty]
         private double _diskCapacityGB = 500;
 

@@ -1,5 +1,6 @@
 <UserControl xmlns="https://github.com/avaloniaui"
 			 xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:conv="using:Game_Catalog.Converters"
 			 xmlns:vm="using:Game_Catalog.ViewModels"
 			 x:Class="Game_Catalog.Views.SettingsView"
 			 x:DataType="vm:SettingsViewModel">
@@ -42,11 +43,8 @@
 		<StackPanel Spacing="8">
 			<TextBlock Text="Розмір диску (ГБ)"
 					   FontSize="14" Opacity="0.6"/>
-			<NumericUpDown Value="{Binding DiskCapacityGB}"
-						   Minimum="100"
-						   Maximum="100000"
-						   Increment="100"
-						   FormatString="0"/>
+			<NumericUpDown Value="{Binding DiskCapacityGB, Converter={x:Static conv:DecimalToDoubleConverter.Instance}}"
+               Minimum="100" Maximum="100000" Increment="100" FormatString="0"/>
 		</StackPanel>
 
 	</StackPanel>

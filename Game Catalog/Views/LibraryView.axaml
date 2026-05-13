@@ -106,8 +106,7 @@
 			</Border>
 
 			<!-- Сітка карток -->
-			<ScrollViewer Grid.Row="1"
-						  IsVisible="{Binding IsGridView}">
+			<ScrollViewer Grid.Row="1" IsVisible="{Binding ShowGrid}">
 				<ItemsControl ItemsSource="{Binding FilteredGames}">
 					<ItemsControl.ItemsPanel>
 						<ItemsPanelTemplate>
@@ -155,11 +154,11 @@
 			</ScrollViewer>
 
 			<!-- Таблиця -->
-			<ListBox Grid.Row="1"
+			<ListBox Grid.Row="1" 
 					 ItemsSource="{Binding FilteredGames}"
 					 SelectedItem="{Binding SelectedGame}"
 					 SelectionChanged="OnSelectionChanged"
-					 IsVisible="{Binding !IsGridView}">
+					 IsVisible="{Binding ShowList}">
 				<ListBox.ItemTemplate>
 					<DataTemplate x:DataType="models:Game">
 						<Grid ColumnDefinitions="*,150,100,80">
