@@ -27,6 +27,7 @@ namespace Game_Catalog.ViewModels
         /// <summary>Indicates whether the game library is empty.</summary>
         public bool IsEmpty => AppData.Instance.Games.Count == 0;
 
+        /// <summary>Available view modes for the library.</summary>
         public string[] ViewModes { get; } = { "Сітка", "Список" };
 
         [ObservableProperty]
@@ -35,8 +36,13 @@ namespace Game_Catalog.ViewModels
         [NotifyPropertyChangedFor(nameof(ShowList))]
         private string _selectedViewMode = "Сітка";
 
+        /// <summary>True if the current view mode is grid, false if it's list.</summary>
         public bool IsGridView => SelectedViewMode == "Сітка";
+
+        /// <summary>Whether to show the grid view. Hidden when the library is empty.</summary>
         public bool ShowGrid => IsGridView && !IsEmpty;
+
+        /// <summary>Whether to show the list view. Hidden when the library is empty.</summary>
         public bool ShowList => !IsGridView && !IsEmpty;
 
         public LibraryViewModel()

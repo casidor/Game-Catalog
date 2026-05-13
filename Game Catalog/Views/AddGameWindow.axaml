@@ -146,6 +146,11 @@
 					<TextBlock Text="Розмір на диску (ГБ)"/>
 					<NumericUpDown Value="{Binding SizeGB, Converter={x:Static conv:DecimalToDoubleConverter.Instance}}"
 								   Minimum="0" Maximum="1000" Increment="0.5" FormatString="0.0"/>
+					<TextBlock Text="{Binding DiskOverflowError}"
+							   IsVisible="{Binding HasDiskOverflowError}"
+							   Foreground="#e05252"
+							   FontSize="11"
+							   TextWrapping="Wrap"/>
 
 					<TextBlock Text="Статус"/>
 					<ComboBox ItemsSource="{Binding Statuses}"

@@ -111,6 +111,13 @@ namespace Game_Catalog.ViewModels
         [ObservableProperty]
         private string _coverImagePath = string.Empty;
 
+        [ObservableProperty]
+        [NotifyPropertyChangedFor(nameof(HasDiskOverflowError))]
+        private string _diskOverflowError = string.Empty;
+
+        /// <summary>Indicates whether the entered disk size exceeds the user-defined capacity limit.</summary>
+        public bool HasDiskOverflowError => !string.IsNullOrEmpty(DiskOverflowError);
+
         /// <summary>Developer names from RAWG that have no matching studio in the catalog.</summary>
         public ObservableCollection<string> SuggestedDeveloperNames { get; } = new();
         public bool HasSuggestedDevelopers => SuggestedDeveloperNames.Count > 0;
@@ -150,6 +157,9 @@ namespace Game_Catalog.ViewModels
         /// </summary>
         public string WindowTitle { get; }
 
+        private readonly Game? _editingGame;
+        partial void OnSizeGBChanged(double value) => DiskOverflowError = string.Empty;
+
         private bool _isInitializing;
         private CancellationTokenSource? _searchCts;
 
@@ -183,6 +193,7 @@ namespace Game_Catalog.ViewModels
         /// <param name="studios">Available studios collection.</param>
         public AddGameViewModel(Game game, ObservableCollection<Studio> studios)
         {
+            _editingGame = game;
             WindowTitle = "Редагувати гру";
             _isInitializing = true;
             Studios = studios;
@@ -209,6 +220,21 @@ namespace Game_Catalog.ViewModels
         {
             ValidateAllProperties();
             if (HasErrors) return;
+
+            var usedGB = AppData.Instance.Games
+                .Where(g => g != _editingGame)
+                .Sum(g => g.SizeGB);
+            var capacity = SettingsService.Current.DiskCapacityGB;
+
+            if (SizeGB > 0 && usedGB + SizeGB > capacity)
+            {
+                DiskOverflowError = $"Загальний розмір перевищить ліміт диску на " +
+                    $"{usedGB + SizeGB - capacity:0.0} ГБ. " +
+                    $"Доступно ще {Math.Max(0, capacity - usedGB):0.0} ГБ.";
+                return;
+            }
+
+            DiskOverflowError = string.Empty;
             Confirmed = true;
             CloseRequested?.Invoke();
         }

@@ -94,7 +94,7 @@
 					 IsVisible="{Binding !IsEmpty}">
 				<ListBox.ItemTemplate>
 					<DataTemplate x:DataType="models:Game">
-						<Grid ColumnDefinitions="*,150,100" Width="600">
+						<Grid ColumnDefinitions="*,150,100">
 							<StackPanel Grid.Column="0" Spacing="2">
 								<TextBlock Text="{Binding Title}" FontWeight="SemiBold"/>
 								<TextBlock Text="{Binding Developer.Name}" FontSize="12" Opacity="0.6"/>

@@ -24,7 +24,6 @@
 		<Border Grid.Row="1"
 				MinHeight="180"
 				MaxHeight="320"
-				Height="280"
 				Margin="0,12,0,0"
 				CornerRadius="8"
 				ClipToBounds="True">
