@@ -31,21 +31,43 @@ namespace Game_Catalog.ViewModels
         /// <summary>Returns true if a non-empty RAWG API key is configured.</summary>
         public bool HasRawgKey => !string.IsNullOrWhiteSpace(RawgApiKey);
 
-        /// <summary> Status message shown after API key validation. </summary>
-        [ObservableProperty] private string _rawgKeyStatusMessage = string.Empty;
+        /// <summary>Status message shown after API key validation.</summary>
+        [ObservableProperty]
+        private string _rawgKeyStatusMessage = string.Empty;
 
-        /// <summary> Indicates whether the key validation is in progress. </summary>
-        [ObservableProperty] private bool _isValidatingKey;
+        /// <summary>Indicates whether the key validation is in progress.</summary>
+        [ObservableProperty]
+        private bool _isValidatingKey;
+
+        /// <summary>Indicates whether the RAWG server is currently reachable.</summary>
         [ObservableProperty]
         [NotifyPropertyChangedFor(nameof(ConnectionStatus))]
         [NotifyPropertyChangedFor(nameof(IsOnline))]
         private bool _isKeyValidated = false;
 
-        /// <summary> Current RAWG connection status based on saved API key. </summary>
+        /// <summary>Current RAWG connection status label.</summary>
         public string ConnectionStatus => IsKeyValidated ? "RAWG підключено" : "Офлайн режим";
 
+        /// <summary>True if RAWG server is reachable with the saved API key.</summary>
         public bool IsOnline => IsKeyValidated;
 
+        /// <summary>
+        /// Initializes the ViewModel and checks RAWG availability in the background
+        /// if an API key is already configured.
+        /// </summary>
+        public SettingsViewModel()
+        {
+            if (!string.IsNullOrWhiteSpace(RawgApiKey))
+                _ = CheckConnectionAsync();
+        }
+
+        /// <summary>Checks RAWG server availability at startup using the saved API key.</summary>
+        private async Task CheckConnectionAsync()
+        {
+            IsKeyValidated = await RawgService.ValidateKeyAsync(RawgApiKey);
+        }
+
+        /// <summary>Validates the entered API key against the RAWG server and saves it if valid.</summary>
         [RelayCommand]
         private async Task ValidateRawgKeyAsync()
         {
