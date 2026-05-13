@@ -22,7 +22,9 @@
 
 		<!-- Банер -->
 		<Border Grid.Row="1"
-				MaxHeight="400"
+				MinHeight="180"
+				MaxHeight="320"
+				Height="280"
 				Margin="0,12,0,0"
 				CornerRadius="8"
 				ClipToBounds="True">
@@ -41,26 +43,6 @@
 							   HorizontalAlignment="Center"
 							   VerticalAlignment="Center"/>
 				</Border>
-
-				<!-- Градієнт -->
-				<Border>
-					<Border.Background>
-						<LinearGradientBrush StartPoint="0%,0%" EndPoint="0%,100%">
-							<GradientStop Color="Transparent" Offset="0.4"/>
-							<GradientStop Color="#CC000000"  Offset="1.0"/>
-						</LinearGradientBrush>
-					</Border.Background>
-				</Border>
-
-				<!-- Оцінка поверх банера -->
-				<TextBlock Text="{Binding PersonalRating, StringFormat='Оцінка: {0}/10'}"
-						   VerticalAlignment="Bottom"
-						   HorizontalAlignment="Right"
-						   Margin="0,0,16,12"
-						   FontSize="20"
-						   FontWeight="Bold"
-						   Foreground="White"/>
-
 			</Panel>
 		</Border>
 
@@ -145,6 +127,14 @@
 						</StackPanel>
 					</Border>
 
+					<Border Background="{DynamicResource CardBackground}"
+							CornerRadius="8" Padding="16" Margin="0,0,8,8" MinWidth="140">
+						<StackPanel Spacing="4">
+							<TextBlock Text="Оцінка" FontSize="11" Opacity="0.5"/>
+							<TextBlock Text="{Binding PersonalRating, StringFormat={}{0}/10}"
+									   FontSize="14" FontWeight="SemiBold"/>
+						</StackPanel>
+					</Border>
 				</WrapPanel>
 
 				<!-- Опис -->
