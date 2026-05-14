@@ -55,7 +55,7 @@ namespace Game_Catalog.ViewModels
         /// <summary>
         /// Release year entered by the user.
         /// </summary>
-        [CurrentYearRange(1970, 5, ErrorMessage = "Рік випуску має бути між 1970 і поточним роком + 5")]
+        [CurrentYearRange(1970, 5)]
         [NotifyDataErrorInfo]
         [ObservableProperty]
         private int _releaseYear = DateTime.Now.Year;

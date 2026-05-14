@@ -137,7 +137,7 @@
 
 					<TextBlock Text="Рік випуску"/>
 					<NumericUpDown Value="{Binding ReleaseYear, Converter={x:Static conv:DecimalToIntConverter.Instance}}"
-								   Minimum="1970" Maximum="2030" FormatString="0"/>
+								   FormatString="0"/>
 
 					<TextBlock Text="Платформа"/>
 					<TextBox Text="{Binding Platform}"
@@ -145,7 +145,7 @@
 
 					<TextBlock Text="Розмір на диску (ГБ)"/>
 					<NumericUpDown Value="{Binding SizeGB, Converter={x:Static conv:DecimalToDoubleConverter.Instance}}"
-								   Minimum="0" Maximum="1000" Increment="0.5" FormatString="0.0"/>
+								   Increment="0.5" FormatString="0.0"/>
 					<TextBlock Text="{Binding DiskOverflowError}"
 							   IsVisible="{Binding HasDiskOverflowError}"
 							   Foreground="#e05252"
@@ -165,11 +165,11 @@
 
 					<TextBlock Text="Години в грі"/>
 					<NumericUpDown Value="{Binding HoursPlayed, Converter={x:Static conv:DecimalToDoubleConverter.Instance}}"
-								   Minimum="0" Maximum="10000" Increment="0.5" FormatString="0.0"/>
+								   Increment="0.5" FormatString="0.0"/>
 
 					<TextBlock Text="Особиста оцінка (1-10)"/>
 					<NumericUpDown Value="{Binding PersonalRating, Converter={x:Static conv:DecimalToIntConverter.Instance}}"
-								   Minimum="1" Maximum="10" FormatString="0"/>
+								   FormatString="0"/>
 
 				</StackPanel>
 			</ScrollViewer>

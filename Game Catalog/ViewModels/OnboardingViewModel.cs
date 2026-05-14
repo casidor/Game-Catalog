@@ -50,7 +50,14 @@ namespace Game_Catalog.ViewModels
 
         /// <summary>Advances to the next step.</summary>
         [RelayCommand]
-        private void Next() => Step++;
+        private void Next()
+        {
+            ValidateAllProperties();
+            if (HasErrors)
+                return;
+
+            Step++;
+        }
 
         /// <summary> Moves to the previous step in the sequence. </summary>
         [RelayCommand]

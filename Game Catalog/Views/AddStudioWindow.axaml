@@ -24,7 +24,7 @@
 		<!-- Foundation year -->
 		<TextBlock Text="Рік заснування"/>
 		<NumericUpDown Value="{Binding FoundationYear, Converter={x:Static conv:DecimalToIntConverter.Instance}}"
-               Minimum="1950" Maximum="2030" FormatString="0"/>
+                       FormatString="0"/>
 
 		<!-- Main genre of studio -->
 		<TextBlock Text="Основний жанр студії"/>

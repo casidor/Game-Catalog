@@ -119,7 +119,9 @@ namespace Game_Catalog.ViewModels
 
         partial void OnDiskCapacityGBChanged(double value)
         {
-            if (value <= 0) return;
+            ValidateProperty(value, nameof(DiskCapacityGB));
+            if (HasErrors)
+                return;
             SettingsService.UpdateDiskCapacity(value);
         }
     }

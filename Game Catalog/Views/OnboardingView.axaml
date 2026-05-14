@@ -65,7 +65,7 @@
 						   FontSize="14"
 						   Opacity="0.6"/>
 				<NumericUpDown Value="{Binding DiskCapacityGB, Converter={x:Static conv:DecimalToDoubleConverter.Instance}}"
-               Minimum="100" Maximum="100000" Increment="100" FormatString="0"/>
+                               Increment="100" FormatString="0"/>
 			</StackPanel>
 
 			<Button Content="Далі"
