@@ -33,10 +33,11 @@ namespace Game_Catalog.ViewModels
         /// <summary> Filtered and searched game list based on active criteria. </summary>
         public IEnumerable<Game> FilteredGames => SourceGames
             .Where(g => string.IsNullOrWhiteSpace(SearchText) ||
-                        g.Title.Contains(SearchText, StringComparison.OrdinalIgnoreCase))
+            g.Title.Contains(SearchText, StringComparison.OrdinalIgnoreCase))
             .Where(g => SelectedGenre == null ||
             g.Genre.Split(',', StringSplitOptions.TrimEntries).Contains(SelectedGenre))
-            .Where(g => SelectedPlatform == null || g.Platform == SelectedPlatform)
+            .Where(g => SelectedPlatform == null ||
+            g.Platform.Split(',', StringSplitOptions.TrimEntries).Contains(SelectedPlatform))
             .Where(g => SelectedStatusFilter == null || g.Status == SelectedStatusFilter)
             .Where(g => SelectedDeveloper == null || g.Developer?.Id == SelectedDeveloper.Id)
             .OrderBy(g => g.Title);
@@ -51,14 +52,17 @@ namespace Game_Catalog.ViewModels
 
         /// <summary> Distinct genres derived from the source collection. </summary>
         public IEnumerable<string?> AvailableGenres => new string?[] { null }.Concat(
-        SourceGames
+            SourceGames
             .SelectMany(g => g.Genre.Split(',', StringSplitOptions.TrimEntries | StringSplitOptions.RemoveEmptyEntries))
             .Distinct()
             .OrderBy(g => g));
 
         /// <summary> Distinct platforms derived from the source collection. </summary>
-        public IEnumerable<string?> AvailablePlatforms =>
-            new string?[] { null }.Concat(SourceGames.Select(g => g.Platform).Distinct().OrderBy(p => p));
+        public IEnumerable<string?> AvailablePlatforms => new string?[] { null }.Concat(
+            SourceGames
+            .SelectMany(g => g.Platform.Split(',', StringSplitOptions.TrimEntries | StringSplitOptions.RemoveEmptyEntries))
+            .Distinct()
+            .OrderBy(p => p));
 
         /// <summary> All game statuses including a null entry to clear the filter. </summary>
         public IEnumerable<GameStatus?> AvailableStatuses =>
