@@ -73,35 +73,5 @@ namespace Game_Catalog.Views
                 $"Не вдалося зберегти налаштування.\n{message}");
             _saveErrorShown = false;
         }
-
-        /// <summary>Handles Ctrl+S and Ctrl+O keyboard shortcuts.</summary>
-        protected override void OnKeyDown(KeyEventArgs e)
-        {
-            if (e.KeyModifiers == KeyModifiers.Control)
-            {
-                if (e.Key == Key.S) { DataService.Save(); e.Handled = true; }
-                else if (e.Key == Key.O) { _ = OpenFileAsync(); e.Handled = true; }
-            }
-            base.OnKeyDown(e);
-        }
-
-        /// <summary>Opens a file picker and loads the selected JSON catalog file.</summary>
-        private async Task OpenFileAsync()
-        {
-            var files = await StorageProvider.OpenFilePickerAsync(new FilePickerOpenOptions
-            {
-                Title = "Open catalog",
-                AllowMultiple = false,
-                FileTypeFilter = [new("Game Catalog JSON") { Patterns = ["*.json"] }]
-            });
-
-            if (files.Count == 0) return;
-
-            var ok = DataService.Load(files[0].Path.LocalPath);
-            if (!ok)
-                await ConfirmationWindow.ShowAlertAsync(this,
-                    "Помилка завантаження",
-                    "Обраний файл пошкоджений або має невірний формат.");
-        }
     }
 }
