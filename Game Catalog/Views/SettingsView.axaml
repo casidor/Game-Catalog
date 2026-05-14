@@ -44,7 +44,10 @@
 			<TextBlock Text="Розмір диску (ГБ)"
 					   FontSize="14" Opacity="0.6"/>
 			<NumericUpDown Value="{Binding DiskCapacityGB, Converter={x:Static conv:DecimalToDoubleConverter.Instance}}"
-						   Increment="100" FormatString="0"/>
+						   Minimum="0" Maximum="100000" Increment="100" FormatString="0"/>
+			<TextBlock Text="{Binding DiskOverflowError}"
+					   Foreground="#F44336" FontSize="12"
+					   IsVisible="{Binding HasDiskOverflowError}"/>
 		</StackPanel>
 
 	</StackPanel>
