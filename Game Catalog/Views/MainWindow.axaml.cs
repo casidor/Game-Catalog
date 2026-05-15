@@ -3,6 +3,7 @@ using Avalonia.Input;
 using Avalonia.Interactivity;
 using Avalonia.Platform.Storage;
 using Game_Catalog.Services;
+using System.IO;
 using System.Threading.Tasks;
 
 namespace Game_Catalog.Views
@@ -30,11 +31,16 @@ namespace Game_Catalog.Views
             DataService.SaveFailed += OnDataSaveFailed;
             SettingsService.SaveFailed += OnSettingsSaveFailed;
 
-            if (!SettingsService.LoadSucceeded)
+            if (!SettingsService.LoadSucceeded && File.Exists(SettingsService.SettingsPath))
                 _ = ConfirmationWindow.ShowAlertAsync(this,
                     "Помилка налаштувань",
                     "Файл налаштувань пошкоджений. Застосовано стандартні налаштування.");
 
+            if (!SettingsService.LoadSucceeded && !File.Exists(SettingsService.SettingsPath) && File.Exists(DataService.DefaultPath))
+                _ = ConfirmationWindow.ShowAlertAsync(this,
+                    "Налаштування скинуто",
+                    "Файл налаштувань не знайдено — застосовано стандартні налаштування.\n" +
+                    "Ваші ігри збережені та доступні.");
             var loaded = DataService.LoadDefault();
             if (!loaded)
                 _ = ConfirmationWindow.ShowAlertAsync(this,

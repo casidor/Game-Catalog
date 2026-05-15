@@ -25,7 +25,7 @@ namespace Game_Catalog.Services
         /// True if the last Load completed successfully.
         /// False if the file was corrupted and defaults were used instead.
         /// </summary>
-        public static bool LoadSucceeded { get; private set; } = true;
+        public static bool LoadSucceeded { get; private set; } = false;
 
         /// <summary>Raised when a save operation fails. Provides a human-readable error message.</summary>
         public static event Action<string>? SaveFailed;
@@ -58,7 +58,6 @@ namespace Game_Catalog.Services
         {
             if (!File.Exists(SettingsPath))
             {
-                LoadSucceeded = true;
                 return;
             }
 

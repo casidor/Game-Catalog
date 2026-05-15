@@ -23,7 +23,7 @@ namespace Game_Catalog.Converters
                 GameStatus.Playing => "Граю",
                 GameStatus.Completed => "Пройдено",
                 GameStatus.Abandoned => "Закинуто",
-                _ => string.Empty
+                _ => null
             };
         }
 
