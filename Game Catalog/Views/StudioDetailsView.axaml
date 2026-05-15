@@ -6,7 +6,7 @@
 			 x:Class="Game_Catalog.Views.StudioDetailsView"
 			 x:DataType="vm:StudioDetailsViewModel">
 
-	<Grid RowDefinitions="auto,auto,*">
+	<Grid RowDefinitions="auto,*">
 
 		<!-- Заголовок -->
 		<StackPanel Grid.Row="0" Orientation="Horizontal" Margin="16,16,16,0">

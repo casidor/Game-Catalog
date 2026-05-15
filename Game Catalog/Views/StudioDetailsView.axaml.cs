@@ -19,7 +19,7 @@ public partial class StudioDetailsView : UserControl
     {
         if (DataContext is not StudioDetailsViewModel detailVm) return;
 
-        var vm = new AddStudioViewModel(detailVm.Studio, AppData.Instance.Studios);
+        var vm = new AddStudioViewModel(detailVm.Studio);
         var window = new AddStudioWindow { DataContext = vm };
 
         var parentWindow = TopLevel.GetTopLevel(this) as Window;

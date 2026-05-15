@@ -94,7 +94,7 @@ namespace Game_Catalog.ViewModels
         /// </summary>
         /// <param name="game">The game to edit.</param>
         /// <param name="studios">Available studios collection.</param>
-        public AddStudioViewModel(Studio studio, ObservableCollection<Studio> studios)
+        public AddStudioViewModel(Studio studio)
         {
             WindowTitle = "Редагувати студію";
             Name = studio.Name;

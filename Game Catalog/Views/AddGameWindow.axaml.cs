@@ -1,5 +1,6 @@
 using Avalonia;
 using Avalonia.Controls;
+using Avalonia.Input;
 using Avalonia.Interactivity;
 using Avalonia.Markup.Xaml;
 using Avalonia.Platform.Storage;
@@ -22,7 +23,13 @@ public partial class AddGameWindow : Window
         if (DataContext is AddGameViewModel vm)
             vm.CloseRequested += Close;
     }
-    /// <summary>Forwards the selected RAWG suggestion to the ViewModel command.</summary>
+    protected override void OnKeyDown(KeyEventArgs e)
+    {
+        if (DataContext is not AddGameViewModel vm) { base.OnKeyDown(e); return; }
+        if (e.Key == Key.Escape) { vm.CancelCommand.Execute(null); e.Handled = true; }
+        else if (e.Key == Key.Enter && !e.Handled) { vm.ConfirmCommand.Execute(null); e.Handled = true; }
+        base.OnKeyDown(e);
+    }
     private void OnSuggestionSelected(object sender, SelectionChangedEventArgs e)
     {
         if (DataContext is not AddGameViewModel vm) return;
