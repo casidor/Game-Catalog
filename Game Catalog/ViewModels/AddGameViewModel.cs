@@ -264,19 +264,25 @@ namespace Game_Catalog.ViewModels
             if (!RawgService.IsAvailable) return;
 
             try { await Task.Delay(600, ct); }
-            catch (TaskCanceledException) { return; }
+            catch (OperationCanceledException) { return; }
 
             IsSearching = true;
-            var results = await RawgService.SearchAsync(query, ct);
-            IsSearching = false;
+            try
+            {
+                var results = await RawgService.SearchAsync(query, ct);
 
-            if (ct.IsCancellationRequested) return;
+                if (ct.IsCancellationRequested) return;
 
-            Suggestions.Clear();
-            foreach (var r in results)
-                Suggestions.Add(r);
+                Suggestions.Clear();
+                foreach (var r in results)
+                    Suggestions.Add(r);
 
-            IsSuggestionsVisible = Suggestions.Count > 0;
+                IsSuggestionsVisible = Suggestions.Count > 0;
+            }
+            finally
+            {
+                IsSearching = false;
+            }
         }
 
         /// <summary>Selects a suggestion, fills all available fields from RAWG detail endpoint, and downloads the cover.</summary>
