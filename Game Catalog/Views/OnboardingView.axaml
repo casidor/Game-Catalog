@@ -47,16 +47,20 @@
 						   FontSize="14"
 						   Opacity="0.6"/>
 				<StackPanel Orientation="Horizontal" Spacing="12">
-					<Button Content="🌑  Dark"
+					<Button Content="🌑 Dark"
 							Command="{Binding SelectThemeCommand}"
 							CommandParameter="Dark"
 							Padding="24,8"
-							FontSize="13"/>
-					<Button Content="☀  Light"
+							FontSize="13"
+							Height="36"
+							Width="100"/>
+					<Button Content="☀ Light"
 							Command="{Binding SelectThemeCommand}"
 							CommandParameter="Light"
 							Padding="24,8"
-							FontSize="13"/>
+							FontSize="13"
+							Height="36"
+							Width="100"/>
 				</StackPanel>
 			</StackPanel>
 
