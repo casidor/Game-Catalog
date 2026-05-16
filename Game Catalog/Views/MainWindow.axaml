@@ -38,7 +38,7 @@
             </StackPanel>
         </Border>
 
-        <!-- Nav buttons -->
+        <!-- Navigation buttons -->
         <StackPanel Grid.Row="1" Spacing="4" Margin="12,0">
             <Button Content="🎮  Бібліотека"
                     Command="{Binding NavigateToCommand}"

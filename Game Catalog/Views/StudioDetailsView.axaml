@@ -8,7 +8,7 @@
 
 	<Grid RowDefinitions="auto,*">
 
-		<!-- Заголовок -->
+		<!-- Page header -->
 		<StackPanel Grid.Row="0" Orientation="Horizontal" Margin="16,16,16,0">
 			<Button Content="← Назад"
 					Command="{Binding GoBackCommand}"
@@ -20,17 +20,17 @@
 					   VerticalAlignment="Center"/>
 		</StackPanel>
 
-		<!-- Контент -->
+		<!-- Page content -->
 		<ScrollViewer Grid.Row="1" Margin="16,16,16,0">
 			<StackPanel Spacing="16">
 
-				<!-- Кнопки дій -->
+				<!-- Action buttons -->
 				<StackPanel Orientation="Horizontal" Spacing="8">
 					<Button Content="✏ Редагувати" Click="OnEditClick"/>
 					<Button Content="🗑 Видалити"   Click="OnDeleteClick"/>
 				</StackPanel>
 
-				<!-- Картки -->
+				<!-- Studio info cards -->
 				<WrapPanel Orientation="Horizontal">
 					<Border Background="{DynamicResource CardBackground}"
 							CornerRadius="8" Padding="16" Margin="0,0,8,8" MinWidth="140">
@@ -55,7 +55,7 @@
 					</Border>
 				</WrapPanel>
 
-				<!-- Ігри студії -->
+				<!-- Studio games list -->
 				<StackPanel Spacing="8">
 					<TextBlock Text="Ігри у бібліотеці"
 							   FontSize="14" Opacity="0.5"

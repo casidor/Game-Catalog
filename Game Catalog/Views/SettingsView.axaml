@@ -11,6 +11,7 @@
 				   FontSize="20"
 				   FontWeight="Bold"/>
 
+		<!-- Theme selector -->
 		<StackPanel Spacing="8">
 			<TextBlock Text="Тема" FontSize="14" Opacity="0.6"/>
 			<ComboBox ItemsSource="{Binding Themes}"
@@ -18,6 +19,7 @@
 					  HorizontalAlignment="Stretch"/>
 		</StackPanel>
 
+		<!-- RAWG API key -->
 		<StackPanel Spacing="8">
 			<TextBlock Text="RAWG API Key" FontSize="14" Opacity="0.6"/>
 			<TextBlock Text="Отримати ключ: rawg.io/apidocs" FontSize="11" Opacity="0.4"/>
@@ -30,6 +32,8 @@
 					   FontSize="12"
 					   IsVisible="{Binding RawgKeyStatusMessage, Converter={x:Static StringConverters.IsNotNullOrEmpty}}"/>
 		</StackPanel>
+
+		<!-- Connection status indicator -->
 		<StackPanel Orientation="Horizontal" Spacing="6">
 			<TextBlock Text="●" FontSize="10" VerticalAlignment="Center"
 					   Foreground="#4caf50" IsVisible="{Binding IsOnline}"/>
@@ -40,6 +44,7 @@
 					   VerticalAlignment="Center"/>
 		</StackPanel>
 
+		<!-- Disk capacity -->
 		<StackPanel Spacing="8">
 			<TextBlock Text="Розмір диску (ГБ)"
 					   FontSize="14" Opacity="0.6"/>

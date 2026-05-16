@@ -11,16 +11,19 @@
 
 	<StackPanel Spacing="16" Margin="24">
 
+		<!-- Dialog title -->
 		<TextBlock Text="{Binding Title}"
 				   FontSize="15"
 				   FontWeight="SemiBold"
 				   TextWrapping="Wrap"/>
 
+		<!-- Dialog message -->
 		<TextBlock Text="{Binding Message}"
 				   Opacity="0.7"
 				   TextWrapping="Wrap"
 				   FontSize="13"/>
 
+		<!-- Action buttons -->
 		<StackPanel Orientation="Horizontal"
 					Spacing="8"
 					HorizontalAlignment="Right"

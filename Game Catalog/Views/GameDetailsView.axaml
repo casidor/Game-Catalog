@@ -7,7 +7,7 @@
 			 x:DataType="vm:GameDetailsViewModel">
 	<Grid RowDefinitions="auto,auto,*">
 
-		<!-- Заголовок -->
+		<!-- Page header -->
 		<StackPanel Grid.Row="0" Orientation="Horizontal" Margin="0,0,0,0">
 			<Button Content="← Назад"
 					Command="{Binding GoBackCommand}"
@@ -20,7 +20,7 @@
 					   Margin="16,16,16,0"/>
 		</StackPanel>
 
-		<!-- Банер -->
+		<!-- Cover banner -->
 		<Border Grid.Row="1"
 				MinHeight="180"
 				MaxHeight="320"
@@ -28,13 +28,9 @@
 				CornerRadius="8"
 				ClipToBounds="True">
 			<Panel>
-
-				<!-- Обкладинка -->
 				<Image Source="{Binding CoverImage}"
 					   Stretch="UniformToFill"
 					   IsVisible="{Binding HasCover}"/>
-
-				<!-- Плейсхолдер -->
 				<Border Background="{DynamicResource CardBackground}"
 						IsVisible="{Binding !HasCover}">
 					<TextBlock Text="🎮"
@@ -45,11 +41,11 @@
 			</Panel>
 		</Border>
 
-		<!-- Контент -->
+		<!-- Page content -->
 		<ScrollViewer Grid.Row="2" Margin="16,16,0,0">
 			<StackPanel Spacing="16">
 
-				<!-- Кнопки дій -->
+				<!-- Action buttons -->
 				<StackPanel Orientation="Horizontal" Spacing="8">
 					<Button Content="✏ Редагувати"
 							Click="OnEditClick"
@@ -64,7 +60,7 @@
 							Click="OnDeleteClick"/>
 				</StackPanel>
 
-				<!-- Характеристики -->
+				<!-- Game properties -->
 				<WrapPanel Orientation="Horizontal">
 
 					<Border Background="{DynamicResource CardBackground}"
@@ -136,7 +132,7 @@
 					</Border>
 				</WrapPanel>
 
-				<!-- Опис -->
+				<!-- Description -->
 				<StackPanel Spacing="8" IsVisible="{Binding HasDescription}">
 					<TextBlock Text="Опис" FontSize="12" Opacity="0.5"/>
 					<TextBlock Text="{Binding Description}"
