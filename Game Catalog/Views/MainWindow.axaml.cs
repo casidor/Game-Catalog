@@ -30,17 +30,10 @@ namespace Game_Catalog.Views
 
             DataService.SaveFailed += OnDataSaveFailed;
             SettingsService.SaveFailed += OnSettingsSaveFailed;
-
-            if (!SettingsService.LoadSucceeded && File.Exists(SettingsService.SettingsPath))
+            if (!SettingsService.LoadSucceeded && File.Exists(DataService.DefaultPath))
                 _ = ConfirmationWindow.ShowAlertAsync(this,
                     "Помилка налаштувань",
-                    "Файл налаштувань пошкоджений. Застосовано стандартні налаштування.");
-
-            if (!SettingsService.LoadSucceeded && !File.Exists(SettingsService.SettingsPath) && File.Exists(DataService.DefaultPath))
-                _ = ConfirmationWindow.ShowAlertAsync(this,
-                    "Налаштування скинуто",
-                    "Файл налаштувань не знайдено — застосовано стандартні налаштування.\n" +
-                    "Ваші ігри збережені та доступні.");
+                    "Файл налаштувань пошкоджений або відсутній. Застосовано стандартні налаштування.");
             var loaded = DataService.LoadDefault();
             if (!loaded)
                 _ = ConfirmationWindow.ShowAlertAsync(this,

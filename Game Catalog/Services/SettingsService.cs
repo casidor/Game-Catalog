@@ -58,6 +58,7 @@ namespace Game_Catalog.Services
         {
             if (!File.Exists(SettingsPath))
             {
+                Save();
                 return;
             }
 
@@ -74,12 +75,14 @@ namespace Game_Catalog.Services
                 else
                 {
                     LoadSucceeded = false;
+                    Save();
                 }
             }
             catch
             {
                 Current = new AppSettings();
                 LoadSucceeded = false;
+                Save();
             }
         }
 

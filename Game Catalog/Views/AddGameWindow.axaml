@@ -178,7 +178,7 @@
 
 					<TextBlock Text="Особиста оцінка (1-10)"/>
 					<NumericUpDown Value="{Binding PersonalRating, Converter={x:Static conv:DecimalToIntConverter.Instance}}"
-								   FormatString="0"/>
+								   Minimum="1" Maximum="10" FormatString="0"/>
 
 				</StackPanel>
 			</ScrollViewer>
