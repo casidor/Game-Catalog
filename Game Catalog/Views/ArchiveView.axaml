@@ -8,6 +8,7 @@
 
 	<Grid RowDefinitions="auto,auto,*">
 
+		<!-- Toolbar -->
 		<Border Grid.Row="0" Padding="16,12">
 			<Grid ColumnDefinitions="Auto,*">
 				<TextBlock Grid.Column="0" Text="Архів"
@@ -25,6 +26,7 @@
 			</Grid>
 		</Border>
 
+		<!-- Filter panel -->
 		<Border Grid.Row="1"
 				Padding="16,10"
 				IsVisible="{Binding IsFiltersVisible}"
@@ -76,6 +78,7 @@
 
 		<Grid Grid.Row="2" RowDefinitions="Auto,*">
 
+			<!-- Table header -->
 			<Border Grid.Row="0"
 					Padding="16,8"
 					BorderBrush="{DynamicResource SidebarBorder}"
@@ -87,6 +90,7 @@
 				</Grid>
 			</Border>
 
+			<!-- Games list -->
 			<ListBox Grid.Row="1"
 					 ItemsSource="{Binding FilteredGames}"
 					 SelectedItem="{Binding SelectedGame}"
@@ -108,6 +112,7 @@
 				</ListBox.ItemTemplate>
 			</ListBox>
 
+			<!-- Empty archive state -->
 			<StackPanel Grid.Row="1"
 						IsVisible="{Binding IsEmpty}"
 						HorizontalAlignment="Center"
@@ -118,6 +123,16 @@
 				<TextBlock Text="Перенесені ігри з'являться тут" Opacity="0.6" HorizontalAlignment="Center"/>
 			</StackPanel>
 
+			<!-- Filtered empty state -->
+			<StackPanel Grid.Row="1"
+						IsVisible="{Binding IsFilteredEmpty}"
+						HorizontalAlignment="Center"
+						VerticalAlignment="Center"
+						Spacing="12">
+				<TextBlock Text="🔍" FontSize="48" HorizontalAlignment="Center"/>
+				<TextBlock Text="Ігор не знайдено" FontSize="18" FontWeight="SemiBold" HorizontalAlignment="Center"/>
+				<TextBlock Text="Спробуйте змінити критерії пошуку" Opacity="0.6" HorizontalAlignment="Center"/>
+			</StackPanel>
 		</Grid>
 
 	</Grid>

@@ -78,9 +78,10 @@ namespace Game_Catalog.ViewModels
             SelectedStatusFilter = null;
             SelectedDeveloper = null;
         }
-        /// <summary> Indicates whether the filter panel is visible. </summary>
         [ObservableProperty] private bool _isFiltersVisible;
 
+        /// <summary> Indicates whether the current filter criteria result in an empty game list. </summary>
+        public bool IsFilteredEmpty => SourceGames.Any() && !FilteredGames.Any();
         [RelayCommand]
         private void ToggleFilters() => IsFiltersVisible = !IsFiltersVisible;
 
@@ -93,6 +94,7 @@ namespace Game_Catalog.ViewModels
                 OnPropertyChanged(nameof(AvailablePlatforms));
                 OnPropertyChanged(nameof(AvailableDevelopers));
                 OnPropertyChanged(nameof(FilteredGames));
+                OnPropertyChanged(nameof(IsFilteredEmpty));
             };
         }
 
@@ -101,6 +103,10 @@ namespace Game_Catalog.ViewModels
         partial void OnSelectedPlatformChanged(string? value) => RefreshFilters();
         partial void OnSelectedStatusFilterChanged(GameStatus? value) => RefreshFilters();
         partial void OnSelectedDeveloperChanged(Studio? value) => RefreshFilters();
-        private void RefreshFilters() => OnPropertyChanged(nameof(FilteredGames));
+        protected virtual void RefreshFilters()
+        {
+            OnPropertyChanged(nameof(FilteredGames));
+            OnPropertyChanged(nameof(IsFilteredEmpty));
+        }
     }
 }

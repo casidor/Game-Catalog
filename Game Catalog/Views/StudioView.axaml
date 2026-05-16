@@ -7,6 +7,7 @@
 
 	<Grid RowDefinitions="auto,auto,*">
 
+		<!-- Toolbar -->
 		<Border Grid.Row="0" Padding="16,12">
 			<Grid ColumnDefinitions="Auto,*">
 				<StackPanel Grid.Column="0" Orientation="Horizontal" Spacing="8" VerticalAlignment="Center">
@@ -29,6 +30,7 @@
 			</Grid>
 		</Border>
 
+		<!-- Filter panel -->
 		<Border Grid.Row="1"
 				Padding="16,10"
 				IsVisible="{Binding IsFiltersVisible}"
@@ -62,6 +64,7 @@
 
 		<Grid Grid.Row="2" RowDefinitions="Auto,*">
 
+			<!-- Table header -->
 			<Border Grid.Row="0"
 					Padding="16,8"
 					BorderBrush="{DynamicResource SidebarBorder}"
@@ -73,6 +76,7 @@
 				</Grid>
 			</Border>
 
+			<!-- Studios list -->
 			<ListBox Grid.Row="1"
 					 ItemsSource="{Binding FilteredStudios}"
 					 SelectedItem="{Binding SelectedStudio}"
@@ -92,6 +96,7 @@
 				</ListBox.ItemTemplate>
 			</ListBox>
 
+			<!-- Empty studios state -->
 			<StackPanel Grid.Row="1"
 						IsVisible="{Binding IsEmpty}"
 						HorizontalAlignment="Center"
@@ -106,6 +111,16 @@
 						Padding="24,10" FontSize="14"/>
 			</StackPanel>
 
+			<!-- Filtered empty state -->
+			<StackPanel Grid.Row="1"
+						IsVisible="{Binding IsFilteredEmpty}"
+						HorizontalAlignment="Center"
+						VerticalAlignment="Center"
+						Spacing="12">
+				<TextBlock Text="🔍" FontSize="48" HorizontalAlignment="Center"/>
+				<TextBlock Text="Студій не знайдено" FontSize="18" FontWeight="SemiBold" HorizontalAlignment="Center"/>
+				<TextBlock Text="Спробуйте змінити критерії пошуку" Opacity="0.6" HorizontalAlignment="Center"/>
+			</StackPanel>
 		</Grid>
 
 	</Grid>

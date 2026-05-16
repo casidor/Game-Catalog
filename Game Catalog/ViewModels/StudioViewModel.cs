@@ -37,6 +37,9 @@ namespace Game_Catalog.ViewModels
         /// <summary> Indicates whether the studios collection is empty. </summary>
         public bool IsEmpty => AppData.Instance.Studios.Count == 0;
 
+        /// <summary> Indicates whether the filtered studio list is empty while the source collection has items. </summary>
+        public bool IsFilteredEmpty => Studios.Any() && !FilteredStudios.Any();
+
         public StudioViewModel()
         {
             Studios.CollectionChanged += (_, _) =>
@@ -45,6 +48,7 @@ namespace Game_Catalog.ViewModels
                 OnPropertyChanged(nameof(AvailableGenres));
                 OnPropertyChanged(nameof(FilteredStudios));
                 OnPropertyChanged(nameof(IsEmpty));
+                OnPropertyChanged(nameof(IsFilteredEmpty));
             };
         }
 
@@ -68,7 +72,11 @@ namespace Game_Catalog.ViewModels
         partial void OnSelectedGenreChanged(string? value) => RefreshFilters();
 
         /// <summary> Refreshes the filtered list property. </summary>
-        private void RefreshFilters() => OnPropertyChanged(nameof(FilteredStudios));
+        private void RefreshFilters()
+        {
+            OnPropertyChanged(nameof(FilteredStudios));
+            OnPropertyChanged(nameof(IsFilteredEmpty));
+        }
 
         /// <summary> Resets all active filters and search text to their default values. </summary>
         [RelayCommand]

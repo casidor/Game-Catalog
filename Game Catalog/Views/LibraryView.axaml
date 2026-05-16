@@ -10,7 +10,7 @@
 
 	<Grid RowDefinitions="auto,auto,*">
 
-		<!-- Тулбар -->
+		<!-- Toolbar -->
 		<Border Grid.Row="0" Padding="16,12">
 			<Grid ColumnDefinitions="Auto,*">
 				<StackPanel Grid.Column="0" Orientation="Horizontal" Spacing="8" VerticalAlignment="Center">
@@ -38,7 +38,7 @@
 			</Grid>
 		</Border>
 
-		<!-- Панель фільтрів -->
+		<!-- Filter panel -->
 		<Border Grid.Row="1"
 				Padding="16,10"
 				IsVisible="{Binding IsFiltersVisible}"
@@ -88,10 +88,10 @@
 			</WrapPanel>
 		</Border>
 
-		<!-- Контент -->
+		<!-- Page content -->
 		<Grid Grid.Row="2" RowDefinitions="Auto,*">
 
-			<!-- Заголовки таблиці -->
+			<!-- Table header (list view only) -->
 			<Border Grid.Row="0"
 					Padding="16,8"
 					IsVisible="{Binding !IsGridView}"
@@ -105,7 +105,7 @@
 				</Grid>
 			</Border>
 
-			<!-- Сітка карток -->
+			<!-- Grid view -->
 			<ScrollViewer Grid.Row="1" IsVisible="{Binding ShowGrid}">
 				<ItemsControl ItemsSource="{Binding FilteredGames}">
 					<ItemsControl.ItemsPanel>
@@ -153,8 +153,8 @@
 				</ItemsControl>
 			</ScrollViewer>
 
-			<!-- Таблиця -->
-			<ListBox Grid.Row="1" 
+			<!-- List view -->
+			<ListBox Grid.Row="1"
 					 ItemsSource="{Binding FilteredGames}"
 					 SelectedItem="{Binding SelectedGame}"
 					 SelectionChanged="OnSelectionChanged"
@@ -174,7 +174,7 @@
 				</ListBox.ItemTemplate>
 			</ListBox>
 
-			<!-- Порожня бібліотека -->
+			<!-- Empty library state -->
 			<StackPanel Grid.Row="1"
 						IsVisible="{Binding IsEmpty}"
 						HorizontalAlignment="Center"
@@ -187,6 +187,16 @@
 						Click="OnAddGameClick"
 						HorizontalAlignment="Center"
 						Padding="24,10" FontSize="14"/>
+			</StackPanel>
+			<!-- Filtered empty state -->
+			<StackPanel Grid.Row="1"
+						IsVisible="{Binding IsFilteredEmpty}"
+						HorizontalAlignment="Center"
+						VerticalAlignment="Center"
+						Spacing="12">
+				<TextBlock Text="🔍" FontSize="48" HorizontalAlignment="Center"/>
+				<TextBlock Text="Ігор не знайдено" FontSize="18" FontWeight="SemiBold" HorizontalAlignment="Center"/>
+				<TextBlock Text="Спробуйте змінити критерії пошуку" Opacity="0.6" HorizontalAlignment="Center"/>
 			</StackPanel>
 		</Grid>
 

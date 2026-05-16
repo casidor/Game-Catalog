@@ -40,10 +40,10 @@ namespace Game_Catalog.ViewModels
         public bool IsGridView => SelectedViewMode == "Сітка";
 
         /// <summary>Whether to show the grid view. Hidden when the library is empty.</summary>
-        public bool ShowGrid => IsGridView && !IsEmpty;
+        public bool ShowGrid => IsGridView && !IsEmpty && !IsFilteredEmpty;
 
         /// <summary>Whether to show the list view. Hidden when the library is empty.</summary>
-        public bool ShowList => !IsGridView && !IsEmpty;
+        public bool ShowList => !IsGridView && !IsEmpty && !IsFilteredEmpty;
 
         public LibraryViewModel()
         {
@@ -59,5 +59,11 @@ namespace Game_Catalog.ViewModels
         /// <summary> Navigates to the game detail page. </summary>
         [RelayCommand]
         private void SelectGame(Game game) => GameSelected?.Invoke(game);
+        protected override void RefreshFilters()
+        {
+            base.RefreshFilters();
+            OnPropertyChanged(nameof(ShowGrid));
+            OnPropertyChanged(nameof(ShowList));
+        }
     }
 }
