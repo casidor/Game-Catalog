@@ -34,7 +34,7 @@
 
 | Платформа | Файл |
 |-----------|------|
-| Windows (instaler) | `GameCatalog-Setup.exe` |
+| Windows (installer) | `GameCatalog-Setup.exe` |
 | Windows (portable) | `GameCatalog-win-x64.exe` |
 | Linux | `GameCatalog-linux-x64` |
 
@@ -69,7 +69,7 @@ dotnet run
 
 ## RAWG API
 
-[RAWG](https://rawg.io/) — безкоштовна база даних ігор. З API ключем застосунок шукає гру за назвою прямо у формі та автоматично заповнює жанр, рік, платформу, опис і обкладинку.
+[RAWG](https://rawg.io/) — безкоштовна база даних ігор. З API ключем застосунок шукає гру за назвою прямо у формі та автоматично заповнює жанр, рік, опис і обкладинку.
 
 Отримати ключ: [rawg.io/apidocs](https://rawg.io/apidocs) — безкоштовно, без обмежень для особистого використання.
 
