@@ -14,12 +14,12 @@
 		<!-- Name of studio -->
 		<TextBlock Text="Назва студії"/>
 		<TextBox Text="{Binding Name}"
-				 Watermark="Введіть назву..."/>
+				 PlaceholderText="Введіть назву..."/>
 
 		<!-- Country -->
 		<TextBlock Text="Країна студії"/>
 		<TextBox Text="{Binding Country}"
-				 Watermark="Введіть країну..."/>
+				 PlaceholderText="Введіть країну..."/>
 
 		<!-- Foundation year -->
 		<TextBlock Text="Рік заснування"/>
@@ -29,7 +29,7 @@
 		<!-- Main genre of studio -->
 		<TextBlock Text="Основний жанр студії"/>
 		<TextBox Text="{Binding MainGenre}"
-				 Watermark="Введіть жанр студії..."/>
+				 PlaceholderText="Введіть жанр студії..."/>
 
 		<!-- Buttons -->
 		<StackPanel Orientation="Horizontal"

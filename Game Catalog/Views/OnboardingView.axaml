@@ -105,7 +105,7 @@
 						   Opacity="0.5"
 						   HorizontalAlignment="Center"/>
 				<TextBox Text="{Binding RawgApiKey}"
-						 Watermark="Вставте API ключ..."
+						 PlaceholderText="Вставте API ключ..."
 						 HorizontalAlignment="Stretch"/>
 				<Button Content="Перевірити ключ"
 						Command="{Binding ValidateRawgKeyCommand}"

@@ -21,7 +21,7 @@
 				<StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="8"
 							HorizontalAlignment="Right" VerticalAlignment="Center">
 					<TextBox Text="{Binding SearchText}"
-							 Watermark="🔍 Пошук студії..."
+							 PlaceholderText="🔍 Пошук студії..."
 							 Width="180" VerticalAlignment="Center"/>
 					<Button Content="⚙ Фільтри"
 							Command="{Binding ToggleFiltersCommand}"

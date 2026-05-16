@@ -53,7 +53,7 @@
 					<TextBox Grid.Row="1"
 							 Margin="0,4,0,0"
 							 Text="{Binding Description}"
-							 Watermark="Додайте опис або нотатки (до 1000 символів)..."
+							 PlaceholderText="Додайте опис або нотатки (до 1000 символів)..."
 							 TextWrapping="Wrap"
 							 AcceptsReturn="True"
 							 MaxLength="1000"
@@ -69,7 +69,7 @@
 					<Panel>
 						<TextBox x:Name="TitleBox"
 								 Text="{Binding Title}"
-								 Watermark="Введіть назву..."/>
+								 PlaceholderText="Введіть назву..."/>
 
 						<!-- RAWG search suggestions popup -->
 						<Popup IsOpen="{Binding IsSuggestionsVisible}"
@@ -142,7 +142,7 @@
 
 					<TextBlock Text="Жанр"/>
 					<TextBox Text="{Binding Genre}"
-							 Watermark="Введіть жанр..."/>
+							 PlaceholderText="Введіть жанр..."/>
 
 					<TextBlock Text="Рік випуску"/>
 					<NumericUpDown Value="{Binding ReleaseYear, Converter={x:Static conv:DecimalToIntConverter.Instance}}"
@@ -150,7 +150,7 @@
 
 					<TextBlock Text="Платформа"/>
 					<TextBox Text="{Binding Platform}"
-							 Watermark="PC, PlayStation, Xbox..."/>
+							 PlaceholderText="PC, PlayStation, Xbox..."/>
 
 					<TextBlock Text="Розмір на диску (ГБ)"/>
 					<NumericUpDown Value="{Binding SizeGB, Converter={x:Static conv:DecimalToDoubleConverter.Instance}}"
