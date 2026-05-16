@@ -25,32 +25,12 @@ namespace Game_Catalog.Models
         /// <summary> List of genres associated with the game. </summary>
         [JsonPropertyName("genres")]
         public List<RawgGenre> Genres { get; set; } = new();
-
-        /// <summary> List of platform wrappers associated with the game. </summary>
-        [JsonPropertyName("platforms")]
-        public List<RawgPlatformWrapper> Platforms { get; set; } = new();
     }
 
     /// <summary> Represents a genre entry from RAWG. </summary>
     public class RawgGenre
     {
         /// <summary> Genre display name. </summary>
-        [JsonPropertyName("name")]
-        public string Name { get; set; } = string.Empty;
-    }
-
-    /// <summary> Wraps a RAWG platform object as returned by the API. </summary>
-    public class RawgPlatformWrapper
-    {
-        /// <summary> The platform details. </summary>
-        [JsonPropertyName("platform")]
-        public RawgPlatform Platform { get; set; } = new();
-    }
-
-    /// <summary> Represents a gaming platform from RAWG. </summary>
-    public class RawgPlatform
-    {
-        /// <summary> Platform display name. </summary>
         [JsonPropertyName("name")]
         public string Name { get; set; } = string.Empty;
     }

@@ -112,7 +112,7 @@
 								Margin="8,0,0,0"
 								Padding="10,0"
 								FontSize="16"
-								VerticalAlignment="Stretch"
+								VerticalAlignment="Top"
 								ToolTip.Tip="Додати студію"/>
 					</Grid>
 					<ItemsControl ItemsSource="{Binding SuggestedDeveloperNames}"

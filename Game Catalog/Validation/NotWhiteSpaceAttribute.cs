@@ -8,7 +8,7 @@ namespace Game_Catalog.Validation
     {
         protected override ValidationResult? IsValid(object? value, ValidationContext validationContext)
         {
-            if (value is string s && string.IsNullOrWhiteSpace(s))
+            if (value is string s && s.Length > 0 && string.IsNullOrWhiteSpace(s))
                 return new ValidationResult(ErrorMessage ?? "Поле не може складатися лише з пробілів.");
 
             return ValidationResult.Success;

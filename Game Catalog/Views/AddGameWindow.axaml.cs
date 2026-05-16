@@ -5,8 +5,10 @@ using Avalonia.Interactivity;
 using Avalonia.Markup.Xaml;
 using Avalonia.Platform.Storage;
 using Game_Catalog.Models;
+using Game_Catalog.Services;
 using Game_Catalog.ViewModels;
 using System;
+using System.IO;
 
 namespace Game_Catalog.Views;
 
@@ -84,7 +86,14 @@ public partial class AddGameWindow : Window
         });
 
         if (files.Count > 0)
-            vm.CoverImagePath = files[0].Path.LocalPath;
+        {
+            var source = files[0].Path.LocalPath;
+            var ext = Path.GetExtension(source);
+            Directory.CreateDirectory(RawgService.CoversFolder);
+            var dest = Path.Combine(RawgService.CoversFolder, $"{Guid.NewGuid()}{ext}");
+            File.Copy(source, dest, overwrite: true);
+            vm.CoverImagePath = dest;
+        }
     }
 
     private void OnClearCoverClick(object sender, RoutedEventArgs e)
