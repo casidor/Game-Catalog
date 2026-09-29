@@ -18,17 +18,17 @@ namespace Game_Catalog.ViewModels
         /// <summary>
         /// Total number of games in the active library.
         /// </summary>
-        public int TotalGames => AppData.Instance.Games.Count;
+        public int TotalGames => AppData.Instance.ActiveGames.Count();
 
         /// <summary>
         /// Sum of hours played across all games in the library.
         /// </summary>
-        public double TotalHours => AppData.Instance.Games.Sum(g => g.HoursPlayed);
+        public double TotalHours => AppData.Instance.ActiveGames.Sum(g => g.HoursPlayed);
 
         /// <summary>
         /// Total disk space occupied by games currently being played, in gigabytes.
         /// </summary>
-        public double TotalDiskGB => AppData.Instance.Games
+        public double TotalDiskGB => AppData.Instance.ActiveGames
             .Where(g => g.Status == GameStatus.Playing)
             .Sum(g => g.SizeGB);
 
@@ -36,14 +36,14 @@ namespace Game_Catalog.ViewModels
         /// Average personal rating across all games, rounded to one decimal place.
         /// Returns zero when the library is empty.
         /// </summary>
-        public double AverageRating => AppData.Instance.Games.Any()
-            ? Math.Round(AppData.Instance.Games.Average(g => g.PersonalRating), 1)
+        public double AverageRating => AppData.Instance.ActiveGames.Any()
+            ? Math.Round(AppData.Instance.ActiveGames.Average(g => g.PersonalRating), 1)
             : 0;
 
         /// <summary>
         /// Average rating converted to a 1–5 star scale.
         /// </summary>
-        public int StarRating => AppData.Instance.Games.Any()
+        public int StarRating => AppData.Instance.ActiveGames.Any()
             ? (int)Math.Round(AverageRating / 2.0)
             : 0;
 

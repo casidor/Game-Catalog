@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Linq;
 using System.Text;
 
 namespace Game_Catalog.Models
@@ -31,6 +32,9 @@ namespace Game_Catalog.Models
         /// Collection of all play sessions.
         /// </summary>
         public ObservableCollection<PlaySession> Sessions { get; } = new();
+
+        /// <summary> Games that are not archived. Use this for statistics and disk checks. </summary>
+        public IEnumerable<Game> ActiveGames => Games.Where(g => !g.IsArchived);
 
         private AppData() { }
     }

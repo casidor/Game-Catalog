@@ -128,7 +128,7 @@ namespace Game_Catalog.ViewModels
 
         partial void OnDiskCapacityGBChanged(double value)
         {
-            double usedGB = AppData.Instance.Games.Sum(g => g.SizeGB);
+            double usedGB = AppData.Instance.ActiveGames.Sum(g => g.SizeGB);
             if (value < usedGB)
             {
                 DiskOverflowError = $"Неможливо встановити менше {usedGB:0.0} ГБ (вже зайнято)";

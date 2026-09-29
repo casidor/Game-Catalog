@@ -221,7 +221,7 @@ namespace Game_Catalog.ViewModels
             ValidateAllProperties();
             if (HasErrors) return;
 
-            var usedGB = AppData.Instance.Games
+            var usedGB = AppData.Instance.ActiveGames
                 .Where(g => g != _editingGame)
                 .Sum(g => g.SizeGB);
             var capacity = SettingsService.Current.DiskCapacityGB;
