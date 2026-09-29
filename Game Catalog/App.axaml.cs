@@ -29,7 +29,7 @@ namespace Game_Catalog
                         ? ThemeVariant.Light
                         : ThemeVariant.Dark;
 
-                if (SettingsService.Current.IsFirstRun && !File.Exists(DataService.DefaultPath))
+                if (SettingsService.Current.IsFirstRun && !File.Exists(DatabaseService.DefaultPath))
                 {
                     var onboarding = new OnboardingWindow();
                     desktop.MainWindow = onboarding;

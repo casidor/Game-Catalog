@@ -3,6 +3,7 @@ using Avalonia.Controls;
 using Avalonia.Interactivity;
 using Avalonia.Markup.Xaml;
 using Game_Catalog.Models;
+using Game_Catalog.Services;
 using Game_Catalog.ViewModels;
 using System.Linq;
 using System.Threading.Tasks;
@@ -31,6 +32,9 @@ public partial class StudioDetailsView : UserControl
             detailVm.Studio.Country = vm.Country;
             detailVm.Studio.FoundationYear = vm.FoundationYear;
             detailVm.Studio.MainGenre = vm.MainGenre;
+
+            DatabaseService.UpdateStudio(detailVm.Studio);
+
             var index = AppData.Instance.Studios.IndexOf(detailVm.Studio);
             if (index >= 0)
                 AppData.Instance.Studios[index] = detailVm.Studio;
@@ -47,21 +51,6 @@ public partial class StudioDetailsView : UserControl
 
     private async Task DeleteStudioAsync(StudioDetailsViewModel detailVm, Window parent)
     {
-        var gamesCount = AppData.Instance.Games
-            .Count(g => g.Developer?.Id == detailVm.Studio.Id);
-        var archivedCount = AppData.Instance.ArchivedGames
-            .Count(g => g.Developer?.Id == detailVm.Studio.Id);
-        var total = gamesCount + archivedCount;
-
-        if (total > 0)
-        {
-            await ConfirmationWindow.ShowAlertAsync(parent,
-                "Неможливо видалити студію",
-                $"Студія «{detailVm.Name}» має {total} {(total == 1 ? "гру" : "ігор")} у бібліотеці або архіві.\n" +
-                "Спочатку видаліть або перепризначте ці ігри.");
-            return;
-        }
-
         var confirmed = await ConfirmationWindow.ShowAsync(
             parent,
             title: "Видалення студії",
@@ -70,6 +59,16 @@ public partial class StudioDetailsView : UserControl
             cancelText: "Скасувати");
 
         if (!confirmed) return;
+
+        if (!DatabaseService.DeleteStudio(detailVm.Studio.Id))
+        {
+            await ConfirmationWindow.ShowAlertAsync(parent,
+                "Неможливо видалити студію",
+                $"Студія «{detailVm.Name}» має ігри у бібліотеці або архіві.\n" +
+                "Спочатку видаліть або перепризначте ці ігри.");
+            return;
+        }
+
         AppData.Instance.Studios.Remove(detailVm.Studio);
         detailVm.GoBackCommand.Execute(null);
     }

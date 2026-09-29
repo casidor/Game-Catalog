@@ -25,11 +25,12 @@ namespace Game_Catalog.Models
         /// Collection of all game development studios.
         /// </summary>
         public ObservableCollection<Studio> Studios { get; } = new();
-
+        
+        
         /// <summary>
-        /// Collection of archived games.
+        /// Collection of all play sessions.
         /// </summary>
-        public ObservableCollection<Game> ArchivedGames { get; } = new();
+        public ObservableCollection<PlaySession> Sessions { get; } = new();
 
         private AppData() { }
     }

@@ -54,9 +54,9 @@ public partial class AddGameWindow : Window
         if (studioVm.Confirmed)
         {
             var studio = studioVm.BuildStudio();
+            DatabaseService.InsertStudio(studio);
             AppData.Instance.Studios.Add(studio);
             vm.SelectedStudio = studio;
-            vm.SuggestedDeveloperNames.Remove(devName);
         }
     }
     private async void OnAddStudioClick(object sender, RoutedEventArgs e)
@@ -70,6 +70,7 @@ public partial class AddGameWindow : Window
         if (studioVm.Confirmed)
         {
             var studio = studioVm.BuildStudio();
+            DatabaseService.InsertStudio(studio);
             AppData.Instance.Studios.Add(studio);
             vm.SelectedStudio = studio;
         }

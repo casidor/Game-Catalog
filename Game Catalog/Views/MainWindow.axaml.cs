@@ -2,6 +2,7 @@ using Avalonia.Controls;
 using Avalonia.Input;
 using Avalonia.Interactivity;
 using Avalonia.Platform.Storage;
+using Game_Catalog.Models;
 using Game_Catalog.Services;
 using System.IO;
 using System.Threading.Tasks;
@@ -28,19 +29,24 @@ namespace Game_Catalog.Views
         {
             base.OnLoaded(e);
 
-            DataService.SaveFailed += OnDataSaveFailed;
             SettingsService.SaveFailed += OnSettingsSaveFailed;
-            if (!SettingsService.LoadSucceeded && File.Exists(DataService.DefaultPath))
+            if (!SettingsService.LoadSucceeded && File.Exists(DatabaseService.DefaultPath))
                 _ = ConfirmationWindow.ShowAlertAsync(this,
                     "Помилка налаштувань",
                     "Файл налаштувань пошкоджений або відсутній. Застосовано стандартні налаштування.");
-            var loaded = DataService.LoadDefault();
-            if (!loaded)
-                _ = ConfirmationWindow.ShowAlertAsync(this,
-                    "Помилка завантаження",
-                    "Файл каталогу пошкоджений або недоступний.\nКаталог завантажено порожнім.");
 
-            DataService.EnableAutoSave();
+            DatabaseService.Initialize();
+
+            var studios = DatabaseService.GetStudios();
+            foreach (var studio in studios)
+                AppData.Instance.Studios.Add(studio);
+
+            var games = DatabaseService.GetGames(studios);
+            foreach (var game in games)
+                AppData.Instance.Games.Add(game);
+
+            foreach (var session in DatabaseService.GetSessions(games))
+                AppData.Instance.Sessions.Add(session);
         }
 
         /// <summary>Unsubscribes from service events when the window is closed.</summary>

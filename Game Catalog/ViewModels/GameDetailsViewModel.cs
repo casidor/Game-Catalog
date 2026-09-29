@@ -27,7 +27,7 @@ namespace Game_Catalog.ViewModels
         /// <summary>
         /// Indicates whether the game is in the archive.
         /// </summary>
-        public bool IsArchived { get; }
+        public bool IsArchived => Game.IsArchived;
 
         /// <summary> Game title. </summary>
         public string Title => Game.Title;
@@ -85,10 +85,9 @@ namespace Game_Catalog.ViewModels
         /// <summary>Formatted disk size string, or "Невідомо" if size is not set.</summary>
         public string DisplaySizeGB => Game.SizeGB == 0 ? "Невідомо" : $"{Game.SizeGB} ГБ";
 
-        public GameDetailsViewModel(Game game, bool isArchived = false)
+        public GameDetailsViewModel(Game game)
         {
             Game = game;
-            IsArchived = isArchived;
         }
 
         /// <summary>

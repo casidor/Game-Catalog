@@ -3,6 +3,7 @@ using Avalonia.Controls;
 using Avalonia.Interactivity;
 using Avalonia.Markup.Xaml;
 using Game_Catalog.Models;
+using Game_Catalog.Services;
 using Game_Catalog.ViewModels;
 
 namespace Game_Catalog.Views;
@@ -22,7 +23,11 @@ public partial class StudioView : UserControl
         await window.ShowDialog(parentWindow!);
 
         if (vm.Confirmed)
-            AppData.Instance.Studios.Add(vm.BuildStudio());
+        {
+            var studio = vm.BuildStudio();
+            DatabaseService.InsertStudio(studio);
+            AppData.Instance.Studios.Add(studio);
+        }
     }
     private void OnSelectionChanged(object sender, SelectionChangedEventArgs e)
     {

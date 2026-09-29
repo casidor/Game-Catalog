@@ -30,8 +30,12 @@ namespace Game_Catalog.ViewModels
         /// <summary> Selected status filter. Null means no filter applied. </summary>
         [ObservableProperty] private GameStatus? _selectedStatusFilter;
 
+        protected abstract bool ArchivedFilter { get; }
+        private IEnumerable<Game> RelevantGames =>
+            SourceGames.Where(g => g.IsArchived == ArchivedFilter);
+
         /// <summary> Filtered and searched game list based on active criteria. </summary>
-        public IEnumerable<Game> FilteredGames => SourceGames
+        public IEnumerable<Game> FilteredGames => RelevantGames
             .Where(g => string.IsNullOrWhiteSpace(SearchText) ||
             g.Title.Contains(SearchText, StringComparison.OrdinalIgnoreCase))
             .Where(g => SelectedGenre == null ||
@@ -44,7 +48,7 @@ namespace Game_Catalog.ViewModels
 
         /// <summary> Distinct developers derived from the source collection. </summary>
         public IEnumerable<Studio?> AvailableDevelopers =>
-            new Studio?[] { null }.Concat(SourceGames
+            new Studio?[] { null }.Concat(RelevantGames
                 .Select(g => g.Developer)
                 .Where(d => d != null)
                 .DistinctBy(d => d!.Id)
@@ -52,14 +56,14 @@ namespace Game_Catalog.ViewModels
 
         /// <summary> Distinct genres derived from the source collection. </summary>
         public IEnumerable<string?> AvailableGenres => new string?[] { null }.Concat(
-            SourceGames
+            RelevantGames
             .SelectMany(g => g.Genre.Split(',', StringSplitOptions.TrimEntries | StringSplitOptions.RemoveEmptyEntries))
             .Distinct()
             .OrderBy(g => g));
 
         /// <summary> Distinct platforms derived from the source collection. </summary>
         public IEnumerable<string?> AvailablePlatforms => new string?[] { null }.Concat(
-            SourceGames
+            RelevantGames
             .SelectMany(g => g.Platform.Split(',', StringSplitOptions.TrimEntries | StringSplitOptions.RemoveEmptyEntries))
             .Distinct()
             .OrderBy(p => p));
@@ -81,7 +85,7 @@ namespace Game_Catalog.ViewModels
         [ObservableProperty] private bool _isFiltersVisible;
 
         /// <summary> Indicates whether the current filter criteria result in an empty game list. </summary>
-        public bool IsFilteredEmpty => SourceGames.Any() && !FilteredGames.Any();
+        public bool IsFilteredEmpty => RelevantGames.Any() && !FilteredGames.Any();
         [RelayCommand]
         private void ToggleFilters() => IsFiltersVisible = !IsFiltersVisible;
 

@@ -3,6 +3,7 @@ using Avalonia.Controls;
 using Avalonia.Interactivity;
 using Avalonia.Markup.Xaml;
 using Game_Catalog.Models;
+using Game_Catalog.Services;
 using Game_Catalog.ViewModels;
 using System.Threading.Tasks;
 
@@ -40,6 +41,8 @@ public partial class GameDetailsView : UserControl
             detailVm.Game.Description = vm.Description;
             detailVm.Game.CoverImagePath = vm.CoverImagePath;
 
+            DatabaseService.UpdateGame(detailVm.Game);
+
             var index = AppData.Instance.Games.IndexOf(detailVm.Game);
             if (index >= 0)
                 AppData.Instance.Games[index] = detailVm.Game;
@@ -52,10 +55,17 @@ public partial class GameDetailsView : UserControl
     private void OnArchiveClick(object sender, RoutedEventArgs e)
     {
         if (DataContext is not GameDetailsViewModel detailVm) return;
-        AppData.Instance.Games.Remove(detailVm.Game);
-        AppData.Instance.ArchivedGames.Add(detailVm.Game);
+
+        detailVm.Game.IsArchived = true;
+        DatabaseService.UpdateGame(detailVm.Game);
+
+        var index = AppData.Instance.Games.IndexOf(detailVm.Game);
+        if (index >= 0)
+            AppData.Instance.Games[index] = detailVm.Game;
+
         detailVm.GoBackCommand.Execute(null);
     }
+
 
     /// <summary>Shows a confirmation dialog and permanently deletes the game if confirmed.</summary>
     private void OnDeleteClick(object sender, RoutedEventArgs e)
@@ -76,10 +86,9 @@ public partial class GameDetailsView : UserControl
             cancelText: "Скасувати");
 
         if (!confirmed) return;
-        if (detailVm.IsArchived)
-            AppData.Instance.ArchivedGames.Remove(detailVm.Game);
-        else
-            AppData.Instance.Games.Remove(detailVm.Game);
+
+        DatabaseService.DeleteGame(detailVm.Game.Id);
+        AppData.Instance.Games.Remove(detailVm.Game);
         detailVm.GoBackCommand.Execute(null);
     }
 
@@ -88,8 +97,13 @@ public partial class GameDetailsView : UserControl
     {
         if (DataContext is not GameDetailsViewModel detailVm) return;
 
-        AppData.Instance.ArchivedGames.Remove(detailVm.Game);
-        AppData.Instance.Games.Add(detailVm.Game);
+        detailVm.Game.IsArchived = false;
+        DatabaseService.UpdateGame(detailVm.Game);
+
+        var index = AppData.Instance.Games.IndexOf(detailVm.Game);
+        if (index >= 0)
+            AppData.Instance.Games[index] = detailVm.Game;
+
         detailVm.GoBackCommand.Execute(null);
     }
 }

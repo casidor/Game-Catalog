@@ -3,6 +3,7 @@ using CommunityToolkit.Mvvm.Input;
 using Game_Catalog.Models;
 using System;
 using System.Collections.ObjectModel;
+using System.Linq;
 
 namespace Game_Catalog.ViewModels
 {
@@ -10,13 +11,14 @@ namespace Game_Catalog.ViewModels
     public partial class ArchiveViewModel : FilterableGameViewModel
     {
         /// <summary> Source collection for the filter base class. </summary>
-        protected override ObservableCollection<Game> SourceGames => AppData.Instance.ArchivedGames;
+        protected override ObservableCollection<Game> SourceGames => AppData.Instance.Games;
+        protected override bool ArchivedFilter => true;
 
         /// <summary> Currently selected archived game. </summary>
         [ObservableProperty] private Game? _selectedGame;
 
         /// <summary> Indicates whether the archive is empty. </summary>
-        public bool IsEmpty => AppData.Instance.ArchivedGames.Count == 0;
+        public bool IsEmpty => !AppData.Instance.Games.Any(g => g.IsArchived);
 
         /// <summary> Raised when the user selects a game to view details. </summary>
         public event Action<Game>? GameSelected;
@@ -25,7 +27,7 @@ namespace Game_Catalog.ViewModels
         public ArchiveViewModel()
         {
             InitializeCollection();
-            AppData.Instance.ArchivedGames.CollectionChanged += (_, _) => OnPropertyChanged(nameof(IsEmpty));
+            AppData.Instance.Games.CollectionChanged += (_, _) => OnPropertyChanged(nameof(IsEmpty));
         }
 
         /// <summary> Navigates to the game detail page. </summary>

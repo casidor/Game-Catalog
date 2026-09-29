@@ -14,6 +14,7 @@ namespace Game_Catalog.ViewModels
     {
         /// <summary> Source collection for the filter base class. </summary>
         protected override ObservableCollection<Game> SourceGames => AppData.Instance.Games;
+        protected override bool ArchivedFilter => false;
 
         /// <summary> Collection of available studios for game assignment. </summary>
         public ObservableCollection<Studio> Studios => AppData.Instance.Studios;
@@ -25,7 +26,7 @@ namespace Game_Catalog.ViewModels
         public event Action<Game>? GameSelected;
 
         /// <summary>Indicates whether the game library is empty.</summary>
-        public bool IsEmpty => AppData.Instance.Games.Count == 0;
+        public bool IsEmpty => !AppData.Instance.Games.Any(g => !g.IsArchived);
 
         /// <summary>Available view modes for the library.</summary>
         public string[] ViewModes { get; } = { "Сітка", "Список" };
