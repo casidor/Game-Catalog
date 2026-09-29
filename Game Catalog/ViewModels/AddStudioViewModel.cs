@@ -55,6 +55,15 @@ namespace Game_Catalog.ViewModels
         private string _mainGenre = string.Empty;
 
         /// <summary>
+        /// Website URL of the studio, entered by the user.
+        /// </summary>
+        [MaxLength(200, ErrorMessage = "Адреса сайту не може перевищувати 200 символів")]
+        [NotWhiteSpace(ErrorMessage = "Адреса сайту не може складатися лише з пробілів")]
+        [NotifyDataErrorInfo]
+        [ObservableProperty]
+        private string _website = string.Empty;
+
+        /// <summary>
         /// Indicates whether the user confirmed the dialog.
         /// </summary>
         public bool Confirmed { get; private set; }
@@ -85,7 +94,8 @@ namespace Game_Catalog.ViewModels
                 Name = this.Name,
                 Country = this.Country,
                 FoundationYear = this.FoundationYear,
-                MainGenre = this.MainGenre
+                MainGenre = this.MainGenre,
+                Website = this.Website
             };
         }
 
@@ -101,6 +111,7 @@ namespace Game_Catalog.ViewModels
             Country = studio.Country;
             FoundationYear = studio.FoundationYear;
             MainGenre = studio.MainGenre;
+            Website = studio.Website;
         }
 
         /// <summary>

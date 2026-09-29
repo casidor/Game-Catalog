@@ -42,6 +42,9 @@ namespace Game_Catalog.ViewModels
         /// <summary>Foundation year or "Невідомо" if the value is zero.</summary>
         public string DisplayFoundationYear => Studio.FoundationYear == 0 ? "Невідомо" : Studio.FoundationYear.ToString();
 
+        /// <summary>Website URL or "Невідомо" if not specified.</summary>
+        public string DisplayWebsite => string.IsNullOrWhiteSpace(Studio.Website) ? "Невідомо" : Studio.Website;
+
         /// <summary> Games developed by this studio. </summary>
         public IEnumerable<Game> StudioGames =>
             AppData.Instance.Games.Where(g => g.Developer?.Id == Studio.Id);
@@ -68,6 +71,7 @@ namespace Game_Catalog.ViewModels
             OnPropertyChanged(nameof(DisplayCountry));
             OnPropertyChanged(nameof(DisplayMainGenre));
             OnPropertyChanged(nameof(DisplayFoundationYear));
+            OnPropertyChanged(nameof(DisplayWebsite));
         }
 
         /// <summary>

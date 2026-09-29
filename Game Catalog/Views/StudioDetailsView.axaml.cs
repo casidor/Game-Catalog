@@ -32,6 +32,7 @@ public partial class StudioDetailsView : UserControl
             detailVm.Studio.Country = vm.Country;
             detailVm.Studio.FoundationYear = vm.FoundationYear;
             detailVm.Studio.MainGenre = vm.MainGenre;
+            detailVm.Studio.Website = vm.Website;
 
             DatabaseService.UpdateStudio(detailVm.Studio);
 

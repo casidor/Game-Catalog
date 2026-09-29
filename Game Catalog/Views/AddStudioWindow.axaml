@@ -31,6 +31,11 @@
 		<TextBox Text="{Binding MainGenre}"
 				 PlaceholderText="Введіть жанр студії..."/>
 
+        <!-- Website -->
+        <TextBlock Text="Сайт студії"/>
+        <TextBox Text="{Binding Website}"
+         PlaceholderText="https://..."/>
+
 		<!-- Buttons -->
 		<StackPanel Orientation="Horizontal"
 					Spacing="8"
