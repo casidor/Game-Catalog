@@ -1,4 +1,6 @@
-﻿using CommunityToolkit.Mvvm.ComponentModel;
+﻿using Avalonia;
+using Avalonia.Controls.ApplicationLifetimes;
+using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using Game_Catalog.Models;
 using System;
@@ -7,6 +9,7 @@ using System.Linq;
 using System.Net.NetworkInformation;
 using System.Runtime.InteropServices;
 using System.Text;
+using System.Threading.Tasks;
 
 namespace Game_Catalog.ViewModels
 {
@@ -52,6 +55,9 @@ namespace Game_Catalog.ViewModels
         /// <summary> Indicates whether this studio has any games in the library. </summary>
         public bool HasGames => StudioGames.Any();
 
+        /// <summary> Indicates whether this studio has a website specified. </summary>
+        public bool HasWebsite => !string.IsNullOrWhiteSpace(Studio.Website);
+
         public StudioDetailsViewModel(Studio studio)
         {
             Studio = studio;
@@ -72,8 +78,30 @@ namespace Game_Catalog.ViewModels
             OnPropertyChanged(nameof(DisplayMainGenre));
             OnPropertyChanged(nameof(DisplayFoundationYear));
             OnPropertyChanged(nameof(DisplayWebsite));
+            OnPropertyChanged(nameof(HasWebsite));
         }
 
+        /// <summary>
+        /// Opens the studio's website in the default web browser if a valid URL is provided.
+        /// </summary>
+        [RelayCommand]
+        private async Task OpenWebsite()
+        {
+            var url = Studio.Website?.Trim();
+            if (string.IsNullOrEmpty(url)) return;
+
+            if (!url.StartsWith("http://", StringComparison.OrdinalIgnoreCase) &&
+                !url.StartsWith("https://", StringComparison.OrdinalIgnoreCase))
+                url = "https://" + url;
+
+            if (!Uri.TryCreate(url, UriKind.Absolute, out var uri)) return;
+
+            if (Application.Current?.ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop
+                && desktop.MainWindow is { } window)
+            {
+                await window.Launcher.LaunchUriAsync(uri);
+            }
+        }
         /// <summary>
         /// Navigates back to the previous page.
         /// </summary>

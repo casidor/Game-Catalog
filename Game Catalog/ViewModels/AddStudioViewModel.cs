@@ -59,6 +59,7 @@ namespace Game_Catalog.ViewModels
         /// </summary>
         [MaxLength(200, ErrorMessage = "Адреса сайту не може перевищувати 200 символів")]
         [NotWhiteSpace(ErrorMessage = "Адреса сайту не може складатися лише з пробілів")]
+        [WebsiteUrl]
         [NotifyDataErrorInfo]
         [ObservableProperty]
         private string _website = string.Empty;
