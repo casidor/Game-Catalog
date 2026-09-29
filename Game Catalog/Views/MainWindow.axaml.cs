@@ -53,19 +53,7 @@ namespace Game_Catalog.Views
         protected override void OnUnloaded(RoutedEventArgs e)
         {
             base.OnUnloaded(e);
-            DataService.SaveFailed -= OnDataSaveFailed;
             SettingsService.SaveFailed -= OnSettingsSaveFailed;
-        }
-
-        /// <summary>Displays an alert when a catalog save operation fails.</summary>
-        private async void OnDataSaveFailed(string message)
-        {
-            if (_saveErrorShown) return;
-            _saveErrorShown = true;
-            await ConfirmationWindow.ShowAlertAsync(this,
-                "Помилка збереження",
-                $"Не вдалося зберегти дані каталогу.\n{message}");
-            _saveErrorShown = false;
         }
 
         /// <summary>Displays an alert when a settings save operation fails.</summary>
