@@ -4,6 +4,7 @@ using Avalonia.Interactivity;
 using Avalonia.Platform.Storage;
 using Game_Catalog.Models;
 using Game_Catalog.Services;
+using System;
 using System.IO;
 using System.Threading.Tasks;
 
@@ -25,7 +26,7 @@ namespace Game_Catalog.Views
         }
 
         /// <summary>Loads saved data and enables auto-save when the window first appears.</summary>
-        protected override void OnLoaded(RoutedEventArgs e)
+        protected override async void OnLoaded(RoutedEventArgs e)
         {
             base.OnLoaded(e);
 
@@ -35,6 +36,25 @@ namespace Game_Catalog.Views
                     "Помилка налаштувань",
                     "Файл налаштувань пошкоджений або відсутній. Застосовано стандартні налаштування.");
 
+            try
+            {
+                LoadData();
+            }
+            catch (Exception ex)
+            {
+                await ConfirmationWindow.ShowAlertAsync(this,
+                    "Помилка бази даних",
+                    "Не вдалося ініціалізувати або прочитати базу даних. " +
+                    "Застосунок буде закрито.\n\n" +
+                    $"Причина: {ex.Message}\n\n" 
+                    //+
+                    //$"Файл бази: {DatabaseService.DefaultPath}"
+                    );
+                Close();
+            }
+        }
+        private static void LoadData()
+        {
             DatabaseService.Initialize();
 
             var studios = DatabaseService.GetStudios();

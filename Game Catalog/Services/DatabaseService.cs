@@ -19,27 +19,47 @@ namespace Game_Catalog.Services
         private static string ConnectionString => $"Data Source={DefaultPath}";
 
         /// <summary> Creates the database file and schema on first run; otherwise does nothing. </summary>
+        /// <summary> Creates the database file and schema on first run; otherwise does nothing. </summary>
         public static void Initialize()
         {
             bool isNewDatabase = !File.Exists(DefaultPath);
-
             Directory.CreateDirectory(Path.GetDirectoryName(DefaultPath)!);
 
-            using var connection = new SqliteConnection(ConnectionString);
-            connection.Open();
-
-            using var pragmaCmd = connection.CreateCommand();
-            pragmaCmd.CommandText = "PRAGMA foreign_keys = ON;";
-            pragmaCmd.ExecuteNonQuery();
-
-            if (isNewDatabase)
+            try
             {
-                string schemaPath = Path.Combine(AppContext.BaseDirectory, "Data", "schema.sql");
-                string schemaSql = File.ReadAllText(schemaPath);
+                using (var connection = new SqliteConnection(ConnectionString))
+                {
+                    connection.Open();
 
-                using var schemaCmd = connection.CreateCommand();
-                schemaCmd.CommandText = schemaSql;
-                schemaCmd.ExecuteNonQuery();
+                    using (var pragmaCmd = connection.CreateCommand())
+                    {
+                        pragmaCmd.CommandText = "PRAGMA foreign_keys = ON;";
+                        pragmaCmd.ExecuteNonQuery();
+                    }
+                    if (isNewDatabase)
+                    {
+                        string schemaPath = Path.Combine(AppContext.BaseDirectory, "Data", "schema.sql");
+                        if (!File.Exists(schemaPath))
+                            throw new FileNotFoundException("Не знайдено файл схеми бази даних.", schemaPath);
+
+                        string schemaSql = File.ReadAllText(schemaPath);
+                        using var transaction = connection.BeginTransaction();
+                        using var schemaCmd = connection.CreateCommand();
+                        schemaCmd.Transaction = transaction;
+                        schemaCmd.CommandText = schemaSql;
+                        schemaCmd.ExecuteNonQuery();
+                        transaction.Commit();
+                    }
+                }
+            }
+            catch
+            {
+                if (isNewDatabase)
+                {
+                    SqliteConnection.ClearAllPools();
+                    try { File.Delete(DefaultPath); } catch { }
+                }
+                throw;
             }
         }
 
