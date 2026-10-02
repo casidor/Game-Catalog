@@ -21,6 +21,9 @@ namespace Game_Catalog.Services
         private static DatabaseException Translate(SqliteException ex, string action) =>
         ex.SqliteErrorCode switch
         {
+            19 when ex.SqliteExtendedErrorCode is 2067 or 1555 
+               => new(DatabaseErrorKind.Duplicate,
+                      $"{action}: такий запис уже існує.", ex),
             19 => new(DatabaseErrorKind.Constraint,
                       $"{action}: порушено обмеження бази даних.", ex),
             5 or 6 => new(DatabaseErrorKind.Unavailable,

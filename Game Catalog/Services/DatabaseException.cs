@@ -2,7 +2,7 @@
 
 namespace Game_Catalog.Services
 {
-    public enum DatabaseErrorKind { Constraint, Unavailable, Unknown }
+    public enum DatabaseErrorKind { Constraint, Duplicate, Unavailable, Unknown }
 
     /// <summary> Represents an exception that occurs during database operations, providing information about the type of error encountered./// </summary>
     public class DatabaseException : Exception
