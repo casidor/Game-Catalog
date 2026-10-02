@@ -42,14 +42,8 @@ namespace Game_Catalog.Views
             }
             catch (Exception ex)
             {
-                await ConfirmationWindow.ShowAlertAsync(this,
-                    "Помилка бази даних",
-                    "Не вдалося ініціалізувати або прочитати базу даних. " +
-                    "Застосунок буде закрито.\n\n" +
-                    $"Причина: {ex.Message}\n\n" 
-                    //+
-                    //$"Файл бази: {DatabaseService.DefaultPath}"
-                    );
+                await ConfirmationWindow.ShowErrorAsync(this, "Помилка бази даних",
+                    "Не вдалося ініціалізувати або прочитати базу даних. Застосунок буде закрито.", ex);
                 Close();
             }
         }

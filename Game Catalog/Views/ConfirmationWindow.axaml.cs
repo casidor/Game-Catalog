@@ -61,4 +61,18 @@ public partial class ConfirmationWindow : Window
         var window = new ConfirmationWindow { DataContext = vm };
         await window.ShowDialog(parent);
     }
+
+    /// <summary>
+    /// Shows a single-button alert dialog with an OK button and displays the exception details.
+    /// </summary>
+    /// <param name="parent"></param>
+    /// <param name="title"></param>
+    /// <param name="message"></param>
+    /// <param name="ex"></param>
+    /// <returns></returns>
+    public static Task ShowErrorAsync(Window parent, string title, string message, Exception ex)
+    {
+        var details = ex.InnerException?.Message ?? ex.Message;
+        return ShowAlertAsync(parent, title, $"{message}\n\nПричина: {details}");
+    }
 }

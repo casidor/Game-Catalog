@@ -36,4 +36,12 @@
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
   </ItemGroup>
+
+  <ItemGroup>
+    <EditorConfigFiles Remove="C:\Users\Roman\source\repos\Game Catalog\Game Catalog\.editorconfig" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Include="C:\Users\Roman\source\repos\Game Catalog\Game Catalog\.editorconfig" />
+  </ItemGroup>
 </Project>

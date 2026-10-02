@@ -20,8 +20,7 @@ namespace Game_Catalog.Models
         /// <summary> Identifier of the developer studio, used for persistence. </summary>
         public int DeveloperId { get; set; }
 
-        /// <summary> Reference to the developer studio. Excluded from JSON serialization. </summary>
-        [JsonIgnore]
+        /// <summary> Reference to the developer studio. </summary>
         public Studio? Developer { get; set; }
 
         /// <summary> Identifier of the base game, if this game is a DLC. Null for standalone games. </summary>

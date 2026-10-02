@@ -18,7 +18,33 @@ namespace Game_Catalog.Services
 
         private static string ConnectionString => $"Data Source={DefaultPath}";
 
-        /// <summary> Creates the database file and schema on first run; otherwise does nothing. </summary>
+        private static DatabaseException Translate(SqliteException ex, string action) =>
+        ex.SqliteErrorCode switch
+        {
+            19 => new(DatabaseErrorKind.Constraint,
+                      $"{action}: порушено обмеження бази даних.", ex),
+            5 or 6 => new(DatabaseErrorKind.Unavailable,
+                      $"{action}: база даних зайнята, спробуйте ще раз.", ex),
+            8 => new(DatabaseErrorKind.Unavailable,
+                      $"{action}: база даних доступна лише для читання.", ex),
+            14 => new(DatabaseErrorKind.Unavailable,
+                      $"{action}: не вдається відкрити файл бази даних.", ex),
+            _ => new(DatabaseErrorKind.Unknown,
+                      $"{action}: помилка бази даних (код {ex.SqliteErrorCode}).", ex)
+        };
+
+        private static void Execute(string action, Action work)
+        {
+            try { work(); }
+            catch (SqliteException ex) { throw Translate(ex, action); }
+        }
+
+        private static T Execute<T>(string action, Func<T> work)
+        {
+            try { return work(); }
+            catch (SqliteException ex) { throw Translate(ex, action); }
+        }
+
         /// <summary> Creates the database file and schema on first run; otherwise does nothing. </summary>
         public static void Initialize()
         {
@@ -52,13 +78,15 @@ namespace Game_Catalog.Services
                     }
                 }
             }
-            catch
+            catch (Exception ex)
             {
                 if (isNewDatabase)
                 {
                     SqliteConnection.ClearAllPools();
                     try { File.Delete(DefaultPath); } catch { }
                 }
+                if (ex is SqliteException se)
+                    throw Translate(se, "Не вдалося створити базу даних");
                 throw;
             }
         }
@@ -104,60 +132,63 @@ namespace Game_Catalog.Services
             return result;
         }
 
-        public static void InsertStudio(Studio studio)
-        {
-            using var connection = OpenConnection();
-            using var cmd = connection.CreateCommand();
-            cmd.CommandText = @"INSERT INTO Studio (name, country, foundation_year, main_genre, website)
+        public static void InsertStudio(Studio studio) =>
+            Execute("Не вдалося зберегти студію", () =>
+            {
+                using var connection = OpenConnection();
+                using var cmd = connection.CreateCommand();
+                cmd.CommandText = @"INSERT INTO Studio (name, country, foundation_year, main_genre, website)
                                  VALUES (@name, @country, @foundation_year, @main_genre, @website)";
 
-            cmd.Parameters.AddWithValue("@name", studio.Name);
-            cmd.Parameters.AddWithValue("@country", ToDb(studio.Country));
-            cmd.Parameters.AddWithValue("@foundation_year", studio.FoundationYear == 0 ? DBNull.Value : studio.FoundationYear);
-            cmd.Parameters.AddWithValue("@main_genre", ToDb(studio.MainGenre));
-            cmd.Parameters.AddWithValue("@website", ToDb(studio.Website));
-            cmd.ExecuteNonQuery();
+                cmd.Parameters.AddWithValue("@name", studio.Name);
+                cmd.Parameters.AddWithValue("@country", ToDb(studio.Country));
+                cmd.Parameters.AddWithValue("@foundation_year", studio.FoundationYear == 0 ? DBNull.Value : studio.FoundationYear);
+                cmd.Parameters.AddWithValue("@main_genre", ToDb(studio.MainGenre));
+                cmd.Parameters.AddWithValue("@website", ToDb(studio.Website));
+                cmd.ExecuteNonQuery();
 
-            cmd.Parameters.Clear();
-            cmd.CommandText = "SELECT last_insert_rowid()";
-            studio.Id = (int)(long)cmd.ExecuteScalar()!;
-        }
+                cmd.Parameters.Clear();
+                cmd.CommandText = "SELECT last_insert_rowid()";
+                studio.Id = (int)(long)cmd.ExecuteScalar()!;
+            });
 
-        public static void UpdateStudio(Studio studio)
-        {
-            using var connection = OpenConnection();
-            using var cmd = connection.CreateCommand();
-            cmd.CommandText = @"UPDATE Studio
+        public static void UpdateStudio(Studio studio) =>
+            Execute("Не вдалося оновити студію", () =>
+            {
+                using var connection = OpenConnection();
+                using var cmd = connection.CreateCommand();
+                cmd.CommandText = @"UPDATE Studio
                                  SET name = @name, country = @country, foundation_year = @foundation_year,
                                      main_genre = @main_genre, website = @website
                                  WHERE studio_id = @id";
 
-            cmd.Parameters.AddWithValue("@name", studio.Name);
-            cmd.Parameters.AddWithValue("@country", ToDb(studio.Country));
-            cmd.Parameters.AddWithValue("@foundation_year", studio.FoundationYear == 0 ? DBNull.Value : studio.FoundationYear);
-            cmd.Parameters.AddWithValue("@main_genre", ToDb(studio.MainGenre));
-            cmd.Parameters.AddWithValue("@website", ToDb(studio.Website));
-            cmd.Parameters.AddWithValue("@id", studio.Id);
-            cmd.ExecuteNonQuery();
-        }
+                cmd.Parameters.AddWithValue("@name", studio.Name);
+                cmd.Parameters.AddWithValue("@country", ToDb(studio.Country));
+                cmd.Parameters.AddWithValue("@foundation_year", studio.FoundationYear == 0 ? DBNull.Value : studio.FoundationYear);
+                cmd.Parameters.AddWithValue("@main_genre", ToDb(studio.MainGenre));
+                cmd.Parameters.AddWithValue("@website", ToDb(studio.Website));
+                cmd.Parameters.AddWithValue("@id", studio.Id);
+                cmd.ExecuteNonQuery();
+            });
 
         /// <summary> Returns false without throwing if the studio still has games referencing it (ON DELETE RESTRICT). </summary>
-        public static bool DeleteStudio(int studioId)
-        {
-            try
+        public static bool DeleteStudio(int studioId) =>
+            Execute("Не вдалося видалити студію", () =>
             {
-                using var connection = OpenConnection();
-                using var cmd = connection.CreateCommand();
-                cmd.CommandText = "DELETE FROM Studio WHERE studio_id = @id";
-                cmd.Parameters.AddWithValue("@id", studioId);
-                cmd.ExecuteNonQuery();
-                return true;
-            }
-            catch (SqliteException ex) when (ex.SqliteErrorCode == 19)
-            {
-                return false;
-            }
-        }
+                try
+                {
+                    using var connection = OpenConnection();
+                    using var cmd = connection.CreateCommand();
+                    cmd.CommandText = "DELETE FROM Studio WHERE studio_id = @id";
+                    cmd.Parameters.AddWithValue("@id", studioId);
+                    cmd.ExecuteNonQuery();
+                    return true;
+                }
+                catch (SqliteException ex) when (ex.SqliteErrorCode == 19)
+                {
+                    return false;
+                }
+            });
 
         #endregion
 
@@ -189,7 +220,7 @@ namespace Game_Catalog.Services
                     Platform = reader.IsDBNull(5) ? string.Empty : reader.GetString(5),
                     Description = reader.IsDBNull(6) ? string.Empty : reader.GetString(6),
                     ReleaseYear = reader.IsDBNull(7) ? 0 : reader.GetInt32(7),
-                    Status = Enum.Parse<GameStatus>(reader.GetString(8)),
+                    Status = Enum.TryParse<GameStatus>(reader.GetString(8), out var status) ? status : GameStatus.Planned,
                     SizeGB = reader.IsDBNull(9) ? 0 : reader.GetDouble(9),
                     PersonalRating = reader.GetInt32(10),
                     HoursPlayed = reader.GetDouble(11),
@@ -208,14 +239,15 @@ namespace Game_Catalog.Services
             return result;
         }
 
-        public static void InsertGame(Game game)
-        {
-            if (game.Developer != null)
-                game.DeveloperId = game.Developer.Id;
+        public static void InsertGame(Game game) =>
+            Execute("Не вдалося зберегти гру", () =>
+            {
+                if (game.Developer != null)
+                    game.DeveloperId = game.Developer.Id;
 
-            using var connection = OpenConnection();
-            using var cmd = connection.CreateCommand();
-            cmd.CommandText = @"INSERT INTO Game (developer_id, parent_game_id, title, genre, platform,
+                using var connection = OpenConnection();
+                using var cmd = connection.CreateCommand();
+                cmd.CommandText = @"INSERT INTO Game (developer_id, parent_game_id, title, genre, platform,
                                                    description, release_year, status, size_gb, personal_rating,
                                                    hours_played, cover_image_path, executable_path, icon_path,
                                                    added_at, is_archived)
@@ -224,23 +256,24 @@ namespace Game_Catalog.Services
                                          @hours_played, @cover_image_path, @executable_path, @icon_path,
                                          @added_at, @is_archived)";
 
-            AddGameParameters(cmd, game);
-            cmd.Parameters.AddWithValue("@added_at", game.AddedAt.ToString("yyyy-MM-dd HH:mm:ss"));
-            cmd.ExecuteNonQuery();
+                AddGameParameters(cmd, game);
+                cmd.Parameters.AddWithValue("@added_at", game.AddedAt.ToString("yyyy-MM-dd HH:mm:ss"));
+                cmd.ExecuteNonQuery();
 
-            cmd.Parameters.Clear();
-            cmd.CommandText = "SELECT last_insert_rowid()";
-            game.Id = (int)(long)cmd.ExecuteScalar()!;
-        }
+                cmd.Parameters.Clear();
+                cmd.CommandText = "SELECT last_insert_rowid()";
+                game.Id = (int)(long)cmd.ExecuteScalar()!;
+            });
 
-        public static void UpdateGame(Game game)
-        {
-            if (game.Developer != null)
-                game.DeveloperId = game.Developer.Id;
+        public static void UpdateGame(Game game) =>
+            Execute("Не вдалося оновити гру", () =>
+            {
+                if (game.Developer != null)
+                    game.DeveloperId = game.Developer.Id;
 
-            using var connection = OpenConnection();
-            using var cmd = connection.CreateCommand();
-            cmd.CommandText = @"UPDATE Game
+                using var connection = OpenConnection();
+                using var cmd = connection.CreateCommand();
+                cmd.CommandText = @"UPDATE Game
                                  SET developer_id = @developer_id, parent_game_id = @parent_game_id,
                                      title = @title, genre = @genre, platform = @platform,
                                      description = @description, release_year = @release_year,
@@ -250,19 +283,20 @@ namespace Game_Catalog.Services
                                      is_archived = @is_archived
                                  WHERE game_id = @id";
 
-            AddGameParameters(cmd, game);
-            cmd.Parameters.AddWithValue("@id", game.Id);
-            cmd.ExecuteNonQuery();
-        }
+                AddGameParameters(cmd, game);
+                cmd.Parameters.AddWithValue("@id", game.Id);
+                cmd.ExecuteNonQuery();
+            });
 
-        public static void DeleteGame(int gameId)
-        {
-            using var connection = OpenConnection();
-            using var cmd = connection.CreateCommand();
-            cmd.CommandText = "DELETE FROM Game WHERE game_id = @id";
-            cmd.Parameters.AddWithValue("@id", gameId);
-            cmd.ExecuteNonQuery();
-        }
+        public static void DeleteGame(int gameId) =>
+            Execute("Не вдалося видалити гру", () =>
+            {
+                using var connection = OpenConnection();
+                using var cmd = connection.CreateCommand();
+                cmd.CommandText = "DELETE FROM Game WHERE game_id = @id";
+                cmd.Parameters.AddWithValue("@id", gameId);
+                cmd.ExecuteNonQuery();
+            });
 
         private static void AddGameParameters(SqliteCommand cmd, Game game)
         {
@@ -306,7 +340,7 @@ namespace Game_Catalog.Services
                     GameId = reader.GetInt32(1),
                     StartTime = reader.GetDateTime(2),
                     EndTime = reader.IsDBNull(3) ? null : reader.GetDateTime(3),
-                    EntryMethod = Enum.Parse<EntryMethod>(reader.GetString(4)),
+                    EntryMethod = Enum.TryParse<EntryMethod>(reader.GetString(4), out var method) ? method : EntryMethod.Manual,
                     Note = reader.IsDBNull(5) ? string.Empty : reader.GetString(5)
                 };
 
@@ -318,49 +352,52 @@ namespace Game_Catalog.Services
             return result;
         }
 
-        public static void InsertSession(PlaySession session)
-        {
-            if (session.Game != null)
-                session.GameId = session.Game.Id;
+        public static void InsertSession(PlaySession session) =>
+            Execute("Не вдалося зберегти сесію", () =>
+            {
+                if (session.Game != null)
+                    session.GameId = session.Game.Id;
 
-            using var connection = OpenConnection();
-            using var cmd = connection.CreateCommand();
-            cmd.CommandText = @"INSERT INTO PlaySession (game_id, start_time, end_time, entry_method, note)
+                using var connection = OpenConnection();
+                using var cmd = connection.CreateCommand();
+                cmd.CommandText = @"INSERT INTO PlaySession (game_id, start_time, end_time, entry_method, note)
                                  VALUES (@game_id, @start_time, @end_time, @entry_method, @note)";
 
-            AddSessionParameters(cmd, session);
-            cmd.ExecuteNonQuery();
+                AddSessionParameters(cmd, session);
+                cmd.ExecuteNonQuery();
 
-            cmd.Parameters.Clear();
-            cmd.CommandText = "SELECT last_insert_rowid()";
-            session.Id = (int)(long)cmd.ExecuteScalar()!;
-        }
+                cmd.Parameters.Clear();
+                cmd.CommandText = "SELECT last_insert_rowid()";
+                session.Id = (int)(long)cmd.ExecuteScalar()!;
+            });
 
-        public static void UpdateSession(PlaySession session)
-        {
-            if (session.Game != null)
-                session.GameId = session.Game.Id;
+        public static void UpdateSession(PlaySession session) =>
+            Execute("Не вдалося оновити сесію", () =>
+            {
+                if (session.Game != null)
+                    session.GameId = session.Game.Id;
 
-            using var connection = OpenConnection();
-            using var cmd = connection.CreateCommand();
-            cmd.CommandText = @"UPDATE PlaySession
+                using var connection = OpenConnection();
+                using var cmd = connection.CreateCommand();
+                cmd.CommandText = @"UPDATE PlaySession
                                  SET game_id = @game_id, start_time = @start_time,
                                      end_time = @end_time, entry_method = @entry_method, note = @note
                                  WHERE play_session_id = @id";
 
-            AddSessionParameters(cmd, session);
-            cmd.Parameters.AddWithValue("@id", session.Id);
-            cmd.ExecuteNonQuery();
-        }
+                AddSessionParameters(cmd, session);
+                cmd.Parameters.AddWithValue("@id", session.Id);
+                cmd.ExecuteNonQuery();
+            });
 
-        public static void DeleteSession(int sessionId)
-        {
-            using var connection = OpenConnection();
-            using var cmd = connection.CreateCommand();
-            cmd.CommandText = "DELETE FROM PlaySession WHERE play_session_id = @id";
-            cmd.Parameters.AddWithValue("@id", sessionId);
-            cmd.ExecuteNonQuery();
-        }
+        public static void DeleteSession(int sessionId) =>
+            Execute("Не вдалося видалити сесію", () =>
+            {
+                using var connection = OpenConnection();
+                using var cmd = connection.CreateCommand();
+                cmd.CommandText = "DELETE FROM PlaySession WHERE play_session_id = @id";
+                cmd.Parameters.AddWithValue("@id", sessionId);
+                cmd.ExecuteNonQuery();
+            });
 
         private static void AddSessionParameters(SqliteCommand cmd, PlaySession session)
         {
