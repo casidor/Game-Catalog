@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Linq;
 using System.Text.Json.Serialization;
 
 namespace Game_Catalog.Models
@@ -62,12 +63,10 @@ namespace Game_Catalog.Models
         public GameStatus Status { get; set; } = GameStatus.Planned;
 
         private double _hoursPlayed;
-        /// <summary> Number of hours the user has played the game. </summary>
-        public double HoursPlayed
-        {
-            get => _hoursPlayed;
-            set => _hoursPlayed = Math.Max(0, value);
-        }
+        /// <summary> Total hours played, computed from this game's finished sessions. </summary>
+        public double HoursPlayed => AppData.Instance.Sessions
+            .Where(s => s.GameId == Id && s.Duration.HasValue)
+            .Sum(s => s.Duration!.Value.TotalHours);
 
         private int _personalRating = 5;
         /// <summary> Personal rating given by the user (1 to 10). </summary>
@@ -129,7 +128,6 @@ namespace Game_Catalog.Models
             Platform = other.Platform;
             SizeGB = other.SizeGB;
             Status = other.Status;
-            HoursPlayed = other.HoursPlayed;
             PersonalRating = other.PersonalRating;
             Description = other.Description;
             CoverImagePath = other.CoverImagePath;

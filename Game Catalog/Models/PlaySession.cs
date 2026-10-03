@@ -22,6 +22,9 @@ namespace Game_Catalog.Models
         /// <summary> Time the session ended. Null if the session is still ongoing. </summary>
         public DateTime? EndTime { get; set; }
 
+        /// <summary> Session duration. Null if the session is still ongoing. </summary>
+        public TimeSpan? Duration => EndTime.HasValue ? EndTime.Value - StartTime : null;
+
         /// <summary> How this session record was added — manually or detected automatically. </summary>
         public EntryMethod EntryMethod { get; set; } = EntryMethod.Manual;
 

@@ -205,10 +205,10 @@ namespace Game_Catalog.Services
             using var connection = OpenConnection();
             using var cmd = connection.CreateCommand();
             cmd.CommandText = @"SELECT game_id, developer_id, parent_game_id, title, genre, platform,
-                                        description, release_year, status, size_gb, personal_rating,
-                                        hours_played, cover_image_path, executable_path, icon_path,
-                                        added_at, is_archived
-                                 FROM Game";
+                                       description, release_year, status, size_gb, personal_rating,
+                                       cover_image_path, executable_path, icon_path,
+                                       added_at, is_archived
+                                FROM Game";
 
             using var reader = cmd.ExecuteReader();
             while (reader.Read())
@@ -226,12 +226,11 @@ namespace Game_Catalog.Services
                     Status = Enum.TryParse<GameStatus>(reader.GetString(8), out var status) ? status : GameStatus.Planned,
                     SizeGB = reader.IsDBNull(9) ? 0 : reader.GetDouble(9),
                     PersonalRating = reader.GetInt32(10),
-                    HoursPlayed = reader.GetDouble(11),
-                    CoverImagePath = reader.IsDBNull(12) ? string.Empty : reader.GetString(12),
-                    ExecutablePath = reader.IsDBNull(13) ? string.Empty : reader.GetString(13),
-                    IconPath = reader.IsDBNull(14) ? string.Empty : reader.GetString(14),
-                    AddedAt = reader.GetDateTime(15),
-                    IsArchived = reader.GetBoolean(16)
+                    CoverImagePath = reader.IsDBNull(11) ? string.Empty : reader.GetString(11),
+                    ExecutablePath = reader.IsDBNull(12) ? string.Empty : reader.GetString(12),
+                    IconPath = reader.IsDBNull(13) ? string.Empty : reader.GetString(13),
+                    AddedAt = reader.GetDateTime(14),
+                    IsArchived = reader.GetBoolean(15)
                 };
 
                 if (studioById.TryGetValue(game.DeveloperId, out var developer))
@@ -252,11 +251,11 @@ namespace Game_Catalog.Services
                 using var cmd = connection.CreateCommand();
                 cmd.CommandText = @"INSERT INTO Game (developer_id, parent_game_id, title, genre, platform,
                                                    description, release_year, status, size_gb, personal_rating,
-                                                   hours_played, cover_image_path, executable_path, icon_path,
+                                                   cover_image_path, executable_path, icon_path,
                                                    added_at, is_archived)
                                  VALUES (@developer_id, @parent_game_id, @title, @genre, @platform,
                                          @description, @release_year, @status, @size_gb, @personal_rating,
-                                         @hours_played, @cover_image_path, @executable_path, @icon_path,
+                                         @cover_image_path, @executable_path, @icon_path,
                                          @added_at, @is_archived)";
 
                 AddGameParameters(cmd, game);
@@ -281,7 +280,7 @@ namespace Game_Catalog.Services
                                      title = @title, genre = @genre, platform = @platform,
                                      description = @description, release_year = @release_year,
                                      status = @status, size_gb = @size_gb, personal_rating = @personal_rating,
-                                     hours_played = @hours_played, cover_image_path = @cover_image_path,
+                                     cover_image_path = @cover_image_path,
                                      executable_path = @executable_path, icon_path = @icon_path,
                                      is_archived = @is_archived
                                  WHERE game_id = @id";
@@ -323,7 +322,6 @@ namespace Game_Catalog.Services
             cmd.Parameters.AddWithValue("@status", game.Status.ToString());
             cmd.Parameters.AddWithValue("@size_gb", game.SizeGB == 0 ? DBNull.Value : game.SizeGB);
             cmd.Parameters.AddWithValue("@personal_rating", game.PersonalRating);
-            cmd.Parameters.AddWithValue("@hours_played", game.HoursPlayed);
             cmd.Parameters.AddWithValue("@cover_image_path", ToDb(game.CoverImagePath));
             cmd.Parameters.AddWithValue("@executable_path", ToDb(game.ExecutablePath));
             cmd.Parameters.AddWithValue("@icon_path", ToDb(game.IconPath));

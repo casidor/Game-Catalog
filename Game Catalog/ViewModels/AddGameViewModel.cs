@@ -86,14 +86,6 @@ namespace Game_Catalog.ViewModels
         private GameStatus _status = GameStatus.Planned;
 
         /// <summary>
-        /// Hours played entered by the user.
-        /// </summary>
-        [Range(0.0, 100000.0, ErrorMessage = "Кількість годин має бути від 0 до 100 000")]
-        [NotifyDataErrorInfo]
-        [ObservableProperty]
-        private double _hoursPlayed;
-
-        /// <summary>
         /// Personal rating entered by the user (1 to 10).
         /// </summary>
         [Range(1, 10, ErrorMessage = "Оцінка від 1 до 10")]
@@ -180,7 +172,6 @@ namespace Game_Catalog.ViewModels
             Platform = Platform,
             SizeGB = SizeGB,
             Status = Status,
-            HoursPlayed = HoursPlayed,
             PersonalRating = PersonalRating,
             Description = Description,
             CoverImagePath = CoverImagePath
@@ -205,7 +196,6 @@ namespace Game_Catalog.ViewModels
             Platform = game.Platform;
             SizeGB = game.SizeGB;
             Status = game.Status;
-            HoursPlayed = game.HoursPlayed;
             PersonalRating = game.PersonalRating;
             Description = game.Description;
             CoverImagePath = game.CoverImagePath;

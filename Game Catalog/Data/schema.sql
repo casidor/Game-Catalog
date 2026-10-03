@@ -22,7 +22,6 @@ CREATE TABLE Game (
     status            TEXT NOT NULL DEFAULT 'Planned',
     size_gb           REAL,
     personal_rating   INTEGER NOT NULL DEFAULT 5,
-    hours_played      REAL NOT NULL DEFAULT 0,
     cover_image_path  TEXT,
     executable_path   TEXT,
     icon_path         TEXT,
@@ -33,7 +32,6 @@ CREATE TABLE Game (
     CHECK (status IN ('Planned', 'Playing', 'Completed', 'Abandoned')),
     CHECK (personal_rating BETWEEN 1 AND 10),
     CHECK (size_gb IS NULL OR size_gb >= 0),
-    CHECK (hours_played >= 0),
     CHECK (is_archived IN (0, 1)),
     FOREIGN KEY (developer_id)   REFERENCES Studio(studio_id) ON DELETE RESTRICT ON UPDATE CASCADE,
     FOREIGN KEY (parent_game_id) REFERENCES Game(game_id)     ON DELETE CASCADE  ON UPDATE CASCADE

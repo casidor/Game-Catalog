@@ -65,6 +65,7 @@ namespace Game_Catalog.ViewModels
         public StatisticsViewModel()
         {
             AppData.Instance.Games.CollectionChanged += (_, _) => Refresh();
+            AppData.Instance.Sessions.CollectionChanged += (_, _) => Refresh();
             SettingsService.DiskCapacityChanged += () => OnPropertyChanged(nameof(DiskMax));
         }
 

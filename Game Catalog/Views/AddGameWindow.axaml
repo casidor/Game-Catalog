@@ -172,10 +172,6 @@
 						</ComboBox.ItemTemplate>
 					</ComboBox>
 
-					<TextBlock Text="Години в грі"/>
-					<NumericUpDown Value="{Binding HoursPlayed, Converter={x:Static conv:DecimalToDoubleConverter.Instance}}"
-								   Increment="0.5" FormatString="0.0"/>
-
 					<TextBlock Text="Особиста оцінка (1-10)"/>
 					<NumericUpDown Value="{Binding PersonalRating, Converter={x:Static conv:DecimalToIntConverter.Instance}}"
 								   Minimum="1" Maximum="10" FormatString="0"/>

@@ -37,7 +37,6 @@ public partial class GameDetailsView : UserControl
         candidate.Platform = vm.Platform;
         candidate.SizeGB = vm.SizeGB;
         candidate.Status = vm.Status;
-        candidate.HoursPlayed = vm.HoursPlayed;
         candidate.PersonalRating = vm.PersonalRating;
         candidate.Description = vm.Description;
         candidate.CoverImagePath = vm.CoverImagePath;
