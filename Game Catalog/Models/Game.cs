@@ -114,5 +114,25 @@ namespace Game_Catalog.Models
 
         /// <summary> Whether the user has archived this game. </summary>
         public bool IsArchived { get; set; }
+
+        /// <summary> Creates a shallow copy of the game (candidate for saving). </summary>
+        public Game Clone() => (Game)MemberwiseClone();
+
+        /// <summary> Applies the properties of another game to this game. </summary>
+        public void ApplyFrom(Game other)
+        {
+            Title = other.Title;
+            Developer = other.Developer;
+            DeveloperId = other.DeveloperId;
+            Genre = other.Genre;
+            ReleaseYear = other.ReleaseYear;
+            Platform = other.Platform;
+            SizeGB = other.SizeGB;
+            Status = other.Status;
+            HoursPlayed = other.HoursPlayed;
+            PersonalRating = other.PersonalRating;
+            Description = other.Description;
+            CoverImagePath = other.CoverImagePath;
+        }
     }
 }

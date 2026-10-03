@@ -21,7 +21,7 @@ namespace Game_Catalog.Services
         private static DatabaseException Translate(SqliteException ex, string action) =>
         ex.SqliteErrorCode switch
         {
-            19 when ex.SqliteExtendedErrorCode is 2067 or 1555 
+            19 when ex.SqliteExtendedErrorCode is 2067 or 1555
                => new(DatabaseErrorKind.Duplicate,
                       $"{action}: такий запис уже існує.", ex),
             19 => new(DatabaseErrorKind.Constraint,
@@ -291,6 +291,16 @@ namespace Game_Catalog.Services
                 cmd.ExecuteNonQuery();
             });
 
+        public static void SetArchived(int gameId, bool archived) =>
+            Execute("Не вдалося змінити архівацію гри", () =>
+            {
+                using var connection = OpenConnection();
+                using var cmd = connection.CreateCommand();
+                cmd.CommandText = "UPDATE Game SET is_archived = @archived WHERE game_id = @id";
+                cmd.Parameters.AddWithValue("@archived", archived ? 1 : 0);
+                cmd.Parameters.AddWithValue("@id", gameId);
+                cmd.ExecuteNonQuery();
+            });
         public static void DeleteGame(int gameId) =>
             Execute("Не вдалося видалити гру", () =>
             {

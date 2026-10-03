@@ -26,23 +26,43 @@ public partial class StudioDetailsView : UserControl
         var parentWindow = TopLevel.GetTopLevel(this) as Window;
         await window.ShowDialog(parentWindow!);
 
-        if (vm.Confirmed)
+        if (!vm.Confirmed) return;
+
+        var studio = detailVm.Studio;
+        var candidate = new Studio
         {
-            detailVm.Studio.Name = vm.Name;
-            detailVm.Studio.Country = vm.Country;
-            detailVm.Studio.FoundationYear = vm.FoundationYear;
-            detailVm.Studio.MainGenre = vm.MainGenre;
-            detailVm.Studio.Website = vm.Website;
+            Id = studio.Id,
+            Name = vm.Name,
+            Country = vm.Country,
+            FoundationYear = vm.FoundationYear,
+            MainGenre = vm.MainGenre,
+            Website = vm.Website
+        };
 
-            DatabaseService.UpdateStudio(detailVm.Studio);
-
-            var index = AppData.Instance.Studios.IndexOf(detailVm.Studio);
-            if (index >= 0)
-                AppData.Instance.Studios[index] = detailVm.Studio;
-
-            detailVm.RefreshStudio();
+        try
+        {
+            DatabaseService.UpdateStudio(candidate);
         }
+        catch (DatabaseException ex)
+        {
+            await ConfirmationWindow.ShowErrorAsync(parentWindow!,
+                "Помилка збереження студії", ex.Message, ex);
+            return;
+        }
+
+        studio.Name = candidate.Name;
+        studio.Country = candidate.Country;
+        studio.FoundationYear = candidate.FoundationYear;
+        studio.MainGenre = candidate.MainGenre;
+        studio.Website = candidate.Website;
+
+        var index = AppData.Instance.Studios.IndexOf(studio);
+        if (index >= 0)
+            AppData.Instance.Studios[index] = studio;
+
+        detailVm.RefreshStudio();
     }
+
     private void OnDeleteClick(object sender, RoutedEventArgs e)
     {
         if (DataContext is not StudioDetailsViewModel detailVm) return;

@@ -26,45 +26,44 @@ public partial class GameDetailsView : UserControl
 
         var parentWindow = TopLevel.GetTopLevel(this) as Window;
         await window.ShowDialog(parentWindow!);
+        if (!vm.Confirmed) return;
 
-        if (vm.Confirmed)
+        var game = detailVm.Game;
+        var candidate = game.Clone();
+        candidate.Title = vm.Title;
+        candidate.Developer = vm.SelectedStudio;
+        candidate.Genre = vm.Genre;
+        candidate.ReleaseYear = vm.ReleaseYear;
+        candidate.Platform = vm.Platform;
+        candidate.SizeGB = vm.SizeGB;
+        candidate.Status = vm.Status;
+        candidate.HoursPlayed = vm.HoursPlayed;
+        candidate.PersonalRating = vm.PersonalRating;
+        candidate.Description = vm.Description;
+        candidate.CoverImagePath = vm.CoverImagePath;
+
+        try
         {
-            detailVm.Game.Title = vm.Title;
-            detailVm.Game.Developer = vm.SelectedStudio;
-            detailVm.Game.Genre = vm.Genre;
-            detailVm.Game.ReleaseYear = vm.ReleaseYear;
-            detailVm.Game.Platform = vm.Platform;
-            detailVm.Game.SizeGB = vm.SizeGB;
-            detailVm.Game.Status = vm.Status;
-            detailVm.Game.HoursPlayed = vm.HoursPlayed;
-            detailVm.Game.PersonalRating = vm.PersonalRating;
-            detailVm.Game.Description = vm.Description;
-            detailVm.Game.CoverImagePath = vm.CoverImagePath;
-
-            DatabaseService.UpdateGame(detailVm.Game);
-
-            var index = AppData.Instance.Games.IndexOf(detailVm.Game);
-            if (index >= 0)
-                AppData.Instance.Games[index] = detailVm.Game;
-
-            detailVm.RefreshGame();
+            DatabaseService.UpdateGame(candidate);
         }
+        catch (DatabaseException ex)
+        {
+            await ConfirmationWindow.ShowErrorAsync(parentWindow!,
+                "Помилка збереження", ex.Message, ex);
+            return;
+        }
+
+        game.ApplyFrom(candidate);
+
+        var index = AppData.Instance.Games.IndexOf(game);
+        if (index >= 0)
+            AppData.Instance.Games[index] = game;
+
+        detailVm.RefreshGame();
     }
 
     /// <summary>Moves the game to the archive and removes it from the main list.</summary>
-    private void OnArchiveClick(object sender, RoutedEventArgs e)
-    {
-        if (DataContext is not GameDetailsViewModel detailVm) return;
-
-        detailVm.Game.IsArchived = true;
-        DatabaseService.UpdateGame(detailVm.Game);
-
-        var index = AppData.Instance.Games.IndexOf(detailVm.Game);
-        if (index >= 0)
-            AppData.Instance.Games[index] = detailVm.Game;
-
-        detailVm.GoBackCommand.Execute(null);
-    }
+    private async void OnArchiveClick(object sender, RoutedEventArgs e) => await SetArchivedAsync(true);
 
 
     /// <summary>Shows a confirmation dialog and permanently deletes the game if confirmed.</summary>
@@ -102,17 +101,32 @@ public partial class GameDetailsView : UserControl
         detailVm.GoBackCommand.Execute(null);
     }
 
-    /// <summary>Restores the game from the archive and adds it back to the main list.</summary>
-    private void OnRestoreClick(object sender, RoutedEventArgs e)
+    /// <summary> Restores the game from the archive and adds it back to the main list. </summary>
+    private async void OnRestoreClick(object sender, RoutedEventArgs e) => await SetArchivedAsync(false);
+
+    /// <summary> Sets the archived status of the game and updates the database and main list accordingly. </summary>
+    private async Task SetArchivedAsync(bool archived)
     {
         if (DataContext is not GameDetailsViewModel detailVm) return;
+        var parent = TopLevel.GetTopLevel(this) as Window;
+        var game = detailVm.Game;
 
-        detailVm.Game.IsArchived = false;
-        DatabaseService.UpdateGame(detailVm.Game);
+        try
+        {
+            DatabaseService.SetArchived(game.Id, archived);
+        }
+        catch (DatabaseException ex)
+        {
+            await ConfirmationWindow.ShowErrorAsync(parent!,
+                "Помилка збереження", ex.Message, ex);
+            return;
+        }
 
-        var index = AppData.Instance.Games.IndexOf(detailVm.Game);
+        game.IsArchived = archived;
+
+        var index = AppData.Instance.Games.IndexOf(game);
         if (index >= 0)
-            AppData.Instance.Games[index] = detailVm.Game;
+            AppData.Instance.Games[index] = game;
 
         detailVm.GoBackCommand.Execute(null);
     }
