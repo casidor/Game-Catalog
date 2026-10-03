@@ -87,8 +87,18 @@ public partial class GameDetailsView : UserControl
 
         if (!confirmed) return;
 
-        DatabaseService.DeleteGame(detailVm.Game.Id);
-        AppData.Instance.Games.Remove(detailVm.Game);
+        try
+        {
+            DatabaseService.DeleteGame(detailVm.Game.Id);
+        }
+        catch (DatabaseException ex)
+        {
+            await ConfirmationWindow.ShowErrorAsync(parent,
+                "Помилка видалення", ex.Message, ex);
+            return;
+        }
+
+        AppData.Instance.RemoveGameCascade(detailVm.Game);
         detailVm.GoBackCommand.Execute(null);
     }
 

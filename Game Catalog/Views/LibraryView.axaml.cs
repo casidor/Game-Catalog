@@ -22,11 +22,18 @@ public partial class LibraryView : UserControl
         var parentWindow = TopLevel.GetTopLevel(this) as Window;
         await window.ShowDialog(parentWindow!);
 
-        if (vm.Confirmed)
+        if (!vm.Confirmed) return;
+
+        try
         {
             var game = vm.BuildGame();
             DatabaseService.InsertGame(game);
             AppData.Instance.Games.Add(game);
+        }
+        catch (DatabaseException ex)
+        {
+            await ConfirmationWindow.ShowErrorAsync(parentWindow!,
+                "Помилка збереження", ex.Message, ex);
         }
     }
     private void OnSelectionChanged(object sender, SelectionChangedEventArgs e)

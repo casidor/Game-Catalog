@@ -61,7 +61,19 @@ public partial class StudioDetailsView : UserControl
 
         if (!confirmed) return;
 
-        if (!DatabaseService.DeleteStudio(detailVm.Studio.Id))
+        bool deleted;
+        try
+        {
+            deleted = DatabaseService.DeleteStudio(detailVm.Studio.Id);
+        }
+        catch (DatabaseException ex)
+        {
+            await ConfirmationWindow.ShowErrorAsync(parent,
+                "Помилка видалення", ex.Message, ex);
+            return;
+        }
+
+        if (!deleted)
         {
             await ConfirmationWindow.ShowAlertAsync(parent,
                 "Неможливо видалити студію",

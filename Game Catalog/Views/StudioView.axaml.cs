@@ -22,11 +22,18 @@ public partial class StudioView : UserControl
         var parentWindow = TopLevel.GetTopLevel(this) as Window;
         await window.ShowDialog(parentWindow!);
 
-        if (vm.Confirmed)
+        if (!vm.Confirmed) return;
+
+        try
         {
             var studio = vm.BuildStudio();
             DatabaseService.InsertStudio(studio);
             AppData.Instance.Studios.Add(studio);
+        }
+        catch (DatabaseException ex)
+        {
+            await ConfirmationWindow.ShowErrorAsync(parentWindow!,
+                "Помилка збереження студії", ex.Message, ex);
         }
     }
     private void OnSelectionChanged(object sender, SelectionChangedEventArgs e)

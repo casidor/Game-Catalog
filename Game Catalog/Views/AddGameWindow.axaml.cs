@@ -9,6 +9,7 @@ using Game_Catalog.Services;
 using Game_Catalog.ViewModels;
 using System;
 using System.IO;
+using System.Threading.Tasks;
 
 namespace Game_Catalog.Views;
 
@@ -41,39 +42,36 @@ public partial class AddGameWindow : Window
         lb.SelectedItem = null;
         vm.SelectSuggestionCommand.Execute(result);
     }
-    private async void OnSuggestStudioClick(object sender, RoutedEventArgs e)
+    private async Task AddStudioAsync(AddGameViewModel vm, string? name = null)
     {
-        if (DataContext is not AddGameViewModel vm) return;
-        if (sender is not Button btn || btn.Tag is not string devName) return;
-
         var studioVm = new AddStudioViewModel();
-        studioVm.Name = devName;
-        var window = new AddStudioWindow { DataContext = studioVm };
-        await window.ShowDialog(this);
+        if (name != null) studioVm.Name = name;
+        await new AddStudioWindow { DataContext = studioVm }.ShowDialog(this);
+        if (!studioVm.Confirmed) return;
 
-        if (studioVm.Confirmed)
+        try
         {
             var studio = studioVm.BuildStudio();
             DatabaseService.InsertStudio(studio);
             AppData.Instance.Studios.Add(studio);
             vm.SelectedStudio = studio;
+        }
+        catch (DatabaseException ex)
+        {
+            await ConfirmationWindow.ShowErrorAsync(this,
+                "Помилка збереження студії", ex.Message, ex);
         }
     }
+
     private async void OnAddStudioClick(object sender, RoutedEventArgs e)
     {
-        if (DataContext is not AddGameViewModel vm) return;
+        if (DataContext is AddGameViewModel vm) await AddStudioAsync(vm);
+    }
 
-        var studioVm = new AddStudioViewModel();
-        var window = new AddStudioWindow { DataContext = studioVm };
-        await window.ShowDialog(this);
-
-        if (studioVm.Confirmed)
-        {
-            var studio = studioVm.BuildStudio();
-            DatabaseService.InsertStudio(studio);
-            AppData.Instance.Studios.Add(studio);
-            vm.SelectedStudio = studio;
-        }
+    private async void OnSuggestStudioClick(object sender, RoutedEventArgs e)
+    {
+        if (DataContext is AddGameViewModel vm && sender is Button { Tag: string name })
+            await AddStudioAsync(vm, name);
     }
     private async void OnPickCoverClick(object sender, RoutedEventArgs e)
     {

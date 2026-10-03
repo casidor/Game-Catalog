@@ -36,6 +36,22 @@ namespace Game_Catalog.Models
         /// <summary> Games that are not archived. Use this for statistics and disk checks. </summary>
         public IEnumerable<Game> ActiveGames => Games.Where(g => !g.IsArchived);
 
+        /// <summary> Removes a game and all its DLC and play sessions from the application data. </summary>
+        public void RemoveGameCascade(Game game)
+        {
+            var ids = Games
+                .Where(g => g.ParentGameId == game.Id)
+                .Select(g => g.Id)
+                .Append(game.Id)
+                .ToHashSet();
+
+            foreach (var s in Sessions.Where(s => ids.Contains(s.GameId)).ToList())
+                Sessions.Remove(s);
+
+            foreach (var g in Games.Where(g => ids.Contains(g.Id)).ToList())
+                Games.Remove(g);
+        }
+
         private AppData() { }
     }
 }
