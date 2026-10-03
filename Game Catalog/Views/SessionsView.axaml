@@ -1,0 +1,75 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+			 xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+			 xmlns:vm="using:Game_Catalog.ViewModels"
+			 xmlns:models="using:Game_Catalog.Models"
+			 xmlns:conv="using:Game_Catalog.Converters"
+			 x:Class="Game_Catalog.Views.SessionsView"
+			 x:DataType="vm:SessionsViewModel">
+
+	<Grid RowDefinitions="auto,auto,*">
+
+		<!-- Toolbar -->
+		<Border Grid.Row="0" Padding="16,12">
+			<StackPanel Orientation="Horizontal" Spacing="8" VerticalAlignment="Center">
+				<TextBlock Text="Сесії" FontSize="20" FontWeight="Bold" VerticalAlignment="Center"/>
+				<Button Content="+ Додати сесію" Click="OnAddSessionClick" VerticalAlignment="Center"/>
+			</StackPanel>
+		</Border>
+
+		<!-- Table header -->
+		<Border Grid.Row="1" Padding="16,8"
+				BorderBrush="{DynamicResource SidebarBorder}" BorderThickness="0,0,0,1">
+			<Grid ColumnDefinitions="*,140,140,90,90,80">
+				<TextBlock Grid.Column="0" Text="Гра"        FontSize="12" Opacity="0.5"/>
+				<TextBlock Grid.Column="1" Text="Початок"    FontSize="12" Opacity="0.5"/>
+				<TextBlock Grid.Column="2" Text="Кінець"     FontSize="12" Opacity="0.5"/>
+				<TextBlock Grid.Column="3" Text="Тривалість" FontSize="12" Opacity="0.5"/>
+				<TextBlock Grid.Column="4" Text="Спосіб"     FontSize="12" Opacity="0.5"/>
+			</Grid>
+		</Border>
+
+		<!-- Sessions list -->
+		<ScrollViewer Grid.Row="2" IsVisible="{Binding !IsEmpty}">
+			<ItemsControl ItemsSource="{Binding Sessions}">
+				<ItemsControl.ItemTemplate>
+					<DataTemplate x:DataType="models:PlaySession">
+						<Border Padding="16,8"
+								BorderBrush="{DynamicResource SidebarBorder}" BorderThickness="0,0,0,1">
+							<Grid ColumnDefinitions="*,140,140,90,90,80">
+								<StackPanel Grid.Column="0" Spacing="2" VerticalAlignment="Center">
+									<TextBlock Text="{Binding Game.Title}" FontWeight="SemiBold"/>
+									<TextBlock Text="{Binding Note}" FontSize="12" Opacity="0.6"
+											   TextTrimming="CharacterEllipsis"/>
+								</StackPanel>
+								<TextBlock Grid.Column="1" VerticalAlignment="Center"
+										   Text="{Binding StartTime, StringFormat='{}{0:dd.MM.yyyy HH:mm}'}"/>
+								<TextBlock Grid.Column="2" VerticalAlignment="Center"
+										   Text="{Binding EndTime, StringFormat='{}{0:dd.MM.yyyy HH:mm}', TargetNullValue='В процесі'}"/>
+								<TextBlock Grid.Column="3" VerticalAlignment="Center"
+										   Text="{Binding Duration, Converter={x:Static conv:DurationConverter.Instance}}"/>
+								<TextBlock Grid.Column="4" VerticalAlignment="Center"
+										   Text="{Binding EntryMethod, Converter={x:Static conv:EntryMethodConverter.Instance}}"/>
+								<StackPanel Grid.Column="5" Orientation="Horizontal" Spacing="4">
+									<Button Content="✏" Click="OnEditClick" ToolTip.Tip="Редагувати"/>
+									<Button Content="🗑" Click="OnDeleteClick" ToolTip.Tip="Видалити"/>
+								</StackPanel>
+							</Grid>
+						</Border>
+					</DataTemplate>
+				</ItemsControl.ItemTemplate>
+			</ItemsControl>
+		</ScrollViewer>
+
+		<!-- Empty state -->
+		<StackPanel Grid.Row="2"
+					IsVisible="{Binding IsEmpty}"
+					HorizontalAlignment="Center" VerticalAlignment="Center" Spacing="16">
+			<TextBlock Text="⏱" FontSize="48" HorizontalAlignment="Center"/>
+			<TextBlock Text="Сесій немає" FontSize="18" FontWeight="SemiBold" HorizontalAlignment="Center"/>
+			<TextBlock Text="Додай першу ігрову сесію" Opacity="0.6" HorizontalAlignment="Center"/>
+			<Button Content="+ Додати сесію" Click="OnAddSessionClick"
+					HorizontalAlignment="Center" Padding="24,10" FontSize="14"/>
+		</StackPanel>
+
+	</Grid>
+</UserControl>

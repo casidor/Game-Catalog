@@ -88,6 +88,7 @@ namespace Game_Catalog.ViewModels
         public GameDetailsViewModel(Game game)
         {
             Game = game;
+            AppData.Instance.Sessions.CollectionChanged += (_, _) => OnPropertyChanged(nameof(HoursPlayed));
         }
 
         /// <summary>

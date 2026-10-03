@@ -22,6 +22,9 @@ namespace Game_Catalog.ViewModels
         /// <summary> The archive page. </summary>
         public ArchiveViewModel ArchivePage { get; } = new();
 
+        /// <summary> The play sessions page. </summary>
+        public SessionsViewModel SessionsPage { get; } = new();
+
         /// <summary> The statistics page. </summary>
         public StatisticsViewModel StatisticsPage { get; } = new();
 
