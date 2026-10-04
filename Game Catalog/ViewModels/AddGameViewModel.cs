@@ -103,6 +103,22 @@ namespace Game_Catalog.ViewModels
         [ObservableProperty]
         private string _coverImagePath = string.Empty;
 
+        /// <summary>Local file path of the game icon.</summary>
+        [ObservableProperty]
+        private string _iconPath = string.Empty;
+
+        /// <summary>Index of the selected form tab (0 = details, 1 = media).</summary>
+        [ObservableProperty]
+        [NotifyPropertyChangedFor(nameof(IsDetailsTab))]
+        [NotifyPropertyChangedFor(nameof(IsMediaTab))]
+        private int _selectedTabIndex;
+
+        /// <summary>True when the details tab is selected.</summary>
+        public bool IsDetailsTab => SelectedTabIndex == 0;
+
+        /// <summary>True when the media tab is selected.</summary>
+        public bool IsMediaTab => SelectedTabIndex == 1;
+
         [ObservableProperty]
         [NotifyPropertyChangedFor(nameof(HasDiskOverflowError))]
         private string _diskOverflowError = string.Empty;
@@ -174,7 +190,8 @@ namespace Game_Catalog.ViewModels
             Status = Status,
             PersonalRating = PersonalRating,
             Description = Description,
-            CoverImagePath = CoverImagePath
+            CoverImagePath = CoverImagePath,
+            IconPath = IconPath
         };
 
         /// <summary>
@@ -199,6 +216,7 @@ namespace Game_Catalog.ViewModels
             PersonalRating = game.PersonalRating;
             Description = game.Description;
             CoverImagePath = game.CoverImagePath;
+            IconPath = game.IconPath;
             _isInitializing = false;
         }
 
@@ -209,7 +227,7 @@ namespace Game_Catalog.ViewModels
         private void Confirm()
         {
             ValidateAllProperties();
-            if (HasErrors) return;
+            if (HasErrors) { SelectedTabIndex = 0; return; }
 
             var usedGB = AppData.Instance.ActiveGames
                 .Where(g => g != _editingGame)
@@ -221,6 +239,7 @@ namespace Game_Catalog.ViewModels
                 DiskOverflowError = $"Загальний розмір перевищить ліміт диску на " +
                     $"{usedGB + SizeGB - capacity:0.0} ГБ. " +
                     $"Доступно ще {Math.Max(0, capacity - usedGB):0.0} ГБ.";
+                SelectedTabIndex = 0;
                 return;
             }
 

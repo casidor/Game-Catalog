@@ -73,31 +73,46 @@ public partial class AddGameWindow : Window
         if (DataContext is AddGameViewModel vm && sender is Button { Tag: string name })
             await AddStudioAsync(vm, name);
     }
-    private async void OnPickCoverClick(object sender, RoutedEventArgs e)
+    private async Task<string?> PickImageAsync(string title)
     {
-        if (DataContext is not AddGameViewModel vm) return;
-
         var files = await StorageProvider.OpenFilePickerAsync(new FilePickerOpenOptions
         {
-            Title = "Оберіть обкладинку",
+            Title = title,
             AllowMultiple = false,
             FileTypeFilter = [new("Зображення") { Patterns = ["*.jpg", "*.jpeg", "*.png", "*.webp"] }]
         });
+        if (files.Count == 0) return null;
 
-        if (files.Count > 0)
-        {
-            var source = files[0].Path.LocalPath;
-            var ext = Path.GetExtension(source);
-            Directory.CreateDirectory(RawgService.CoversFolder);
-            var dest = Path.Combine(RawgService.CoversFolder, $"{Guid.NewGuid()}{ext}");
-            File.Copy(source, dest, overwrite: true);
-            vm.CoverImagePath = dest;
-        }
+        var source = files[0].Path.LocalPath;
+        Directory.CreateDirectory(RawgService.CoversFolder);
+        var dest = Path.Combine(RawgService.CoversFolder, $"{Guid.NewGuid()}{Path.GetExtension(source)}");
+        File.Copy(source, dest, overwrite: true);
+        return dest;
+    }
+
+    private async void OnPickCoverClick(object sender, RoutedEventArgs e)
+    {
+        if (DataContext is not AddGameViewModel vm) return;
+        var path = await PickImageAsync("Оберіть обкладинку");
+        if (path != null) vm.CoverImagePath = path;
     }
 
     private void OnClearCoverClick(object sender, RoutedEventArgs e)
     {
         if (DataContext is AddGameViewModel vm)
             vm.CoverImagePath = string.Empty;
+    }
+
+    private async void OnPickIconClick(object sender, RoutedEventArgs e)
+    {
+        if (DataContext is not AddGameViewModel vm) return;
+        var path = await PickImageAsync("Оберіть іконку");
+        if (path != null) vm.IconPath = path;
+    }
+
+    private void OnClearIconClick(object sender, RoutedEventArgs e)
+    {
+        if (DataContext is AddGameViewModel vm)
+            vm.IconPath = string.Empty;
     }
 }

@@ -131,6 +131,7 @@ namespace Game_Catalog.Models
             PersonalRating = other.PersonalRating;
             Description = other.Description;
             CoverImagePath = other.CoverImagePath;
+            IconPath = other.IconPath;
         }
     }
 }
