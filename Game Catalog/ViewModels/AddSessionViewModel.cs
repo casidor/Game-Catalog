@@ -36,9 +36,7 @@ namespace Game_Catalog.ViewModels
         /// <summary> Time of day the session ended. </summary>
         [ObservableProperty]
         private TimeSpan? _endTime;
-
         /// <summary> How the session was added. </summary>
-        [ObservableProperty]
         private EntryMethod _entryMethod = EntryMethod.Manual;
 
         /// <summary> Optional note about the session. </summary>
@@ -57,9 +55,6 @@ namespace Game_Catalog.ViewModels
 
         /// <summary> Games available for selection. </summary>
         public ObservableCollection<Game> Games { get; }
-
-        /// <summary> Available entry methods. </summary>
-        public EntryMethod[] Methods { get; } = Enum.GetValues<EntryMethod>();
 
         /// <summary> Indicates whether the user confirmed the dialog. </summary>
         public bool Confirmed { get; private set; }
@@ -85,7 +80,7 @@ namespace Game_Catalog.ViewModels
             StartTime = session.StartTime.TimeOfDay;
             EndDate = session.EndTime?.Date;
             EndTime = session.EndTime?.TimeOfDay;
-            EntryMethod = session.EntryMethod;
+            _entryMethod = session.EntryMethod;
             Note = session.Note;
         }
 
@@ -99,7 +94,7 @@ namespace Game_Catalog.ViewModels
             GameId = SelectedGame?.Id ?? 0,
             StartTime = Combine(StartDate, StartTime)!.Value,
             EndTime = Combine(EndDate, EndTime),
-            EntryMethod = EntryMethod,
+            EntryMethod = _entryMethod,
             Note = Note
         };
 

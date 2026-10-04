@@ -10,11 +10,19 @@ namespace Game_Catalog.Converters
         /// <summary>Shared singleton instance of the converter.</summary>
         public static readonly DurationConverter Instance = new();
 
-        /// <summary>Returns a dash for null (ongoing session).</summary>
+        /// <summary> Converts a TimeSpan or a number of hours to a short Ukrainian string ("1 г 30 хв"). </summary>
         public object? Convert(object? value, Type targetType, object? parameter, CultureInfo culture)
         {
-            if (value is not TimeSpan ts) return "—";
-            return $"{(int)ts.TotalHours} г {ts.Minutes} хв";
+            TimeSpan? ts = value switch
+            {
+                TimeSpan t => t,
+                double hours => TimeSpan.FromHours(hours),
+                _ => null
+            };
+            if (ts is null) return "—";
+
+            var totalMinutes = (int)Math.Round(ts.Value.TotalMinutes);
+            return $"{totalMinutes / 60} г {totalMinutes % 60} хв";
         }
 
         /// <summary>Not supported. Always throws <see cref="NotSupportedException"/>.</summary>

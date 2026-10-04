@@ -107,8 +107,8 @@
 					<Border Background="{DynamicResource CardBackground}"
 							CornerRadius="8" Padding="16" Margin="0,0,8,8" MinWidth="140">
 						<StackPanel Spacing="4">
-							<TextBlock Text="Годин зіграно" FontSize="11" Opacity="0.5"/>
-							<TextBlock Text="{Binding HoursPlayed, StringFormat='{}{0} год'}"
+							<TextBlock Text="Часу зіграно" FontSize="11" Opacity="0.5"/>
+							<TextBlock Text="{Binding HoursPlayed, Converter={x:Static conv:DurationConverter.Instance}}"
 									   FontSize="14" FontWeight="SemiBold"/>
 						</StackPanel>
 					</Border>
