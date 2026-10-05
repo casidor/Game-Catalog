@@ -23,18 +23,18 @@
 
 		<!-- Foundation year -->
 		<TextBlock Text="Рік заснування"/>
-		<NumericUpDown Value="{Binding FoundationYear, Converter={x:Static conv:DecimalToIntConverter.Instance}}"
-                       FormatString="0"/>
+		<NumericUpDown Value="{Binding FoundationYear, Converter={x:Static conv:DecimalToNullableIntConverter.Instance}}"
+					   FormatString="0"/>
 
 		<!-- Main genre of studio -->
 		<TextBlock Text="Основний жанр студії"/>
 		<TextBox Text="{Binding MainGenre}"
 				 PlaceholderText="Введіть жанр студії..."/>
 
-        <!-- Website -->
-        <TextBlock Text="Сайт студії"/>
-        <TextBox Text="{Binding Website}"
-         PlaceholderText="https://..."/>
+		<!-- Website -->
+		<TextBlock Text="Сайт студії"/>
+		<TextBox Text="{Binding Website}"
+				 PlaceholderText="https://..."/>
 
 		<!-- Buttons -->
 		<StackPanel Orientation="Horizontal"

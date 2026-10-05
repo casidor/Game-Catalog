@@ -17,6 +17,9 @@ namespace Game_Catalog.Validation
 
         protected override ValidationResult? IsValid(object? value, ValidationContext validationContext)
         {
+            if (value is null)
+                return ValidationResult.Success;
+
             if (value is not int year)
                 return new ValidationResult("Вкажіть коректний рік");
 

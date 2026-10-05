@@ -43,7 +43,7 @@ namespace Game_Catalog.ViewModels
         public string DisplayMainGenre => string.IsNullOrWhiteSpace(Studio.MainGenre) ? "Невідомо" : Studio.MainGenre;
 
         /// <summary>Foundation year or "Невідомо" if the value is zero.</summary>
-        public string DisplayFoundationYear => Studio.FoundationYear == 0 ? "Невідомо" : Studio.FoundationYear.ToString();
+        public string DisplayFoundationYear => Studio.FoundationYear?.ToString() ?? "Невідомо";
 
         /// <summary>Website URL or "Невідомо" if not specified.</summary>
         public string DisplayWebsite => string.IsNullOrWhiteSpace(Studio.Website) ? "Невідомо" : Studio.Website;

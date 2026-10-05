@@ -89,7 +89,7 @@
 								<TextBlock Text="{Binding Name}" FontWeight="SemiBold"/>
 								<TextBlock Text="{Binding Country}" FontSize="12" Opacity="0.6"/>
 							</StackPanel>
-							<TextBlock Grid.Column="1" Text="{Binding FoundationYear}" VerticalAlignment="Center"/>
+							<TextBlock Grid.Column="1" Text="{Binding FoundationYear, TargetNullValue='—'}" VerticalAlignment="Center"/>
 							<TextBlock Grid.Column="2" Text="{Binding MainGenre}"      VerticalAlignment="Center"/>
 						</Grid>
 					</DataTemplate>

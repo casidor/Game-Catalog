@@ -173,6 +173,8 @@ namespace Game_Catalog.ViewModels
             OnPropertyChanged(nameof(Description));
             OnPropertyChanged(nameof(HasDescription));
             OnPropertyChanged(nameof(DisplaySizeGB));
+            OnPropertyChanged(nameof(IconImage));
+            OnPropertyChanged(nameof(HasIcon));
         }
 
         /// <summary>

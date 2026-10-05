@@ -127,7 +127,7 @@ namespace Game_Catalog.Services
                     Id = reader.GetInt32(0),
                     Name = reader.GetString(1),
                     Country = reader.IsDBNull(2) ? string.Empty : reader.GetString(2),
-                    FoundationYear = reader.IsDBNull(3) ? 0 : reader.GetInt32(3),
+                    FoundationYear = reader.IsDBNull(3) ? null : reader.GetInt32(3),
                     MainGenre = reader.IsDBNull(4) ? string.Empty : reader.GetString(4),
                     Website = reader.IsDBNull(5) ? string.Empty : reader.GetString(5)
                 });
@@ -145,7 +145,7 @@ namespace Game_Catalog.Services
 
                 cmd.Parameters.AddWithValue("@name", studio.Name);
                 cmd.Parameters.AddWithValue("@country", ToDb(studio.Country));
-                cmd.Parameters.AddWithValue("@foundation_year", studio.FoundationYear == 0 ? DBNull.Value : studio.FoundationYear);
+                cmd.Parameters.AddWithValue("@foundation_year", (object?)studio.FoundationYear ?? DBNull.Value);
                 cmd.Parameters.AddWithValue("@main_genre", ToDb(studio.MainGenre));
                 cmd.Parameters.AddWithValue("@website", ToDb(studio.Website));
                 cmd.ExecuteNonQuery();
@@ -167,7 +167,7 @@ namespace Game_Catalog.Services
 
                 cmd.Parameters.AddWithValue("@name", studio.Name);
                 cmd.Parameters.AddWithValue("@country", ToDb(studio.Country));
-                cmd.Parameters.AddWithValue("@foundation_year", studio.FoundationYear == 0 ? DBNull.Value : studio.FoundationYear);
+                cmd.Parameters.AddWithValue("@foundation_year", (object?)studio.FoundationYear ?? DBNull.Value);
                 cmd.Parameters.AddWithValue("@main_genre", ToDb(studio.MainGenre));
                 cmd.Parameters.AddWithValue("@website", ToDb(studio.Website));
                 cmd.Parameters.AddWithValue("@id", studio.Id);

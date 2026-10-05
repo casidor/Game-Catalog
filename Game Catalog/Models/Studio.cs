@@ -24,13 +24,8 @@ namespace Game_Catalog.Models
             set => _country = value ?? string.Empty;
         }
 
-        private int _foundationYear;
-        /// <summary> The year the studio was founded. </summary>
-        public int FoundationYear
-        {
-            get => _foundationYear;
-            set => _foundationYear = Math.Max(0, value);
-        }
+        /// <summary> The year the studio was founded. Null if unknown. </summary>
+        public int? FoundationYear { get; set; }
 
         private string _mainGenre = string.Empty;
         /// <summary> The main genre the studio is known for. </summary>

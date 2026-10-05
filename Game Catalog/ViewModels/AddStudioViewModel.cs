@@ -43,7 +43,7 @@ namespace Game_Catalog.ViewModels
         [CurrentYearRange(1950, ErrorMessage = "Некоректний рік заснування")]
         [NotifyDataErrorInfo]
         [ObservableProperty]
-        private int _foundationYear = DateTime.Now.Year;
+        private int? _foundationYear;
 
         /// <summary>
         /// Main genre the studio is known for, entered by the user.
