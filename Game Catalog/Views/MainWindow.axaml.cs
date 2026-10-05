@@ -4,6 +4,7 @@ using Avalonia.Interactivity;
 using Avalonia.Platform.Storage;
 using Game_Catalog.Models;
 using Game_Catalog.Services;
+using Game_Catalog.ViewModels;
 using System;
 using System.IO;
 using System.Threading.Tasks;
@@ -18,6 +19,9 @@ namespace Game_Catalog.Views
     {
         /// <summary>Prevents stacking multiple simultaneous save-error dialogs.</summary>
         private bool _saveErrorShown;
+
+        /// <summary>Currently open developer query window, if any.</summary>
+        private QueryEditorWindow? _queryWindow;
 
         /// <summary>Initializes the window and loads XAML.</summary>
         public MainWindow()
@@ -102,6 +106,20 @@ namespace Game_Catalog.Views
                 "Esc — скасувати / закрити діалог\n" +
                 "Tab / Shift+Tab — перехід між полями форми");
 
+            }
+            if (e.Key == Key.F12)
+            {
+                e.Handled = true;
+                if (_queryWindow != null)
+                {
+                    _queryWindow.Close();
+                }
+                else
+                {
+                    _queryWindow = new QueryEditorWindow { DataContext = new QueryEditorViewModel() };
+                    _queryWindow.Closed += (_, _) => _queryWindow = null;
+                    _queryWindow.Show();
+                }
             }
             base.OnKeyDown(e);
         }

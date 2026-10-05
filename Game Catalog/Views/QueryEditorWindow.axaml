@@ -1,0 +1,41 @@
+<Window xmlns="https://github.com/avaloniaui"
+		xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+		xmlns:vm="using:Game_Catalog.ViewModels"
+		x:Class="Game_Catalog.Views.QueryEditorWindow"
+		x:DataType="vm:QueryEditorViewModel"
+		Title="Редактор запитів"
+		Width="800" Height="600"
+		MinWidth="500" MinHeight="400"
+		WindowStartupLocation="CenterScreen">
+
+	<Grid RowDefinitions="Auto,Auto,Auto,*" Margin="16" RowSpacing="8">
+
+		<TextBox Grid.Row="0"
+				 Text="{Binding QueryText}"
+				 AcceptsReturn="True"
+				 TextWrapping="Wrap"
+				 Height="140"
+				 FontFamily="Consolas, Menlo, monospace"/>
+
+		<StackPanel Grid.Row="1" Orientation="Horizontal" Spacing="8">
+			<Button Content="▶ Виконати" Command="{Binding ExecuteCommand}"/>
+			<Button Content="Очистити" Command="{Binding ClearCommand}"/>
+			<CheckBox Content="Дозволити зміни (INSERT/UPDATE/DELETE)"
+					  IsChecked="{Binding AllowModify}"
+					  VerticalAlignment="Center"/>
+		</StackPanel>
+
+		<TextBlock Grid.Row="2"
+				   Text="{Binding Message}"
+				   IsVisible="{Binding HasMessage}"
+				   TextWrapping="Wrap"
+				   Opacity="0.8"/>
+
+		<DataGrid x:Name="ResultGrid"
+				  Grid.Row="3"
+				  IsReadOnly="True"
+				  CanUserResizeColumns="True"
+				  CanUserSortColumns="False"
+				  GridLinesVisibility="All"/>
+	</Grid>
+</Window>

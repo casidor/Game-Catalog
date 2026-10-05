@@ -422,5 +422,53 @@ namespace Game_Catalog.Services
         }
 
         #endregion
+
+        #region Query Editor
+
+        /// <summary>Result of an arbitrary SQL query: column names and string rows.</summary>
+        public sealed record QueryResult(List<string> Columns, List<string?[]> Rows, int RowsAffected);
+
+        /// <summary>
+        /// Executes arbitrary SQL for the developer query editor.
+        /// In read-only mode the connection is opened with Mode=ReadOnly, so modifying statements fail.
+        /// </summary>
+        public static QueryResult ExecuteQuery(string sql, bool allowModify)
+        {
+            var mode = allowModify ? SqliteOpenMode.ReadWrite : SqliteOpenMode.ReadOnly;
+            var connString = new SqliteConnectionStringBuilder
+            {
+                DataSource = DefaultPath,
+                Mode = mode
+            }.ToString();
+
+            using var connection = new SqliteConnection(connString);
+            connection.Open();
+
+            using (var pragma = connection.CreateCommand())
+            {
+                pragma.CommandText = "PRAGMA foreign_keys = ON;";
+                pragma.ExecuteNonQuery();
+            }
+
+            using var cmd = connection.CreateCommand();
+            cmd.CommandText = sql;
+
+            using var reader = cmd.ExecuteReader();
+            var columns = new List<string>();
+            for (int i = 0; i < reader.FieldCount; i++)
+                columns.Add(reader.GetName(i));
+
+            var rows = new List<string?[]>();
+            while (reader.Read())
+            {
+                var row = new string?[reader.FieldCount];
+                for (int i = 0; i < reader.FieldCount; i++)
+                    row[i] = reader.IsDBNull(i) ? null : Convert.ToString(reader.GetValue(i), System.Globalization.CultureInfo.InvariantCulture);
+                rows.Add(row);
+            }
+
+            return new QueryResult(columns, rows, reader.RecordsAffected);
+        }
+        #endregion
     }
 }
