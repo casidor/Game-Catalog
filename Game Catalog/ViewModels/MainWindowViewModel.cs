@@ -1,6 +1,7 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using Game_Catalog.Models;
+using System;
 
 namespace Game_Catalog.ViewModels
 {
@@ -36,6 +37,13 @@ namespace Game_Catalog.ViewModels
             LibraryPage.GameSelected += game => NavigateToGame(game);
             ArchivePage.GameSelected += game => NavigateToGame(game);
             StudioPage.StudioSelected += studio => NavigateToStudio(studio);
+        }
+
+        /// <summary> Disposes the previous page when navigating away from it. </summary>
+        partial void OnCurrentPageChanging(ViewModelBase value)
+        {
+            if (CurrentPage is IDisposable disposable && !ReferenceEquals(CurrentPage, value))
+                disposable.Dispose();
         }
 
         /// <summary>

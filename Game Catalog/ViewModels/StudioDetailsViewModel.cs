@@ -5,6 +5,7 @@ using CommunityToolkit.Mvvm.Input;
 using Game_Catalog.Models;
 using System;
 using System.Collections.Generic;
+using System.Collections.Specialized;
 using System.Linq;
 using System.Net.NetworkInformation;
 using System.Runtime.InteropServices;
@@ -16,7 +17,7 @@ namespace Game_Catalog.ViewModels
     /// <summary>
     /// ViewModel for the studio details page.
     /// </summary>
-    public partial class StudioDetailsViewModel : ViewModelBase
+    public partial class StudioDetailsViewModel : ViewModelBase, IDisposable
     {
         /// <summary>
         /// The studio being displayed.
@@ -61,11 +62,19 @@ namespace Game_Catalog.ViewModels
         public StudioDetailsViewModel(Studio studio)
         {
             Studio = studio;
-            AppData.Instance.Games.CollectionChanged += (_, _) =>
-            {
-                OnPropertyChanged(nameof(StudioGames));
-                OnPropertyChanged(nameof(HasGames));
-            };
+            AppData.Instance.Games.CollectionChanged += OnGamesChanged;
+        }
+
+        private void OnGamesChanged(object? sender, NotifyCollectionChangedEventArgs e)
+        {
+            OnPropertyChanged(nameof(StudioGames));
+            OnPropertyChanged(nameof(HasGames));
+        }
+
+        /// <summary> Unsubscribes from global collection events. </summary>
+        public void Dispose()
+        {
+            AppData.Instance.Games.CollectionChanged -= OnGamesChanged;
         }
 
         /// <summary>

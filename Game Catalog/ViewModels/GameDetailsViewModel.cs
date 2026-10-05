@@ -4,6 +4,7 @@ using CommunityToolkit.Mvvm.Input;
 using Game_Catalog.Models;
 using System;
 using System.Collections.Generic;
+using System.Collections.Specialized;
 using System.IO;
 using System.Linq;
 using System.Text;
@@ -13,7 +14,7 @@ namespace Game_Catalog.ViewModels
     /// <summary>
     /// ViewModel for the game detail page.
     /// </summary>
-    public partial class GameDetailsViewModel : ViewModelBase
+    public partial class GameDetailsViewModel : ViewModelBase, IDisposable
     {
         /// <summary>
         /// The game being displayed.
@@ -142,16 +143,24 @@ namespace Game_Catalog.ViewModels
         public GameDetailsViewModel(Game game)
         {
             Game = game;
-            AppData.Instance.Sessions.CollectionChanged += (_, _) =>
-            {
-                OnPropertyChanged(nameof(HoursPlayed));
-                OnPropertyChanged(nameof(GameSessions));
-                OnPropertyChanged(nameof(SessionsCount));
-                OnPropertyChanged(nameof(HasSessions));
-                OnPropertyChanged(nameof(LastPlayed));
-                OnPropertyChanged(nameof(IconImage));
-                OnPropertyChanged(nameof(HasIcon));
-            };
+            AppData.Instance.Sessions.CollectionChanged += OnSessionsChanged;
+        }
+
+        private void OnSessionsChanged(object? sender, NotifyCollectionChangedEventArgs e)
+        {
+            OnPropertyChanged(nameof(HoursPlayed));
+            OnPropertyChanged(nameof(GameSessions));
+            OnPropertyChanged(nameof(SessionsCount));
+            OnPropertyChanged(nameof(HasSessions));
+            OnPropertyChanged(nameof(LastPlayed));
+            OnPropertyChanged(nameof(IconImage));
+            OnPropertyChanged(nameof(HasIcon));
+        }
+
+        /// <summary> Unsubscribes from global collection events. </summary>
+        public void Dispose()
+        {
+            AppData.Instance.Sessions.CollectionChanged -= OnSessionsChanged;
         }
 
         /// <summary>
