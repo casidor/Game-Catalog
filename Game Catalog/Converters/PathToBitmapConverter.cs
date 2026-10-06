@@ -1,5 +1,6 @@
 ﻿using Avalonia.Data.Converters;
 using Avalonia.Media.Imaging;
+using Game_Catalog.Services;
 using System;
 using System.Globalization;
 using System.IO;
@@ -24,6 +25,11 @@ namespace Game_Catalog.Converters
             if (value is not string path || !File.Exists(path))
                 return null;
 
+            // With a width parameter: decode through the cache.
+            if (parameter != null && int.TryParse(parameter.ToString(), out var width) && width > 0)
+                return ImageCache.Get(path, width);
+
+            // Without parameter: old behaviour.
             try
             {
                 return new Bitmap(path);

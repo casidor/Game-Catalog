@@ -94,25 +94,31 @@ public partial class AddGameWindow : Window
     {
         if (DataContext is not AddGameViewModel vm) return;
         var path = await PickImageAsync("Оберіть обкладинку");
-        if (path != null) vm.CoverImagePath = path;
+        if (path == null) return;
+        ImageCache.Invalidate(vm.CoverImagePath);
+        vm.CoverImagePath = path;
     }
 
     private void OnClearCoverClick(object sender, RoutedEventArgs e)
     {
-        if (DataContext is AddGameViewModel vm)
-            vm.CoverImagePath = string.Empty;
+        if (DataContext is not AddGameViewModel vm) return;
+        ImageCache.Invalidate(vm.CoverImagePath);
+        vm.CoverImagePath = string.Empty;
     }
 
     private async void OnPickIconClick(object sender, RoutedEventArgs e)
     {
         if (DataContext is not AddGameViewModel vm) return;
         var path = await PickImageAsync("Оберіть іконку");
-        if (path != null) vm.IconPath = path;
+        if (path == null) return;
+        ImageCache.Invalidate(vm.IconPath);
+        vm.IconPath = path;
     }
 
     private void OnClearIconClick(object sender, RoutedEventArgs e)
     {
-        if (DataContext is AddGameViewModel vm)
-            vm.IconPath = string.Empty;
+        if (DataContext is not AddGameViewModel vm) return;
+        ImageCache.Invalidate(vm.IconPath);
+        vm.IconPath = string.Empty;
     }
 }

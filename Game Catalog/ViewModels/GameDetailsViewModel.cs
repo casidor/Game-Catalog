@@ -2,6 +2,7 @@
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using Game_Catalog.Models;
+using Game_Catalog.Services;
 using System;
 using System.Collections.Generic;
 using System.Collections.Specialized;
@@ -59,21 +60,7 @@ namespace Game_Catalog.ViewModels
         public string DeveloperName => Game.Developer?.Name ?? "Невідомо";
 
         /// <summary>Loaded bitmap of the game cover, or null if the cover is unavailable or corrupted.</summary>
-        public Bitmap? CoverImage
-        {
-            get
-            {
-                if (!File.Exists(Game.CoverImagePath)) return null;
-                try
-                {
-                    return new Bitmap(Game.CoverImagePath);
-                }
-                catch
-                {
-                    return null;
-                }
-            }
-        }
+        public Bitmap? CoverImage => ImageCache.Get(Game.CoverImagePath, 1920);
 
         /// <summary>Indicates whether a cover image is available for this game.</summary>
         public bool HasCover => File.Exists(Game.CoverImagePath);
@@ -127,15 +114,7 @@ namespace Game_Catalog.ViewModels
         }
 
         /// <summary>Loaded bitmap of the game icon, or null if the icon is unavailable or corrupted.</summary>
-        public Bitmap? IconImage
-        {
-            get
-            {
-                if (!File.Exists(Game.IconPath)) return null;
-                try { return new Bitmap(Game.IconPath); }
-                catch { return null; }
-            }
-        }
+        public Bitmap? IconImage => ImageCache.Get(Game.IconPath, 128);
 
         /// <summary>Indicates whether an icon is available for this game.</summary>
         public bool HasIcon => File.Exists(Game.IconPath);

@@ -120,14 +120,15 @@
 									Background="Transparent"
 									Command="{Binding $parent[ItemsControl].((vm:LibraryViewModel)DataContext).SelectGameCommand}"
 									CommandParameter="{Binding}">
-								<Border Width="160" Height="220"
+								<Border Width="160" Height="245"
 										CornerRadius="8"
 										ClipToBounds="True"
 										Background="{DynamicResource CardBackground}">
 									<Grid RowDefinitions="*,Auto">
 										<Panel Grid.Row="0">
-											<Image Source="{Binding CoverImagePath, Converter={x:Static conv:PathToBitmapConverter.Instance}}"
+											<Image Width="160" Height="215"
 												   Stretch="UniformToFill"
+												   Source="{Binding CoverImagePath, Converter={x:Static conv:PathToBitmapConverter.Instance}, ConverterParameter=640}"
 												   IsVisible="{Binding CoverImagePath, Converter={x:Static StringConverters.IsNotNullOrEmpty}}"/>
 											<TextBlock Text="🎮"
 													   FontSize="48"
