@@ -21,6 +21,9 @@
                     <SolidColorBrush x:Key="LogoForeground"     Color="#e0e0f0"/>
                     <SolidColorBrush x:Key="SubtitleForeground" Color="#6060a0"/>
                     <SolidColorBrush x:Key="NavForeground"      Color="#c0c0e0"/>
+                    <SolidColorBrush x:Key="ButtonBackground" Color="#2a2a3a"/>
+                    <SolidColorBrush x:Key="ButtonBackgroundPointerOver" Color="#363650"/>
+                    <SolidColorBrush x:Key="ButtonBackgroundPressed" Color="#4a4a70"/>
                 </ResourceDictionary>
 
                 <ResourceDictionary x:Key="Light">
@@ -31,6 +34,9 @@
                     <SolidColorBrush x:Key="LogoForeground"     Color="#1a1a1a"/>
                     <SolidColorBrush x:Key="SubtitleForeground" Color="#888888"/>
                     <SolidColorBrush x:Key="NavForeground"      Color="#333333"/>
+                    <SolidColorBrush x:Key="ButtonBackground" Color="#d0d0e2"/>
+                    <SolidColorBrush x:Key="ButtonBackgroundPointerOver" Color="#c0c0d6"/>
+                    <SolidColorBrush x:Key="ButtonBackgroundPressed" Color="#adadc8"/>
                 </ResourceDictionary>
 
             </ResourceDictionary.ThemeDictionaries>
@@ -44,6 +50,7 @@
             <Setter Property="HorizontalContentAlignment" Value="Center"/>
             <Setter Property="VerticalContentAlignment"   Value="Center"/>
             <Setter Property="MinHeight"                  Value="32"/>
+            <Setter Property="CornerRadius" Value="6"/>
         </Style>
     </Application.Styles>
 </Application>
