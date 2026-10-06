@@ -84,6 +84,13 @@ public partial class AddGameWindow : Window
         if (files.Count == 0) return null;
 
         var source = files[0].Path.LocalPath;
+        if (!ImageInspector.IsReadable(source))
+        {
+            await ConfirmationWindow.ShowAlertAsync(this,
+                "Файл не підтримується",
+                "Не вдалося прочитати зображення. Оберіть JPG, PNG або WEBP.");
+            return null;
+        }
         Directory.CreateDirectory(RawgService.CoversFolder);
         var dest = Path.Combine(RawgService.CoversFolder, $"{Guid.NewGuid()}{Path.GetExtension(source)}");
         File.Copy(source, dest, overwrite: true);
@@ -135,5 +142,48 @@ public partial class AddGameWindow : Window
         if (DataContext is not AddGameViewModel vm) return;
         ImageCache.Invalidate(vm.BackgroundImagePath);
         vm.BackgroundImagePath = string.Empty;
+    }
+    private async void OnDownloadUrlClick(object sender, RoutedEventArgs e)
+    {
+        if (DataContext is not AddGameViewModel vm) return;
+        if (sender is not Button { Tag: string kind }) return;
+
+        string? downloaded = null;
+        var dialog = new InputWindow(
+            title: "Завантажити за URL",
+            prompt: "Адреса зображення",
+            placeholder: "https://...",
+            confirmText: "Завантажити",
+            handler: async url =>
+            {
+                try
+                {
+                    downloaded = await ImageDownloader.DownloadAsync(url);
+                    return null;
+                }
+                catch (InvalidOperationException ex)
+                {
+                    return ex.Message;
+                }
+            });
+
+        await dialog.ShowDialog(this);
+        if (downloaded is not { } path) return;
+
+        switch (kind)
+        {
+            case "Cover":
+                ImageCache.Invalidate(vm.CoverImagePath);
+                vm.CoverImagePath = path;
+                break;
+            case "Background":
+                ImageCache.Invalidate(vm.BackgroundImagePath);
+                vm.BackgroundImagePath = path;
+                break;
+            case "Icon":
+                ImageCache.Invalidate(vm.IconPath);
+                vm.IconPath = path;
+                break;
+        }
     }
 }

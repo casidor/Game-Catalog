@@ -111,6 +111,24 @@ namespace Game_Catalog.ViewModels
         [ObservableProperty]
         private string _iconPath = string.Empty;
 
+        /// <summary>Info and warnings for the selected cover.</summary>
+        [ObservableProperty] private ImageReport _coverReport = ImageReport.Empty;
+
+        /// <summary>Info and warnings for the selected background.</summary>
+        [ObservableProperty] private ImageReport _backgroundReport = ImageReport.Empty;
+
+        /// <summary>Info and warnings for the selected icon.</summary>
+        [ObservableProperty] private ImageReport _iconReport = ImageReport.Empty;
+
+        partial void OnCoverImagePathChanged(string value) =>
+            CoverReport = ImageInspector.Inspect(value, ImageKind.Cover);
+
+        partial void OnBackgroundImagePathChanged(string value) =>
+            BackgroundReport = ImageInspector.Inspect(value, ImageKind.Background);
+
+        partial void OnIconPathChanged(string value) =>
+            IconReport = ImageInspector.Inspect(value, ImageKind.Icon);
+
         /// <summary>Index of the selected form tab (0 = details, 1 = media).</summary>
         [ObservableProperty]
         [NotifyPropertyChangedFor(nameof(IsDetailsTab))]
