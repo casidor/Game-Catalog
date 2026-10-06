@@ -9,10 +9,10 @@
 
 		<!-- Layer 1: blurred cover over the whole page, covered by a theme-colored veil -->
 		<Panel ClipToBounds="True">
-			<Image Source="{Binding CoverImage}"
+			<Image Source="{Binding BlurImage}"
 				   Stretch="UniformToFill"
 				   Effect="blur(60)"
-				   IsVisible="{Binding HasCover}"/>
+				   IsVisible="{Binding HasBackground}"/>
 			<Border Background="{DynamicResource AppBackground}" Opacity="0.85"/>
 		</Panel>
 
@@ -61,10 +61,10 @@
 				<StackPanel>
 
 					<Panel Height="550">
-						<Image Source="{Binding CoverImage}"
+						<Image Source="{Binding BackgroundImage}"
 							   Stretch="UniformToFill"
 							   VerticalAlignment="Center"
-							   IsVisible="{Binding HasCover}">
+							   IsVisible="{Binding HasBackground}">
 							<Image.OpacityMask>
 								<LinearGradientBrush StartPoint="0%,0%" EndPoint="0%,100%">
 									<GradientStop Offset="0.0" Color="#FFFFFFFF"/>
@@ -75,7 +75,7 @@
 						</Image>
 
 						<Border Background="{DynamicResource CardBackground}"
-								IsVisible="{Binding !HasCover}">
+								IsVisible="{Binding !HasBackground}">
 							<TextBlock Text="🎮"
 									   FontSize="64"
 									   HorizontalAlignment="Center"
@@ -95,6 +95,19 @@
 						  IsVisible="{Binding IsDetailsTab}">
 
 						<StackPanel Grid.Column="0" Spacing="8">
+							<Border Width="240" Height="320"
+									CornerRadius="8" ClipToBounds="True"
+									HorizontalAlignment="Left"
+									Background="{DynamicResource CardBackground}">
+								<Panel>
+									<Image Source="{Binding CoverImage}"
+										   Stretch="UniformToFill"
+										   IsVisible="{Binding HasCover}"/>
+									<TextBlock Text="🎮" FontSize="48"
+											   HorizontalAlignment="Center" VerticalAlignment="Center"
+											   IsVisible="{Binding !HasCover}"/>
+								</Panel>
+							</Border>
 							<TextBlock Text="Деталі" FontSize="14" FontWeight="SemiBold"/>
 							<Border Height="1" Background="{DynamicResource SidebarBorder}"/>
 

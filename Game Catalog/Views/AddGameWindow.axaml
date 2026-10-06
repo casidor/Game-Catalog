@@ -183,52 +183,75 @@
 		</ScrollViewer>
 
 		<!-- Media tab -->
-		<Grid Grid.Row="1" ColumnDefinitions="*,24,180" Margin="24"
-			  IsVisible="{Binding IsMediaTab}">
+		<ScrollViewer Grid.Row="1" IsVisible="{Binding IsMediaTab}">
+			<Grid ColumnDefinitions="*,24,180" Margin="24">
 
-			<!-- Cover -->
-			<StackPanel Grid.Column="0" Spacing="8">
-				<TextBlock Text="Обкладинка"/>
-				<Border Height="300" CornerRadius="8" ClipToBounds="True"
-						Background="{DynamicResource CardBackground}">
-					<Panel>
-						<StackPanel VerticalAlignment="Center" HorizontalAlignment="Center"
-									IsVisible="{Binding CoverImagePath, Converter={x:Static StringConverters.IsNullOrEmpty}}">
-							<TextBlock Text="🎮" FontSize="36" HorizontalAlignment="Center"/>
-							<TextBlock Text="Обкладинка не вибрана" FontSize="11" Opacity="0.5"
-									   TextAlignment="Center" Margin="8,6,8,0"/>
-						</StackPanel>
-						<Image Source="{Binding CoverImagePath, Converter={x:Static conv:PathToBitmapConverter.Instance}, ConverterParameter=320}"
-							   Stretch="UniformToFill"
-							   IsVisible="{Binding CoverImagePath, Converter={x:Static StringConverters.IsNotNullOrEmpty}}"/>
-					</Panel>
-				</Border>
-				<StackPanel Orientation="Horizontal" Spacing="8">
-					<Button Content="📁 Обрати файл" Click="OnPickCoverClick"/>
-					<Button Content="✕ Очистити" Click="OnClearCoverClick"
-							IsVisible="{Binding CoverImagePath, Converter={x:Static StringConverters.IsNotNullOrEmpty}}"/>
+				<StackPanel Grid.Column="0" Spacing="8">
+					<!-- Cover -->
+					<TextBlock Text="Обкладинка"/>
+					<Border Height="300" CornerRadius="8" ClipToBounds="True"
+							Background="{DynamicResource CardBackground}">
+						<Panel>
+							<StackPanel VerticalAlignment="Center" HorizontalAlignment="Center"
+										IsVisible="{Binding CoverImagePath, Converter={x:Static StringConverters.IsNullOrEmpty}}">
+								<TextBlock Text="🎮" FontSize="36" HorizontalAlignment="Center"/>
+								<TextBlock Text="Обкладинка не вибрана" FontSize="11" Opacity="0.5"
+										   TextAlignment="Center" Margin="8,6,8,0"/>
+							</StackPanel>
+							<Image Source="{Binding CoverImagePath, Converter={x:Static conv:PathToBitmapConverter.Instance}, ConverterParameter=640}"
+								   Stretch="UniformToFill"
+								   IsVisible="{Binding CoverImagePath, Converter={x:Static StringConverters.IsNotNullOrEmpty}}"/>
+						</Panel>
+					</Border>
+					<StackPanel Orientation="Horizontal" Spacing="8">
+						<Button Content="📁 Обрати файл" Click="OnPickCoverClick"/>
+						<Button Content="✕ Очистити" Click="OnClearCoverClick"
+								IsVisible="{Binding CoverImagePath, Converter={x:Static StringConverters.IsNotNullOrEmpty}}"/>
+					</StackPanel>
+
+					<!-- Background -->
+					<TextBlock Text="Фон" Margin="0,12,0,0"/>
+					<Border Height="180" CornerRadius="8" ClipToBounds="True"
+							Background="{DynamicResource CardBackground}">
+						<Panel>
+							<StackPanel VerticalAlignment="Center" HorizontalAlignment="Center"
+										IsVisible="{Binding BackgroundImagePath, Converter={x:Static StringConverters.IsNullOrEmpty}}">
+								<TextBlock Text="🎮" FontSize="36" HorizontalAlignment="Center"/>
+								<TextBlock Text="Фон не вибраний" FontSize="11" Opacity="0.5"
+										   TextAlignment="Center" Margin="8,6,8,0"/>
+							</StackPanel>
+							<Image Source="{Binding BackgroundImagePath, Converter={x:Static conv:PathToBitmapConverter.Instance}, ConverterParameter=640}"
+								   Stretch="UniformToFill"
+								   IsVisible="{Binding BackgroundImagePath, Converter={x:Static StringConverters.IsNotNullOrEmpty}}"/>
+						</Panel>
+					</Border>
+					<StackPanel Orientation="Horizontal" Spacing="8">
+						<Button Content="📁 Обрати файл" Click="OnPickBackgroundClick"/>
+						<Button Content="✕ Очистити" Click="OnClearBackgroundClick"
+								IsVisible="{Binding BackgroundImagePath, Converter={x:Static StringConverters.IsNotNullOrEmpty}}"/>
+					</StackPanel>
 				</StackPanel>
-			</StackPanel>
 
-			<!-- Icon -->
-			<StackPanel Grid.Column="2" Spacing="8">
-				<TextBlock Text="Іконка"/>
-				<Border Width="96" Height="96" HorizontalAlignment="Left"
-						Background="{DynamicResource CardBackground}">
-					<Panel>
-						<TextBlock Text="🎮" FontSize="32"
-								   HorizontalAlignment="Center" VerticalAlignment="Center" Opacity="0.5"
-								   IsVisible="{Binding IconPath, Converter={x:Static StringConverters.IsNullOrEmpty}}"/>
-						<Image Source="{Binding IconPath, Converter={x:Static conv:PathToBitmapConverter.Instance}, ConverterParameter=128}"
-							   Stretch="Uniform"
-							   IsVisible="{Binding IconPath, Converter={x:Static StringConverters.IsNotNullOrEmpty}}"/>
-					</Panel>
-				</Border>
-				<Button Content="📁 Обрати файл" Click="OnPickIconClick"/>
-				<Button Content="✕ Очистити" Click="OnClearIconClick"
-						IsVisible="{Binding IconPath, Converter={x:Static StringConverters.IsNotNullOrEmpty}}"/>
-			</StackPanel>
-		</Grid>
+				<!-- Icon -->
+				<StackPanel Grid.Column="2" Spacing="8">
+					<TextBlock Text="Іконка"/>
+					<Border Width="96" Height="96" HorizontalAlignment="Left"
+							Background="{DynamicResource CardBackground}">
+						<Panel>
+							<TextBlock Text="🎮" FontSize="32"
+									   HorizontalAlignment="Center" VerticalAlignment="Center" Opacity="0.5"
+									   IsVisible="{Binding IconPath, Converter={x:Static StringConverters.IsNullOrEmpty}}"/>
+							<Image Source="{Binding IconPath, Converter={x:Static conv:PathToBitmapConverter.Instance}, ConverterParameter=128}"
+								   Stretch="Uniform"
+								   IsVisible="{Binding IconPath, Converter={x:Static StringConverters.IsNotNullOrEmpty}}"/>
+						</Panel>
+					</Border>
+					<Button Content="📁 Обрати файл" Click="OnPickIconClick"/>
+					<Button Content="✕ Очистити" Click="OnClearIconClick"
+							IsVisible="{Binding IconPath, Converter={x:Static StringConverters.IsNotNullOrEmpty}}"/>
+				</StackPanel>
+			</Grid>
+		</ScrollViewer>
 
 		<!-- Bottom action buttons -->
 		<Border Grid.Row="2"

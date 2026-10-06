@@ -121,4 +121,19 @@ public partial class AddGameWindow : Window
         ImageCache.Invalidate(vm.IconPath);
         vm.IconPath = string.Empty;
     }
+    private async void OnPickBackgroundClick(object sender, RoutedEventArgs e)
+    {
+        if (DataContext is not AddGameViewModel vm) return;
+        var path = await PickImageAsync("Оберіть фон");
+        if (path == null) return;
+        ImageCache.Invalidate(vm.BackgroundImagePath);
+        vm.BackgroundImagePath = path;
+    }
+
+    private void OnClearBackgroundClick(object sender, RoutedEventArgs e)
+    {
+        if (DataContext is not AddGameViewModel vm) return;
+        ImageCache.Invalidate(vm.BackgroundImagePath);
+        vm.BackgroundImagePath = string.Empty;
+    }
 }

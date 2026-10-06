@@ -59,11 +59,17 @@ namespace Game_Catalog.ViewModels
         /// <summary> Developer studio name. </summary>
         public string DeveloperName => Game.Developer?.Name ?? "Невідомо";
 
-        /// <summary>Loaded bitmap of the game cover, or null if the cover is unavailable or corrupted.</summary>
-        public Bitmap? CoverImage => ImageCache.Get(Game.CoverImagePath, 1920);
-
-        /// <summary>Indicates whether a cover image is available for this game.</summary>
+        /// <summary>Cover shown as a poster in the details tab.</summary>
+        public Bitmap? CoverImage => ImageCache.Get(Game.CoverImagePath, 640);
         public bool HasCover => File.Exists(Game.CoverImagePath);
+
+        /// <summary>Wide background shown in the page header.</summary>
+        public Bitmap? BackgroundImage => ImageCache.Get(Game.BackgroundImagePath, 1920);
+
+        /// <summary>Small copy of the background used under the blur effect.</summary>
+        public Bitmap? BlurImage => ImageCache.Get(Game.BackgroundImagePath, 400);
+
+        public bool HasBackground => File.Exists(Game.BackgroundImagePath);
 
         /// <summary>Plain-text description of the game.</summary>
         public string Description => Game.Description;
@@ -163,6 +169,9 @@ namespace Game_Catalog.ViewModels
             OnPropertyChanged(nameof(DisplaySizeGB));
             OnPropertyChanged(nameof(IconImage));
             OnPropertyChanged(nameof(HasIcon));
+            OnPropertyChanged(nameof(BackgroundImage));
+            OnPropertyChanged(nameof(BlurImage));
+            OnPropertyChanged(nameof(HasBackground));
         }
 
         /// <summary>

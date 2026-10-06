@@ -92,6 +92,14 @@ namespace Game_Catalog.Models
             set => _coverImagePath = value ?? string.Empty;
         }
 
+        private string _backgroundImagePath = string.Empty;
+        /// <summary> Local file path to the wide background image used in the details header. </summary>
+        public string BackgroundImagePath
+        {
+            get => _backgroundImagePath;
+            set => _backgroundImagePath = value ?? string.Empty;
+        }
+
         private string _executablePath = string.Empty;
         /// <summary> Local file path to the game's executable, used for future auto-tracking of play sessions. </summary>
         public string ExecutablePath
@@ -131,6 +139,8 @@ namespace Game_Catalog.Models
             PersonalRating = other.PersonalRating;
             Description = other.Description;
             CoverImagePath = other.CoverImagePath;
+            BackgroundImagePath = other.BackgroundImagePath;
+            ExecutablePath = other.ExecutablePath;
             IconPath = other.IconPath;
         }
     }

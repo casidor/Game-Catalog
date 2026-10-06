@@ -103,6 +103,10 @@ namespace Game_Catalog.ViewModels
         [ObservableProperty]
         private string _coverImagePath = string.Empty;
 
+        /// <summary>Local file path of the background image.</summary>
+        [ObservableProperty]
+        private string _backgroundImagePath = string.Empty;
+
         /// <summary>Local file path of the game icon.</summary>
         [ObservableProperty]
         private string _iconPath = string.Empty;
@@ -191,6 +195,7 @@ namespace Game_Catalog.ViewModels
             PersonalRating = PersonalRating,
             Description = Description,
             CoverImagePath = CoverImagePath,
+            BackgroundImagePath = BackgroundImagePath,
             IconPath = IconPath
         };
 
@@ -216,6 +221,7 @@ namespace Game_Catalog.ViewModels
             PersonalRating = game.PersonalRating;
             Description = game.Description;
             CoverImagePath = game.CoverImagePath;
+            BackgroundImagePath = game.BackgroundImagePath;
             IconPath = game.IconPath;
             _isInitializing = false;
         }

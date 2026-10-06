@@ -40,6 +40,7 @@ public partial class GameDetailsView : UserControl
         candidate.PersonalRating = vm.PersonalRating;
         candidate.Description = vm.Description;
         candidate.CoverImagePath = vm.CoverImagePath;
+        candidate.BackgroundImagePath = vm.BackgroundImagePath;
         candidate.IconPath = vm.IconPath;
 
         try
