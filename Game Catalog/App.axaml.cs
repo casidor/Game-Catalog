@@ -4,6 +4,7 @@ using Avalonia.Data.Core;
 using Avalonia.Data.Core.Plugins;
 using Avalonia.Markup.Xaml;
 using Avalonia.Styling;
+using Game_Catalog.Data;
 using Game_Catalog.Services;
 using Game_Catalog.ViewModels;
 using Game_Catalog.Views;
@@ -23,6 +24,7 @@ namespace Game_Catalog
         {
             if (ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop)
             {
+                Db.Configure();
                 SettingsService.Load();
                 Application.Current!.RequestedThemeVariant =
                     SettingsService.Current.Theme == "Light"
