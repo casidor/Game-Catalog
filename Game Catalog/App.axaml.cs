@@ -25,6 +25,7 @@ namespace Game_Catalog
             if (ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop)
             {
                 Db.Configure();
+                Dialogs.Current = new DialogService();
                 SettingsService.Load();
                 Application.Current!.RequestedThemeVariant =
                     SettingsService.Current.Theme == "Light"

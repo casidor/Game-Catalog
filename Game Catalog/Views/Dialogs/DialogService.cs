@@ -1,0 +1,43 @@
+﻿using Avalonia;
+using Avalonia.Controls;
+using Avalonia.Controls.ApplicationLifetimes;
+using Game_Catalog.Services;
+using Game_Catalog.ViewModels;
+using System;
+using System.Threading.Tasks;
+
+namespace Game_Catalog.Views;
+
+/// <summary> Avalonia implementation of <see cref="IDialogService"/> based on the main window. </summary>
+public sealed class DialogService : IDialogService
+{
+    private static Window? Owner =>
+        (Application.Current?.ApplicationLifetime as IClassicDesktopStyleApplicationLifetime)?.MainWindow;
+
+    /// <inheritdoc/>
+    public async Task<bool> ConfirmAsync(string title, string message,
+        string confirmText, string cancelText = "Скасувати")
+    {
+        if (Owner is not { } owner) return false;
+
+        var vm = new ConfirmationViewModel(title, message, confirmText, cancelText);
+        await new ConfirmationWindow { DataContext = vm }.ShowDialog(owner);
+        return vm.Confirmed;
+    }
+
+    /// <inheritdoc/>
+    public async Task AlertAsync(string title, string message)
+    {
+        if (Owner is not { } owner) return;
+
+        var vm = new ConfirmationViewModel(title, message, isAlert: true);
+        await new ConfirmationWindow { DataContext = vm }.ShowDialog(owner);
+    }
+
+    /// <inheritdoc/>
+    public Task ErrorAsync(string title, string message, Exception ex)
+    {
+        var details = ex.InnerException?.Message ?? ex.Message;
+        return AlertAsync(title, $"{message}\n\nПричина: {details}");
+    }
+}
