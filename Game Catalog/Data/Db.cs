@@ -27,6 +27,8 @@ namespace Game_Catalog.Data
             var connection = new SqliteConnection(ConnectionString);
             connection.Open();
 
+            connection.CreateFunction("lower_ua", (string? s) => s?.ToLowerInvariant(), isDeterministic: true);
+
             using var cmd = connection.CreateCommand();
             cmd.CommandText = "PRAGMA foreign_keys = ON;";
             cmd.ExecuteNonQuery();

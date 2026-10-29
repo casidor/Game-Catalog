@@ -4,25 +4,25 @@ PRAGMA foreign_keys = ON;
 
 CREATE TABLE Genre (
     genre_id          INTEGER PRIMARY KEY AUTOINCREMENT,
-    genre_name        TEXT NOT NULL COLLATE UKR_NOCASE UNIQUE,
+    genre_name        TEXT NOT NULL COLLATE NOCASE UNIQUE,
     genre_description TEXT,
     CHECK (length(trim(genre_name)) > 0)
 ) STRICT;
 
 CREATE TABLE Studio (
     studio_id       INTEGER PRIMARY KEY AUTOINCREMENT,
-    studio_name     TEXT NOT NULL COLLATE UKR_NOCASE UNIQUE,
+    studio_name     TEXT NOT NULL COLLATE NOCASE UNIQUE,
     country         TEXT,
     foundation_year INTEGER,
     main_genre      INTEGER,
     website         TEXT,
     CHECK (length(trim(studio_name)) > 0),
-    FOREIGN KEY (main_genre) REFERENCES Genre(genre_id) ON DELETE SET NULL ON UPDATE CASCADE
+    FOREIGN KEY (main_genre) REFERENCES Genre(genre_id) ON DELETE RESTRICT ON UPDATE CASCADE
 ) STRICT;
 
 CREATE TABLE Platform (
     platform_id        INTEGER PRIMARY KEY AUTOINCREMENT,
-    platform_name      TEXT NOT NULL COLLATE UKR_NOCASE UNIQUE,
+    platform_name      TEXT NOT NULL COLLATE NOCASE UNIQUE,
     manufacturer       TEXT,
     platform_icon_path TEXT,
     CHECK (length(trim(platform_name)) > 0)
@@ -30,7 +30,7 @@ CREATE TABLE Platform (
 
 CREATE TABLE Tag (
     tag_id   INTEGER PRIMARY KEY AUTOINCREMENT,
-    tag_name TEXT NOT NULL COLLATE UKR_NOCASE UNIQUE,
+    tag_name TEXT NOT NULL COLLATE NOCASE UNIQUE,
     color    TEXT,
     CHECK (length(trim(tag_name)) > 0)
 ) STRICT;
@@ -157,7 +157,7 @@ CREATE TABLE Achievement (
 -- Indexes
 
 CREATE UNIQUE INDEX ux_game_identity
-    ON Game (game_title COLLATE UKR_NOCASE, developer_id, COALESCE(release_year, 0));
+    ON Game (game_title COLLATE NOCASE, developer_id, COALESCE(release_year, 0));
 
 CREATE INDEX ix_studio_main_genre  ON Studio (main_genre);
 CREATE INDEX ix_game_developer     ON Game (developer_id);
