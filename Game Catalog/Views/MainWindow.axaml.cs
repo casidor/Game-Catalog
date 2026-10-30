@@ -2,6 +2,7 @@ using Avalonia.Controls;
 using Avalonia.Input;
 using Avalonia.Interactivity;
 using Avalonia.Platform.Storage;
+using Game_Catalog.Data;
 using Game_Catalog.Models;
 using Game_Catalog.Services;
 using Game_Catalog.ViewModels;
@@ -42,6 +43,7 @@ namespace Game_Catalog.Views
 
             try
             {
+                DatabaseInitializer.Initialize();
                 LoadData();
             }
             catch (Exception ex)

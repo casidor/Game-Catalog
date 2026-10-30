@@ -11,7 +11,7 @@ namespace Game_Catalog.Data
         /// <summary> Path to the SQLite database file in the user's AppData folder. </summary>
         public static readonly string DefaultPath = Path.Combine(
             Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData),
-            "GameCatalog", "game_catalog.db");
+            "GameCatalog", "game_catalog_v2.db");
 
         private static string ConnectionString => $"Data Source={DefaultPath}";
 

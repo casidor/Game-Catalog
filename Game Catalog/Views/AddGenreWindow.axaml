@@ -1,0 +1,33 @@
+<Window xmlns="https://github.com/avaloniaui"
+		xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+		xmlns:vm="using:Game_Catalog.ViewModels"
+		x:Class="Game_Catalog.Views.AddGenreWindow"
+		x:DataType="vm:AddGenreViewModel"
+		Title="{Binding WindowTitle}"
+		Width="450"
+		SizeToContent="Height"
+		WindowStartupLocation="CenterOwner"
+		CanResize="False">
+	<StackPanel Spacing="12" Margin="24">
+
+		<TextBlock Text="Назва жанру"/>
+		<TextBox Text="{Binding GenreName}"
+				 PlaceholderText="Введіть назву..."/>
+
+		<TextBlock Text="Опис"/>
+		<TextBox Text="{Binding GenreDescription}"
+				 PlaceholderText="Необов'язково (до 500 символів)..."
+				 TextWrapping="Wrap"
+				 AcceptsReturn="True"
+				 Height="100"/>
+
+		<StackPanel Orientation="Horizontal"
+					Spacing="8"
+					HorizontalAlignment="Right"
+					Margin="0,8,0,0">
+			<Button Content="Скасувати" Command="{Binding CancelCommand}"/>
+			<Button Content="Зберегти" Command="{Binding ConfirmCommand}"/>
+		</StackPanel>
+
+	</StackPanel>
+</Window>

@@ -1,6 +1,7 @@
 ﻿using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Controls.ApplicationLifetimes;
+using Game_Catalog.Models;
 using Game_Catalog.Services;
 using Game_Catalog.ViewModels;
 using System;
@@ -39,5 +40,15 @@ public sealed class DialogService : IDialogService
     {
         var details = ex.InnerException?.Message ?? ex.Message;
         return AlertAsync(title, $"{message}\n\nПричина: {details}");
+    }
+
+    /// <inheritdoc/>
+    public async Task<Genre?> ShowGenreEditorAsync(Genre? genre = null)
+    {
+        if (Owner is not { } owner) return null;
+
+        var vm = genre == null ? new AddGenreViewModel() : new AddGenreViewModel(genre);
+        await new AddGenreWindow { DataContext = vm }.ShowDialog(owner);
+        return vm.Confirmed ? vm.BuildGenre() : null;
     }
 }

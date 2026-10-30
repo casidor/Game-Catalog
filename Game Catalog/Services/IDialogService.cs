@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Game_Catalog.Models;
+using System;
 using System.Threading.Tasks;
 
 namespace Game_Catalog.Services;
@@ -15,4 +16,7 @@ public interface IDialogService
 
     /// <summary> Shows a single-button error dialog with the exception reason. </summary>
     Task ErrorAsync(string title, string message, Exception ex);
+
+    /// <summary> Shows the genre editor and returns the entered genre, or null if cancelled. </summary>
+    Task<Genre?> ShowGenreEditorAsync(Genre? genre = null);
 }
