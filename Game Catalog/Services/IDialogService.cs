@@ -19,4 +19,7 @@ public interface IDialogService
 
     /// <summary> Shows the genre editor and returns the entered genre, or null if cancelled. </summary>
     Task<Genre?> ShowGenreEditorAsync(Genre? genre = null);
+
+    /// <summary> Shows the platform editor and returns the entered platform, or null if cancelled. </summary>
+    Task<Platform?> ShowPlatformEditorAsync(Platform? platform = null);
 }

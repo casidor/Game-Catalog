@@ -51,4 +51,14 @@ public sealed class DialogService : IDialogService
         await new AddGenreWindow { DataContext = vm }.ShowDialog(owner);
         return vm.Confirmed ? vm.BuildGenre() : null;
     }
+
+    /// <inheritdoc/>
+    public async Task<Platform?> ShowPlatformEditorAsync(Platform? platform = null)
+    {
+        if (Owner is not { } owner) return null;
+
+        var vm = platform == null ? new AddPlatformViewModel() : new AddPlatformViewModel(platform);
+        await new AddPlatformWindow { DataContext = vm }.ShowDialog(owner);
+        return vm.Confirmed ? vm.BuildPlatform() : null;
+    }
 }
