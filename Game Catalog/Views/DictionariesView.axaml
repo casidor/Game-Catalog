@@ -1,0 +1,22 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+			 xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+			 xmlns:vm="using:Game_Catalog.ViewModels"
+			 xmlns:views="using:Game_Catalog.Views"
+			 x:Class="Game_Catalog.Views.DictionariesView"
+			 x:DataType="vm:DictionariesViewModel">
+
+	<Grid RowDefinitions="Auto,Auto,*">
+
+		<TextBlock Grid.Row="0" Text="Довідники"
+				   FontSize="20" FontWeight="Bold" Margin="16,16,16,8"/>
+
+		<TabStrip Grid.Row="1" Margin="16,0" SelectedIndex="{Binding SelectedTabIndex}">
+			<TabStripItem Content="Жанри"/>
+		</TabStrip>
+
+		<Panel Grid.Row="2" IsVisible="{Binding IsGenresTab}">
+			<views:GenresTabView DataContext="{Binding Genres}"/>
+		</Panel>
+
+	</Grid>
+</UserControl>

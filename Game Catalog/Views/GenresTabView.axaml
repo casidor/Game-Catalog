@@ -1,0 +1,76 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+			 xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+			 xmlns:vm="using:Game_Catalog.ViewModels"
+			 xmlns:models="using:Game_Catalog.Models"
+			 x:Class="Game_Catalog.Views.GenresTabView"
+			 x:DataType="vm:GenresViewModel">
+
+	<Grid RowDefinitions="Auto,Auto,*">
+
+		<!-- Toolbar -->
+		<Border Grid.Row="0" Padding="16,12">
+			<Grid ColumnDefinitions="Auto,*">
+				<Button Grid.Column="0" Content="+ Додати жанр"
+						Command="{Binding AddCommand}"/>
+				<TextBox Grid.Column="1" Text="{Binding SearchText}"
+						 PlaceholderText="🔍 Пошук жанру..."
+						 Width="200" HorizontalAlignment="Right"/>
+			</Grid>
+		</Border>
+
+		<!-- Table header -->
+		<Border Grid.Row="1" Padding="16,8"
+				BorderBrush="{DynamicResource SidebarBorder}" BorderThickness="0,0,0,1">
+			<Grid ColumnDefinitions="220,*,80">
+				<TextBlock Grid.Column="0" Text="Назва" FontSize="12" Opacity="0.5"/>
+				<TextBlock Grid.Column="1" Text="Опис" FontSize="12" Opacity="0.5"/>
+			</Grid>
+		</Border>
+
+		<!-- Genres list -->
+		<ScrollViewer Grid.Row="2">
+			<ItemsControl ItemsSource="{Binding Genres}">
+				<ItemsControl.ItemTemplate>
+					<DataTemplate x:DataType="models:Genre">
+						<Border Padding="16,8"
+								BorderBrush="{DynamicResource SidebarBorder}" BorderThickness="0,0,0,1">
+							<Grid ColumnDefinitions="220,*,80">
+								<TextBlock Grid.Column="0" Text="{Binding GenreName}"
+										   FontWeight="SemiBold" VerticalAlignment="Center"/>
+								<TextBlock Grid.Column="1" Text="{Binding GenreDescription}"
+										   Opacity="0.7" VerticalAlignment="Center"
+										   TextTrimming="CharacterEllipsis"
+										   ToolTip.Tip="{Binding GenreDescription}"/>
+								<StackPanel Grid.Column="2" Orientation="Horizontal" Spacing="4">
+									<Button Content="✏" ToolTip.Tip="Редагувати"
+											Command="{Binding $parent[ItemsControl].((vm:GenresViewModel)DataContext).EditCommand}"
+											CommandParameter="{Binding}"/>
+									<Button Content="🗑" ToolTip.Tip="Видалити"
+											Command="{Binding $parent[ItemsControl].((vm:GenresViewModel)DataContext).DeleteCommand}"
+											CommandParameter="{Binding}"/>
+								</StackPanel>
+							</Grid>
+						</Border>
+					</DataTemplate>
+				</ItemsControl.ItemTemplate>
+			</ItemsControl>
+		</ScrollViewer>
+
+		<!-- Empty state -->
+		<StackPanel Grid.Row="2" IsVisible="{Binding IsEmpty}"
+					HorizontalAlignment="Center" VerticalAlignment="Center" Spacing="16">
+			<TextBlock Text="🏷" FontSize="48" HorizontalAlignment="Center"/>
+			<TextBlock Text="Жанрів немає" FontSize="18" FontWeight="SemiBold" HorizontalAlignment="Center"/>
+			<TextBlock Text="Додайте перший жанр" Opacity="0.6" HorizontalAlignment="Center"/>
+		</StackPanel>
+
+		<!-- Filtered empty state -->
+		<StackPanel Grid.Row="2" IsVisible="{Binding IsFilteredEmpty}"
+					HorizontalAlignment="Center" VerticalAlignment="Center" Spacing="12">
+			<TextBlock Text="🔍" FontSize="48" HorizontalAlignment="Center"/>
+			<TextBlock Text="Жанрів не знайдено" FontSize="18" FontWeight="SemiBold" HorizontalAlignment="Center"/>
+			<TextBlock Text="Спробуйте змінити критерії пошуку" Opacity="0.6" HorizontalAlignment="Center"/>
+		</StackPanel>
+
+	</Grid>
+</UserControl>

@@ -29,6 +29,9 @@ namespace Game_Catalog.ViewModels
         /// <summary> The statistics page. </summary>
         public StatisticsViewModel StatisticsPage { get; } = new();
 
+        /// <summary> The dictionaries page. </summary>
+        public DictionariesViewModel DictionariesPage { get; } = new();
+
         /// <summary> The settings page. </summary>
         public SettingsViewModel SettingsPage { get; } = new();
         public MainWindowViewModel()

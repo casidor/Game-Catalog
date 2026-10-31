@@ -80,6 +80,14 @@
                             Padding="16,12" FontSize="14"
                             Background="Transparent"
                             Foreground="{DynamicResource NavForeground}" CornerRadius="8"/>
+                    <Button Content="🏷  Довідники"
+                            Command="{Binding NavigateToCommand}"
+                            CommandParameter="{Binding DictionariesPage}"
+                            HorizontalAlignment="Stretch"
+                            HorizontalContentAlignment="Left"
+                            Padding="16,12" FontSize="14"
+                            Background="Transparent"
+                            Foreground="{DynamicResource NavForeground}" CornerRadius="8"/>
                 </StackPanel>
 
                 <!-- Settings pinned to bottom -->
