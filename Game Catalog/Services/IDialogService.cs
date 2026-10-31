@@ -22,4 +22,7 @@ public interface IDialogService
 
     /// <summary> Shows the platform editor and returns the entered platform, or null if cancelled. </summary>
     Task<Platform?> ShowPlatformEditorAsync(Platform? platform = null);
+
+    /// <summary> Shows the tag editor and returns the entered tag, or null if cancelled. </summary>
+    Task<Tag?> ShowTagEditorAsync(Tag? tag = null);
 }

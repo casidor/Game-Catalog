@@ -1,0 +1,76 @@
+<Window xmlns="https://github.com/avaloniaui"
+		xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+		xmlns:vm="using:Game_Catalog.ViewModels"
+		xmlns:models="using:Game_Catalog.Models"
+		xmlns:conv="using:Game_Catalog.Converters"
+		x:Class="Game_Catalog.Views.AddTagWindow"
+		x:DataType="vm:AddTagViewModel"
+		Title="{Binding WindowTitle}"
+		Width="450"
+		SizeToContent="Height"
+		WindowStartupLocation="CenterOwner"
+		CanResize="False">
+
+	<Window.Styles>
+		<Style Selector="ListBox.swatches ListBoxItem">
+			<Setter Property="Padding" Value="8"/>
+			<Setter Property="Margin" Value="2"/>
+			<Setter Property="CornerRadius" Value="6"/>
+			<Setter Property="HorizontalContentAlignment" Value="Center"/>
+		</Style>
+	</Window.Styles>
+
+	<StackPanel Spacing="12" Margin="24">
+
+		<TextBlock Text="Назва тегу"/>
+		<TextBox Text="{Binding TagName}"
+				 PlaceholderText="Введіть назву..."/>
+
+		<TextBlock Text="{Binding SelectedColorName, StringFormat='Колір: {0}'}"/>
+
+		<!-- Palette: 4 x 4 swatches -->
+		<ListBox Classes="swatches"
+				 ItemsSource="{Binding Colors}"
+				 SelectedItem="{Binding SelectedColor}"
+				 Width="216"
+				 HorizontalAlignment="Left"
+				 ScrollViewer.VerticalScrollBarVisibility="Disabled"
+				 ScrollViewer.HorizontalScrollBarVisibility="Disabled">
+			<ListBox.ItemsPanel>
+				<ItemsPanelTemplate>
+					<UniformGrid Columns="4"/>
+				</ItemsPanelTemplate>
+			</ListBox.ItemsPanel>
+			<ListBox.ItemTemplate>
+				<DataTemplate x:DataType="models:TagColor">
+					<Ellipse Width="28" Height="28"
+							 Fill="{Binding Key, Converter={x:Static conv:TagColorConverter.Instance}}"
+							 Stroke="{DynamicResource NavForeground}"
+							 StrokeThickness="1"
+							 ToolTip.Tip="{Binding Name}"/>
+				</DataTemplate>
+			</ListBox.ItemTemplate>
+		</ListBox>
+
+		<!-- No color -->
+		<Button Command="{Binding ClearColorCommand}"
+				HorizontalAlignment="Left">
+			<StackPanel Orientation="Horizontal" Spacing="8">
+				<Ellipse Width="16" Height="16"
+						 Stroke="{DynamicResource NavForeground}"
+						 StrokeThickness="1"/>
+				<TextBlock Text="Без кольору"/>
+				<TextBlock Text="✓" IsVisible="{Binding HasNoColor}"/>
+			</StackPanel>
+		</Button>
+
+		<StackPanel Orientation="Horizontal"
+					Spacing="8"
+					HorizontalAlignment="Right"
+					Margin="0,8,0,0">
+			<Button Content="Скасувати" Command="{Binding CancelCommand}"/>
+			<Button Content="Зберегти" Command="{Binding ConfirmCommand}"/>
+		</StackPanel>
+
+	</StackPanel>
+</Window>

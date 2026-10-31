@@ -61,4 +61,14 @@ public sealed class DialogService : IDialogService
         await new AddPlatformWindow { DataContext = vm }.ShowDialog(owner);
         return vm.Confirmed ? vm.BuildPlatform() : null;
     }
+
+    /// <inheritdoc/>
+    public async Task<Tag?> ShowTagEditorAsync(Tag? tag = null)
+    {
+        if (Owner is not { } owner) return null;
+
+        var vm = tag == null ? new AddTagViewModel() : new AddTagViewModel(tag);
+        await new AddTagWindow { DataContext = vm }.ShowDialog(owner);
+        return vm.Confirmed ? vm.BuildTag() : null;
+    }
 }
