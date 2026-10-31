@@ -13,6 +13,7 @@
 		<TabStrip Grid.Row="1" Margin="16,0" SelectedIndex="{Binding SelectedTabIndex}">
 			<TabStripItem Content="Жанри"/>
 			<TabStripItem Content="Платформи"/>
+			<TabStripItem Content="Теги"/>
 		</TabStrip>
 
 		<Panel Grid.Row="2" IsVisible="{Binding IsGenresTab}">
@@ -21,6 +22,10 @@
 
 		<Panel Grid.Row="2" IsVisible="{Binding IsPlatformsTab}">
 			<views:PlatformsTabView DataContext="{Binding Platforms}"/>
+		</Panel>
+
+		<Panel Grid.Row="2" IsVisible="{Binding IsTagsTab}">
+			<views:TagsTabView DataContext="{Binding Tags}"/>
 		</Panel>
 
 	</Grid>

@@ -20,20 +20,12 @@ namespace Game_Catalog.ViewModels
         [ObservableProperty]
         private string _tagName = string.Empty;
 
-        /// <summary> Selected palette color. Null means the tag has no color. </summary>
+        /// <summary> Selected palette entry. The "no color" entry means the tag has no color. </summary>
         [ObservableProperty]
-        [NotifyPropertyChangedFor(nameof(HasNoColor))]
-        [NotifyPropertyChangedFor(nameof(SelectedColorName))]
-        private TagColor? _selectedColor;
+        private TagColor? _selectedColor = TagPalette.NoColor;
 
-        /// <summary> Palette colors offered in the dialog. </summary>
-        public IReadOnlyList<TagColor> Colors => TagPalette.Colors;
-
-        /// <summary> True when no palette color is selected. </summary>
-        public bool HasNoColor => SelectedColor == null;
-
-        /// <summary> Name of the selected color, or a label for no color. </summary>
-        public string SelectedColorName => SelectedColor?.Name ?? "Без кольору";
+        /// <summary> Palette options offered in the dialog: "no color" first, then the colors. </summary>
+        public IReadOnlyList<TagColor> Options => TagPalette.Options;
 
         /// <summary> Indicates whether the user confirmed the dialog. </summary>
         public bool Confirmed { get; private set; }
@@ -58,7 +50,7 @@ namespace Game_Catalog.ViewModels
             WindowTitle = "Редагувати тег";
             _tagId = tag.TagId;
             TagName = tag.TagName;
-            SelectedColor = TagPalette.Find(tag.Color);
+            SelectedColor = TagPalette.Find(tag.Color) ?? TagPalette.NoColor;
         }
 
         /// <summary> Builds a tag object from the entered data. </summary>
@@ -68,10 +60,6 @@ namespace Game_Catalog.ViewModels
             TagName = TagName,
             Color = SelectedColor?.Key ?? string.Empty
         };
-
-        /// <summary> Removes the color selection. </summary>
-        [RelayCommand]
-        private void ClearColor() => SelectedColor = null;
 
         /// <summary> Validates the form and closes the dialog. </summary>
         [RelayCommand]

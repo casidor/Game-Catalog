@@ -12,11 +12,39 @@
 		CanResize="False">
 
 	<Window.Styles>
+		<!-- Swatch items: no selection or hover background, spacing from margin -->
 		<Style Selector="ListBox.swatches ListBoxItem">
-			<Setter Property="Padding" Value="8"/>
-			<Setter Property="Margin" Value="2"/>
-			<Setter Property="CornerRadius" Value="6"/>
-			<Setter Property="HorizontalContentAlignment" Value="Center"/>
+			<Setter Property="Padding" Value="0"/>
+			<Setter Property="Margin" Value="5"/>
+			<Setter Property="MinHeight" Value="0"/>
+		</Style>
+		<Style Selector="ListBox.swatches ListBoxItem /template/ ContentPresenter#PART_ContentPresenter">
+			<Setter Property="Background" Value="Transparent"/>
+		</Style>
+		<Style Selector="ListBox.swatches ListBoxItem:pointerover /template/ ContentPresenter#PART_ContentPresenter">
+			<Setter Property="Background" Value="Transparent"/>
+		</Style>
+		<Style Selector="ListBox.swatches ListBoxItem:selected /template/ ContentPresenter#PART_ContentPresenter">
+			<Setter Property="Background" Value="Transparent"/>
+		</Style>
+		<Style Selector="ListBox.swatches ListBoxItem:selected:pointerover /template/ ContentPresenter#PART_ContentPresenter">
+			<Setter Property="Background" Value="Transparent"/>
+		</Style>
+		<Style Selector="ListBox.swatches ListBoxItem:focus /template/ ContentPresenter#PART_ContentPresenter">
+			<Setter Property="Background" Value="Transparent"/>
+		</Style>
+
+		<!-- Hover: slight smooth scale-up -->
+		<Style Selector="Border.swatch">
+			<Setter Property="RenderTransform" Value="none"/>
+			<Setter Property="Transitions">
+				<Transitions>
+					<TransformOperationsTransition Property="RenderTransform" Duration="0:0:0.12"/>
+				</Transitions>
+			</Setter>
+		</Style>
+		<Style Selector="Border.swatch:pointerover">
+			<Setter Property="RenderTransform" Value="scale(1.05)"/>
 		</Style>
 	</Window.Styles>
 
@@ -26,43 +54,54 @@
 		<TextBox Text="{Binding TagName}"
 				 PlaceholderText="Введіть назву..."/>
 
-		<TextBlock Text="{Binding SelectedColorName, StringFormat='Колір: {0}'}"/>
+		<TextBlock Text="{Binding SelectedColor.Name, StringFormat='Колір: {0}'}"/>
 
-		<!-- Palette: 4 x 4 swatches -->
+		<!-- Palette: no color + 17 colors, 6 per row -->
 		<ListBox Classes="swatches"
-				 ItemsSource="{Binding Colors}"
+				 ItemsSource="{Binding Options}"
 				 SelectedItem="{Binding SelectedColor}"
-				 Width="216"
+				 Width="252"
+				 Padding="0"
+				 BorderThickness="0"
+				 Background="Transparent"
 				 HorizontalAlignment="Left"
 				 ScrollViewer.VerticalScrollBarVisibility="Disabled"
 				 ScrollViewer.HorizontalScrollBarVisibility="Disabled">
 			<ListBox.ItemsPanel>
 				<ItemsPanelTemplate>
-					<UniformGrid Columns="4"/>
+					<UniformGrid Columns="6"/>
 				</ItemsPanelTemplate>
 			</ListBox.ItemsPanel>
 			<ListBox.ItemTemplate>
 				<DataTemplate x:DataType="models:TagColor">
-					<Ellipse Width="28" Height="28"
-							 Fill="{Binding Key, Converter={x:Static conv:TagColorConverter.Instance}}"
-							 Stroke="{DynamicResource NavForeground}"
-							 StrokeThickness="1"
-							 ToolTip.Tip="{Binding Name}"/>
+					<Panel Width="32" Height="32" ToolTip.Tip="{Binding Name}">
+
+						<!-- Colored swatch -->
+						<Border Classes="swatch" CornerRadius="6"
+								Background="{Binding Key, Converter={x:Static conv:TagColorConverter.Instance}}"
+								IsVisible="{Binding !IsNone}"/>
+
+						<!-- No color swatch: neutral square with a diagonal line -->
+						<Border Classes="swatch" CornerRadius="6"
+								Background="{DynamicResource CardBackground}"
+								BorderBrush="{DynamicResource SidebarBorder}"
+								BorderThickness="1"
+								IsVisible="{Binding IsNone}">
+							<Line StartPoint="7,7" EndPoint="25,25"
+								  Stroke="Gray" StrokeThickness="1.5"/>
+						</Border>
+
+						<!-- Check mark of the selected swatch -->
+						<TextBlock Text="✓"
+								   FontSize="16" FontWeight="Bold"
+								   HorizontalAlignment="Center" VerticalAlignment="Center"
+								   IsHitTestVisible="False"
+								   Foreground="{Binding Key, Converter={x:Static conv:TagCheckBrushConverter.Instance}}"
+								   IsVisible="{Binding $parent[ListBoxItem].IsSelected}"/>
+					</Panel>
 				</DataTemplate>
 			</ListBox.ItemTemplate>
 		</ListBox>
-
-		<!-- No color -->
-		<Button Command="{Binding ClearColorCommand}"
-				HorizontalAlignment="Left">
-			<StackPanel Orientation="Horizontal" Spacing="8">
-				<Ellipse Width="16" Height="16"
-						 Stroke="{DynamicResource NavForeground}"
-						 StrokeThickness="1"/>
-				<TextBlock Text="Без кольору"/>
-				<TextBlock Text="✓" IsVisible="{Binding HasNoColor}"/>
-			</StackPanel>
-		</Button>
 
 		<StackPanel Orientation="Horizontal"
 					Spacing="8"

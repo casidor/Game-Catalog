@@ -35,7 +35,7 @@ CREATE TABLE Tag (
     CHECK (length(trim(tag_name)) > 0)
     CHECK (color IS NULL OR color IN (
     'Red', 'Orange', 'Amber', 'Yellow', 'Lime', 'Green', 'Teal', 'Cyan',
-    'Sky', 'Blue', 'Indigo', 'Violet', 'Fuchsia', 'Pink', 'Brown', 'Gray'))
+    'Sky', 'Blue', 'Indigo', 'Violet', 'Fuchsia', 'Pink', 'Brown', 'Olive', 'Gray'))
 ) STRICT;
 
 -- Game
