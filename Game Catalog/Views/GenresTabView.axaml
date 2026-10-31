@@ -29,7 +29,7 @@
 
 		<!-- Genres list -->
 		<ScrollViewer Grid.Row="2">
-			<ItemsControl ItemsSource="{Binding Genres}">
+			<ItemsControl ItemsSource="{Binding Items}">
 				<ItemsControl.ItemTemplate>
 					<DataTemplate x:DataType="models:Genre">
 						<Border Padding="16,8"

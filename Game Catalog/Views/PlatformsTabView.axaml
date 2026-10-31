@@ -29,7 +29,7 @@
 
 		<!-- Platforms list -->
 		<ScrollViewer Grid.Row="2">
-			<ItemsControl ItemsSource="{Binding Platforms}">
+			<ItemsControl ItemsSource="{Binding Items}">
 				<ItemsControl.ItemTemplate>
 					<DataTemplate x:DataType="models:Platform">
 						<Border Padding="16,8"
