@@ -33,6 +33,9 @@ CREATE TABLE Tag (
     tag_name TEXT NOT NULL COLLATE NOCASE UNIQUE,
     color    TEXT,
     CHECK (length(trim(tag_name)) > 0)
+    CHECK (color IS NULL OR color IN (
+    'Red', 'Orange', 'Amber', 'Yellow', 'Lime', 'Green', 'Teal', 'Cyan',
+    'Sky', 'Blue', 'Indigo', 'Violet', 'Fuchsia', 'Pink', 'Brown', 'Gray'))
 ) STRICT;
 
 -- Game
