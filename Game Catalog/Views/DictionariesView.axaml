@@ -12,10 +12,15 @@
 
 		<TabStrip Grid.Row="1" Margin="16,0" SelectedIndex="{Binding SelectedTabIndex}">
 			<TabStripItem Content="Жанри"/>
+			<TabStripItem Content="Платформи"/>
 		</TabStrip>
 
 		<Panel Grid.Row="2" IsVisible="{Binding IsGenresTab}">
 			<views:GenresTabView DataContext="{Binding Genres}"/>
+		</Panel>
+
+		<Panel Grid.Row="2" IsVisible="{Binding IsPlatformsTab}">
+			<views:PlatformsTabView DataContext="{Binding Platforms}"/>
 		</Panel>
 
 	</Grid>
