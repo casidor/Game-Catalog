@@ -17,12 +17,12 @@ namespace Game_Catalog.ViewModels
     /// <summary>
     /// ViewModel for the studio details page.
     /// </summary>
-    public partial class StudioDetailsViewModel : ViewModelBase, IDisposable
+    public partial class LegacyStudioDetailsViewModel : ViewModelBase, IDisposable
     {
         /// <summary>
         /// The studio being displayed.
         /// </summary> 
-        public Studio Studio { get; }
+        public LegacyStudio Studio { get; }
 
         /// <summary>
         /// Raised when the user requests to go back to the previous page.
@@ -59,7 +59,7 @@ namespace Game_Catalog.ViewModels
         /// <summary> Indicates whether this studio has a website specified. </summary>
         public bool HasWebsite => !string.IsNullOrWhiteSpace(Studio.Website);
 
-        public StudioDetailsViewModel(Studio studio)
+        public LegacyStudioDetailsViewModel(LegacyStudio studio)
         {
             Studio = studio;
             AppData.Instance.Games.CollectionChanged += OnGamesChanged;

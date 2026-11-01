@@ -8,16 +8,16 @@ using Game_Catalog.ViewModels;
 
 namespace Game_Catalog.Views;
 
-public partial class StudioView : UserControl
+public partial class LegacyStudioView : UserControl
 {
-    public StudioView()
+    public LegacyStudioView()
     {
         InitializeComponent();
     }
     private async void OnAddStudioClick(object sender, RoutedEventArgs e)
     {
-        var vm = new AddStudioViewModel();
-        var window = new AddStudioWindow { DataContext = vm };
+        var vm = new LegacyAddStudioViewModel();
+        var window = new LegacyAddStudioWindow { DataContext = vm };
 
         var parentWindow = TopLevel.GetTopLevel(this) as Window;
         await window.ShowDialog(parentWindow!);
@@ -38,7 +38,7 @@ public partial class StudioView : UserControl
     }
     private void OnSelectionChanged(object sender, SelectionChangedEventArgs e)
     {
-        if (DataContext is StudioViewModel vm && vm.SelectedStudio != null)
+        if (DataContext is LegacyStudioViewModel vm && vm.SelectedStudio != null)
         {
             vm.SelectStudioCommand.Execute(vm.SelectedStudio);
             vm.SelectedStudio = null;

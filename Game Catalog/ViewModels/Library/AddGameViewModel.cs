@@ -39,7 +39,7 @@ namespace Game_Catalog.ViewModels
         [Required(ErrorMessage = "Оберіть студію-розробника")]
         [NotifyDataErrorInfo]
         [ObservableProperty]
-        private Studio? _selectedStudio;
+        private LegacyStudio? _selectedStudio;
 
         /// <summary>
         /// Game genre entered by the user.
@@ -166,7 +166,7 @@ namespace Game_Catalog.ViewModels
         /// <summary>
         /// List of available studios for selection.
         /// </summary>
-        public ObservableCollection<Studio> Studios { get; }
+        public ObservableCollection<LegacyStudio> Studios { get; }
 
         /// <summary>
         /// List of available game statuses.
@@ -193,7 +193,7 @@ namespace Game_Catalog.ViewModels
         private bool _isInitializing;
         private CancellationTokenSource? _searchCts;
 
-        public AddGameViewModel(ObservableCollection<Studio> studios)
+        public AddGameViewModel(ObservableCollection<LegacyStudio> studios)
         {
             Studios = studios;
             SuggestedDeveloperNames.CollectionChanged += (_, _) => OnPropertyChanged(nameof(HasSuggestedDevelopers));
@@ -222,7 +222,7 @@ namespace Game_Catalog.ViewModels
         /// </summary>
         /// <param name="game">The game to edit.</param>
         /// <param name="studios">Available studios collection.</param>
-        public AddGameViewModel(Game game, ObservableCollection<Studio> studios)
+        public AddGameViewModel(Game game, ObservableCollection<LegacyStudio> studios)
         {
             _editingGame = game;
             WindowTitle = "Редагувати гру";

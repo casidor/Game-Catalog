@@ -10,18 +10,18 @@ using System.Threading.Tasks;
 
 namespace Game_Catalog.Views;
 
-public partial class StudioDetailsView : UserControl
+public partial class LegacyStudioDetailsView : UserControl
 {
-    public StudioDetailsView()
+    public LegacyStudioDetailsView()
     {
         InitializeComponent();
     }
     private async void OnEditClick(object sender, RoutedEventArgs e)
     {
-        if (DataContext is not StudioDetailsViewModel detailVm) return;
+        if (DataContext is not LegacyStudioDetailsViewModel detailVm) return;
 
-        var vm = new AddStudioViewModel(detailVm.Studio);
-        var window = new AddStudioWindow { DataContext = vm };
+        var vm = new LegacyAddStudioViewModel(detailVm.Studio);
+        var window = new LegacyAddStudioWindow { DataContext = vm };
 
         var parentWindow = TopLevel.GetTopLevel(this) as Window;
         await window.ShowDialog(parentWindow!);
@@ -29,7 +29,7 @@ public partial class StudioDetailsView : UserControl
         if (!vm.Confirmed) return;
 
         var studio = detailVm.Studio;
-        var candidate = new Studio
+        var candidate = new LegacyStudio
         {
             Id = studio.Id,
             Name = vm.Name,
@@ -65,12 +65,12 @@ public partial class StudioDetailsView : UserControl
 
     private void OnDeleteClick(object sender, RoutedEventArgs e)
     {
-        if (DataContext is not StudioDetailsViewModel detailVm) return;
+        if (DataContext is not LegacyStudioDetailsViewModel detailVm) return;
         var parent = TopLevel.GetTopLevel(this) as Window;
         _ = DeleteStudioAsync(detailVm, parent!);
     }
 
-    private async Task DeleteStudioAsync(StudioDetailsViewModel detailVm, Window parent)
+    private async Task DeleteStudioAsync(LegacyStudioDetailsViewModel detailVm, Window parent)
     {
         var confirmed = await ConfirmationWindow.ShowAsync(
             parent,
@@ -108,7 +108,7 @@ public partial class StudioDetailsView : UserControl
 
     private void OnGameSelectionChanged(object sender, SelectionChangedEventArgs e)
     {
-        if (DataContext is not StudioDetailsViewModel vm) return;
+        if (DataContext is not LegacyStudioDetailsViewModel vm) return;
         if (sender is not ListBox lb || lb.SelectedItem is not Game game) return;
         lb.SelectedItem = null;
         vm.SelectGameCommand.Execute(game);

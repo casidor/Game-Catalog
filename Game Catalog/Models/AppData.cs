@@ -25,7 +25,7 @@ namespace Game_Catalog.Models
         /// <summary>
         /// Collection of all game development studios.
         /// </summary>
-        public ObservableCollection<Studio> Studios { get; } = new();
+        public ObservableCollection<LegacyStudio> Studios { get; } = new();
         
         
         /// <summary>

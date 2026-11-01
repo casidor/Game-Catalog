@@ -25,7 +25,7 @@ namespace Game_Catalog.ViewModels
         [ObservableProperty] private string? _selectedPlatform;
 
         /// <summary> Selected developer studio filter. Null means no filter applied. </summary>
-        [ObservableProperty] private Studio? _selectedDeveloper;
+        [ObservableProperty] private LegacyStudio? _selectedDeveloper;
 
         /// <summary> Selected status filter. Null means no filter applied. </summary>
         [ObservableProperty] private GameStatus? _selectedStatusFilter;
@@ -47,8 +47,8 @@ namespace Game_Catalog.ViewModels
             .OrderBy(g => g.Title);
 
         /// <summary> Distinct developers derived from the source collection. </summary>
-        public IEnumerable<Studio?> AvailableDevelopers =>
-            new Studio?[] { null }.Concat(RelevantGames
+        public IEnumerable<LegacyStudio?> AvailableDevelopers =>
+            new LegacyStudio?[] { null }.Concat(RelevantGames
                 .Select(g => g.Developer)
                 .Where(d => d != null)
                 .DistinctBy(d => d!.Id)
@@ -106,7 +106,7 @@ namespace Game_Catalog.ViewModels
         partial void OnSelectedGenreChanged(string? value) => RefreshFilters();
         partial void OnSelectedPlatformChanged(string? value) => RefreshFilters();
         partial void OnSelectedStatusFilterChanged(GameStatus? value) => RefreshFilters();
-        partial void OnSelectedDeveloperChanged(Studio? value) => RefreshFilters();
+        partial void OnSelectedDeveloperChanged(LegacyStudio? value) => RefreshFilters();
         protected virtual void RefreshFilters()
         {
             OnPropertyChanged(nameof(FilteredGames));

@@ -10,14 +10,14 @@ using System.Text;
 namespace Game_Catalog.ViewModels
 {
     /// <summary> ViewModel for the studio management page. </summary>
-    public partial class StudioViewModel : ViewModelBase
+    public partial class LegacyStudioViewModel : ViewModelBase
     {
         /// <summary> Collection of all studios in the library. </summary>
-        public ObservableCollection<Studio> Studios => AppData.Instance.Studios;
+        public ObservableCollection<LegacyStudio> Studios => AppData.Instance.Studios;
 
         /// <summary> Currently selected studio in the list. </summary>
         [ObservableProperty]
-        private Studio? _selectedStudio;
+        private LegacyStudio? _selectedStudio;
 
         /// <summary> Text used to search studios by name. </summary>
         [ObservableProperty]
@@ -32,7 +32,7 @@ namespace Game_Catalog.ViewModels
         private string? _selectedGenre;
 
         /// <summary> Raised when the user selects a studio to view details. </summary>
-        public event Action<Studio>? StudioSelected;
+        public event Action<LegacyStudio>? StudioSelected;
 
         /// <summary> Indicates whether the studios collection is empty. </summary>
         public bool IsEmpty => AppData.Instance.Studios.Count == 0;
@@ -40,7 +40,7 @@ namespace Game_Catalog.ViewModels
         /// <summary> Indicates whether the filtered studio list is empty while the source collection has items. </summary>
         public bool IsFilteredEmpty => Studios.Any() && !FilteredStudios.Any();
 
-        public StudioViewModel()
+        public LegacyStudioViewModel()
         {
             Studios.CollectionChanged += (_, _) =>
             {
@@ -53,7 +53,7 @@ namespace Game_Catalog.ViewModels
         }
 
         /// <summary> Filtered and searched studio list based on active criteria. </summary>
-        public IEnumerable<Studio> FilteredStudios => Studios
+        public IEnumerable<LegacyStudio> FilteredStudios => Studios
             .Where(s => string.IsNullOrWhiteSpace(SearchText) ||
                         s.Name.Contains(SearchText, StringComparison.OrdinalIgnoreCase))
             .Where(s => SelectedCountry == null || s.Country == SelectedCountry)
@@ -96,7 +96,7 @@ namespace Game_Catalog.ViewModels
         /// <summary> Navigates to the studio detail page. </summary>
         /// <param name="studio">The selected studio.</param>
         [RelayCommand]
-        private void SelectStudio(Studio studio)
+        private void SelectStudio(LegacyStudio studio)
         {
             StudioSelected?.Invoke(studio);
         }

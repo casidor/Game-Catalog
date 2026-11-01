@@ -22,7 +22,7 @@ namespace Game_Catalog.Models
         public int DeveloperId { get; set; }
 
         /// <summary> Reference to the developer studio. </summary>
-        public Studio? Developer { get; set; }
+        public LegacyStudio? Developer { get; set; }
 
         /// <summary> Identifier of the base game, if this game is a DLC. Null for standalone games. </summary>
         public int? ParentGameId { get; set; }

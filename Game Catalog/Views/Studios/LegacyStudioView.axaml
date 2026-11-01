@@ -2,8 +2,8 @@
 			 xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
 			 xmlns:vm="using:Game_Catalog.ViewModels"
 			 xmlns:models="using:Game_Catalog.Models"
-			 x:Class="Game_Catalog.Views.StudioView"
-			 x:DataType="vm:StudioViewModel">
+			 x:Class="Game_Catalog.Views.LegacyStudioView"
+			 x:DataType="vm:LegacyStudioViewModel">
 
 	<Grid RowDefinitions="auto,auto,*">
 
@@ -83,7 +83,7 @@
 					 SelectionChanged="OnSelectionChanged"
 					 IsVisible="{Binding !IsEmpty}">
 				<ListBox.ItemTemplate>
-					<DataTemplate x:DataType="models:Studio">
+					<DataTemplate x:DataType="models:LegacyStudio">
 						<Grid ColumnDefinitions="*,150,100">
 							<StackPanel Grid.Column="0" Spacing="2">
 								<TextBlock Text="{Binding Name}" FontWeight="SemiBold"/>

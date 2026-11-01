@@ -44,9 +44,9 @@ public partial class AddGameWindow : Window
     }
     private async Task AddStudioAsync(AddGameViewModel vm, string? name = null)
     {
-        var studioVm = new AddStudioViewModel();
+        var studioVm = new LegacyAddStudioViewModel();
         if (name != null) studioVm.Name = name;
-        await new AddStudioWindow { DataContext = studioVm }.ShowDialog(this);
+        await new LegacyAddStudioWindow { DataContext = studioVm }.ShowDialog(this);
         if (!studioVm.Confirmed) return;
 
         try

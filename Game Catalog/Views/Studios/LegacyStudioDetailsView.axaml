@@ -3,8 +3,8 @@
 			 xmlns:vm="using:Game_Catalog.ViewModels"
 			 xmlns:models="using:Game_Catalog.Models"
 			 xmlns:conv="using:Game_Catalog.Converters"
-			 x:Class="Game_Catalog.Views.StudioDetailsView"
-			 x:DataType="vm:StudioDetailsViewModel">
+			 x:Class="Game_Catalog.Views.LegacyStudioDetailsView"
+			 x:DataType="vm:LegacyStudioDetailsViewModel">
 
 	<Grid RowDefinitions="auto,*">
 

@@ -17,7 +17,7 @@ namespace Game_Catalog.ViewModels
         protected override bool ArchivedFilter => false;
 
         /// <summary> Collection of available studios for game assignment. </summary>
-        public ObservableCollection<Studio> Studios => AppData.Instance.Studios;
+        public ObservableCollection<LegacyStudio> Studios => AppData.Instance.Studios;
 
         /// <summary> Currently selected game in the list. </summary>
         [ObservableProperty] private Game? _selectedGame;

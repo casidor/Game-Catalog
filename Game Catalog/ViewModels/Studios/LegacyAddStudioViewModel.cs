@@ -15,7 +15,7 @@ namespace Game_Catalog.ViewModels
     /// <summary>
     /// ViewModel for the add studio dialog window, allowing users to input details about a new game development studio.
     /// </summary>
-    public partial class AddStudioViewModel : ViewModelBase
+    public partial class LegacyAddStudioViewModel : ViewModelBase
     {
         /// <summary>
         /// Name of the studio entered by the user.
@@ -79,7 +79,7 @@ namespace Game_Catalog.ViewModels
         /// </summary>
         public string WindowTitle { get; }
 
-        public AddStudioViewModel()
+        public LegacyAddStudioViewModel()
         {
             WindowTitle = "Додати студію";
         }
@@ -88,9 +88,9 @@ namespace Game_Catalog.ViewModels
         /// </summary>
         /// <returns>A Studio object initialized with the Name, Country, FoundationYear, and MainGenre properties of the current
         /// instance.</returns>
-        public Studio BuildStudio()
+        public LegacyStudio BuildStudio()
         {
-            return new Studio
+            return new LegacyStudio
             {
                 Name = this.Name,
                 Country = this.Country,
@@ -105,7 +105,7 @@ namespace Game_Catalog.ViewModels
         /// </summary>
         /// <param name="game">The game to edit.</param>
         /// <param name="studios">Available studios collection.</param>
-        public AddStudioViewModel(Studio studio)
+        public LegacyAddStudioViewModel(LegacyStudio studio)
         {
             WindowTitle = "Редагувати студію";
             Name = studio.Name;

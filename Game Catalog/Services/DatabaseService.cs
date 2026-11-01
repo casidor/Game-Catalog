@@ -110,9 +110,9 @@ namespace Game_Catalog.Services
 
         #region Studio
 
-        public static List<Studio> GetStudios()
+        public static List<LegacyStudio> GetStudios()
         {
-            var result = new List<Studio>();
+            var result = new List<LegacyStudio>();
 
             using var connection = OpenConnection();
             using var cmd = connection.CreateCommand();
@@ -122,7 +122,7 @@ namespace Game_Catalog.Services
             using var reader = cmd.ExecuteReader();
             while (reader.Read())
             {
-                result.Add(new Studio
+                result.Add(new LegacyStudio
                 {
                     Id = reader.GetInt32(0),
                     Name = reader.GetString(1),
@@ -135,7 +135,7 @@ namespace Game_Catalog.Services
             return result;
         }
 
-        public static void InsertStudio(Studio studio) =>
+        public static void InsertStudio(LegacyStudio studio) =>
             Execute("Не вдалося зберегти студію", () =>
             {
                 using var connection = OpenConnection();
@@ -155,7 +155,7 @@ namespace Game_Catalog.Services
                 studio.Id = (int)(long)cmd.ExecuteScalar()!;
             });
 
-        public static void UpdateStudio(Studio studio) =>
+        public static void UpdateStudio(LegacyStudio studio) =>
             Execute("Не вдалося оновити студію", () =>
             {
                 using var connection = OpenConnection();
@@ -197,7 +197,7 @@ namespace Game_Catalog.Services
 
         #region Game
 
-        public static List<Game> GetGames(IEnumerable<Studio> studios)
+        public static List<Game> GetGames(IEnumerable<LegacyStudio> studios)
         {
             var studioById = studios.ToDictionary(s => s.Id);
             var result = new List<Game>();
