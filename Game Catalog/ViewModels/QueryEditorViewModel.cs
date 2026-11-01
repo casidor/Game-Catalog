@@ -1,6 +1,6 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
-using Game_Catalog.Services;
+using Game_Catalog.Data;
 using Microsoft.Data.Sqlite;
 using System;
 using System.Collections.Generic;
@@ -45,7 +45,7 @@ namespace Game_Catalog.ViewModels
 
             try
             {
-                var result = DatabaseService.ExecuteQuery(QueryText, AllowModify);
+                var result = QueryRunner.Execute(QueryText, AllowModify);
                 Columns = result.Columns;
                 Rows = result.Rows;
                 Message = result.Columns.Count > 0
