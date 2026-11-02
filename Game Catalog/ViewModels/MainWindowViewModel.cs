@@ -18,7 +18,7 @@ namespace Game_Catalog.ViewModels
         public LibraryViewModel LibraryPage { get; } = new();
 
         /// <summary> The studio management page. </summary>
-        public LegacyStudioViewModel StudioPage { get; } = new();
+        public StudioViewModel StudioPage { get; } = new();
 
         /// <summary> The archive page. </summary>
         public ArchiveViewModel ArchivePage { get; } = new();
@@ -39,7 +39,6 @@ namespace Game_Catalog.ViewModels
             _currentPage = LibraryPage;
             LibraryPage.GameSelected += game => NavigateToGame(game);
             ArchivePage.GameSelected += game => NavigateToGame(game);
-            StudioPage.StudioSelected += studio => NavigateToStudio(studio);
         }
 
         /// <summary> Disposes the previous page when navigating away from it. </summary>
@@ -66,13 +65,6 @@ namespace Game_Catalog.ViewModels
         {
             var detailVm = new GameDetailsViewModel(game);
             detailVm.BackRequested += () => CurrentPage = game.IsArchived ? ArchivePage : LibraryPage;
-            CurrentPage = detailVm;
-        }
-        public void NavigateToStudio(LegacyStudio studio)
-        {
-            var detailVm = new LegacyStudioDetailsViewModel(studio);
-            detailVm.BackRequested += () => CurrentPage = StudioPage;
-            detailVm.GameSelected += game => NavigateToGame(game);
             CurrentPage = detailVm;
         }
     }

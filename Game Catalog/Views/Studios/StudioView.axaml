@@ -1,0 +1,184 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+			 xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+			 xmlns:vm="using:Game_Catalog.ViewModels"
+			 xmlns:conv="using:Game_Catalog.Converters"
+			 x:Class="Game_Catalog.Views.StudioView"
+			 x:DataType="vm:StudioViewModel">
+
+	<Grid RowDefinitions="Auto,*">
+
+		<!-- Toolbar -->
+		<Border Grid.Row="0" Padding="16,12">
+			<Grid ColumnDefinitions="Auto,*">
+				<TextBlock Grid.Column="0" Text="Студії"
+						   FontSize="20" FontWeight="Bold"
+						   VerticalAlignment="Center"/>
+				<StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="8"
+							HorizontalAlignment="Right" VerticalAlignment="Center">
+					<TextBox Text="{Binding SearchText}"
+							 PlaceholderText="🔍 Пошук студії..."
+							 Width="220" VerticalAlignment="Center"/>
+					<Button Content="{Binding FiltersButtonText}"
+							Command="{Binding OpenFiltersCommand}"
+							VerticalAlignment="Center"/>
+					<Button Content="✕ Скинути"
+							Command="{Binding ResetFiltersCommand}"
+							IsVisible="{Binding HasActiveFilter}"
+							VerticalAlignment="Center"/>
+				</StackPanel>
+			</Grid>
+		</Border>
+
+		<!-- Studios table -->
+		<DataGrid Grid.Row="1"
+				  ItemsSource="{Binding Rows}"
+				  IsVisible="{Binding !IsEmpty}"
+				  AutoGenerateColumns="False"
+				  IsReadOnly="True"
+				  CanUserSortColumns="True"
+				  CanUserResizeColumns="True"
+				  CanUserReorderColumns="False"
+				  GridLinesVisibility="None"
+				  HeadersVisibility="Column"
+				  BorderThickness="0"
+				  Background="Transparent"
+				  RowHeight="44"
+				  Margin="8,0">
+
+			<DataGrid.Styles>
+				<Style Selector="DataGridColumnHeader">
+					<Setter Property="Background" Value="Transparent"/>
+					<Setter Property="FontSize" Value="12"/>
+				</Style>
+				<Style Selector="DataGridRow">
+					<Setter Property="Background"
+							Value="{ReflectionBinding IsMatch, Converter={x:Static conv:SearchMatchBrushConverter.Instance}}"/>
+				</Style>
+			</DataGrid.Styles>
+
+			<DataGrid.Columns>
+				<DataGridTextColumn Header="Назва" Width="2*"
+									Binding="{ReflectionBinding StudioName}"/>
+				<DataGridTextColumn Header="Країна" Width="*"
+									Binding="{ReflectionBinding Country}"/>
+				<DataGridTextColumn Header="Рік заснування" Width="150"
+									Binding="{ReflectionBinding FoundationYear, TargetNullValue='—'}"/>
+				<DataGridTextColumn Header="Основний жанр" Width="*"
+									Binding="{ReflectionBinding MainGenreName}"/>
+				<DataGridTemplateColumn Header="" Width="70" CanUserSort="False" CanUserResize="False">
+					<DataGridTemplateColumn.CellTemplate>
+						<DataTemplate x:DataType="vm:StudioRow">
+							<Button Content="🗑" ToolTip.Tip="Видалити"
+									HorizontalAlignment="Center"
+									Command="{Binding $parent[DataGrid].((vm:StudioViewModel)DataContext).DeleteCommand}"
+									CommandParameter="{Binding Studio}"/>
+						</DataTemplate>
+					</DataGridTemplateColumn.CellTemplate>
+				</DataGridTemplateColumn>
+			</DataGrid.Columns>
+		</DataGrid>
+
+		<!-- Empty state -->
+		<StackPanel Grid.Row="1"
+					IsVisible="{Binding IsEmpty}"
+					HorizontalAlignment="Center" VerticalAlignment="Center" Spacing="16">
+			<TextBlock Text="🏢" FontSize="48" HorizontalAlignment="Center"/>
+			<TextBlock Text="Студій немає" FontSize="18" FontWeight="SemiBold" HorizontalAlignment="Center"/>
+			<TextBlock Text="Додайте першу студію" Opacity="0.6" HorizontalAlignment="Center"/>
+		</StackPanel>
+
+		<!-- Filtered empty state -->
+		<StackPanel Grid.Row="1"
+					IsVisible="{Binding IsFilteredEmpty}"
+					HorizontalAlignment="Center" VerticalAlignment="Center" Spacing="12">
+			<TextBlock Text="🔍" FontSize="48" HorizontalAlignment="Center"/>
+			<TextBlock Text="Студій не знайдено" FontSize="18" FontWeight="SemiBold" HorizontalAlignment="Center"/>
+			<TextBlock Text="Спробуйте змінити фільтр" Opacity="0.6" HorizontalAlignment="Center"/>
+		</StackPanel>
+
+		<!-- Filter side panel with a dimmed, click-blocking backdrop -->
+		<Grid Grid.Row="0" Grid.RowSpan="2" IsVisible="{Binding IsFilterPanelOpen}">
+			<Border Background="{DynamicResource OverlayScrim}" PointerPressed="OnOverlayPressed"/>
+			<Border HorizontalAlignment="Right" Width="340"
+					Background="{DynamicResource SidebarBackground}"
+					BorderBrush="{DynamicResource SidebarBorder}"
+					BorderThickness="1,0,0,0"
+					BoxShadow="-6 0 20 0 #40000000">
+				<Grid RowDefinitions="Auto,*,Auto">
+
+					<!-- Header -->
+					<Border Grid.Row="0" Padding="12,12"
+							BorderBrush="{DynamicResource SidebarBorder}" BorderThickness="0,0,0,1">
+						<Grid ColumnDefinitions="Auto,*,Auto">
+							<Button Grid.Column="0" Content="✕"
+									Command="{Binding CancelFiltersCommand}"
+									Background="Transparent" Padding="10,4"/>
+							<TextBlock Grid.Column="1" Text="Фільтри"
+									   FontSize="18" FontWeight="Bold"
+									   Margin="12,0" VerticalAlignment="Center"/>
+							<Button Grid.Column="2" Content="Скинути"
+									Command="{Binding ClearDraftCommand}"
+									Background="Transparent" Padding="10,4"/>
+						</Grid>
+					</Border>
+
+					<!-- Filter groups -->
+					<ScrollViewer Grid.Row="1">
+						<StackPanel>
+
+							<StackPanel Spacing="8" Margin="20,16">
+								<TextBlock Text="Країна" FontSize="15" FontWeight="SemiBold"/>
+								<ItemsControl ItemsSource="{Binding CountryOptions}">
+									<ItemsControl.ItemTemplate>
+										<DataTemplate x:DataType="vm:FilterOption">
+											<CheckBox Content="{Binding Name}" IsChecked="{Binding IsChecked}"/>
+										</DataTemplate>
+									</ItemsControl.ItemTemplate>
+								</ItemsControl>
+							</StackPanel>
+
+							<Border Height="1" Background="{DynamicResource SidebarBorder}"/>
+
+							<StackPanel Spacing="8" Margin="20,16">
+								<TextBlock Text="Основний жанр" FontSize="15" FontWeight="SemiBold"/>
+								<ItemsControl ItemsSource="{Binding GenreOptions}">
+									<ItemsControl.ItemTemplate>
+										<DataTemplate x:DataType="vm:FilterOption">
+											<CheckBox Content="{Binding Name}" IsChecked="{Binding IsChecked}"/>
+										</DataTemplate>
+									</ItemsControl.ItemTemplate>
+								</ItemsControl>
+							</StackPanel>
+
+							<Border Height="1" Background="{DynamicResource SidebarBorder}"/>
+
+							<StackPanel Spacing="8" Margin="20,16">
+								<TextBlock Text="Рік заснування" FontSize="15" FontWeight="SemiBold"/>
+								<Grid ColumnDefinitions="Auto,8,*,16,Auto,8,*">
+									<TextBlock Grid.Column="0" Text="від" VerticalAlignment="Center"/>
+									<NumericUpDown Grid.Column="2" FormatString="0"
+												   Value="{Binding DraftYearFrom, Converter={x:Static conv:DecimalToNullableIntConverter.Instance}}"/>
+									<TextBlock Grid.Column="4" Text="до" VerticalAlignment="Center"/>
+									<NumericUpDown Grid.Column="6" FormatString="0"
+												   Value="{Binding DraftYearTo, Converter={x:Static conv:DecimalToNullableIntConverter.Instance}}"/>
+								</Grid>
+							</StackPanel>
+
+						</StackPanel>
+					</ScrollViewer>
+
+					<!-- Apply -->
+					<Border Grid.Row="2" Padding="20,12"
+							BorderBrush="{DynamicResource SidebarBorder}" BorderThickness="0,1,0,0">
+						<Button Content="Застосувати"
+								Command="{Binding ApplyFiltersCommand}"
+								HorizontalAlignment="Stretch"
+								Padding="0,10"/>
+					</Border>
+
+				</Grid>
+			</Border>
+		</Grid>
+
+	</Grid>
+</UserControl>

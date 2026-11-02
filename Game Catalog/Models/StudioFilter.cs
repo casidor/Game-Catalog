@@ -1,25 +1,16 @@
-﻿namespace Game_Catalog.Models
-{
-    /// <summary> Sort order of the studio list. Values are used directly in SQL. </summary>
-    public enum StudioSort
-    {
-        NameAsc = 1,
-        NameDesc = 2,
-        YearAsc = 3,
-        YearDesc = 4
-    }
+﻿using System;
+using System.Collections.Generic;
 
-    /// <summary> Search, filter and sort criteria for the studio list. Null or empty means "not set". </summary>
+namespace Game_Catalog.Models
+{
+    /// <summary> Filter criteria for the studio list. Empty lists and null bounds mean "not set". </summary>
     public sealed record StudioFilter
     {
-        /// <summary> Text searched in the studio name and country. </summary>
-        public string? Search { get; init; }
+        /// <summary> Countries to keep. Empty means any country. </summary>
+        public IReadOnlyList<string> Countries { get; init; } = Array.Empty<string>();
 
-        /// <summary> Exact country to match. </summary>
-        public string? Country { get; init; }
-
-        /// <summary> Main genre id to match. </summary>
-        public int? MainGenreId { get; init; }
+        /// <summary> Main genre ids to keep. Empty means any genre. </summary>
+        public IReadOnlyList<int> GenreIds { get; init; } = Array.Empty<int>();
 
         /// <summary> Lower bound of the foundation year, inclusive. </summary>
         public int? YearFrom { get; init; }
@@ -27,7 +18,8 @@
         /// <summary> Upper bound of the foundation year, inclusive. </summary>
         public int? YearTo { get; init; }
 
-        /// <summary> Sort order of the result. </summary>
-        public StudioSort SortBy { get; init; } = StudioSort.NameAsc;
+        /// <summary> True when no criterion is set. </summary>
+        public bool IsEmpty =>
+            Countries.Count == 0 && GenreIds.Count == 0 && YearFrom == null && YearTo == null;
     }
 }

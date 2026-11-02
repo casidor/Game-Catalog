@@ -2,13 +2,14 @@
 using Game_Catalog.Models;
 using Microsoft.Data.Sqlite;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace Game_Catalog.Data.Repositories
 {
     /// <summary> Data access for the Studio table. </summary>
     public static class StudioRepository
     {
-        /// <summary> Returns studios matching the filter, ordered as requested. All work is done by the database. </summary>
+        /// <summary> Returns studios matching the filter, ordered by name. Filtering is done by the database. </summary>
         public static List<Studio> GetAll(StudioFilter filter) =>
             Db.Run("Не вдалося завантажити студії", () =>
             {
@@ -18,27 +19,19 @@ namespace Game_Catalog.Data.Repositories
                            s.main_genre, g.genre_name AS main_genre_name, s.website
                     FROM Studio s
                     LEFT JOIN Genre g ON g.genre_id = s.main_genre
-                    WHERE (instr(lower_ua(s.studio_name), lower_ua(@Search)) > 0
-                           OR instr(lower_ua(COALESCE(s.country, '')), lower_ua(@Search)) > 0)
-                      AND (@Country     IS NULL OR s.country = @Country)
-                      AND (@MainGenreId IS NULL OR s.main_genre = @MainGenreId)
-                      AND (@YearFrom    IS NULL OR s.foundation_year >= @YearFrom)
-                      AND (@YearTo      IS NULL OR s.foundation_year <= @YearTo)
-                    ORDER BY
-                        CASE WHEN @SortBy IN (3, 4) THEN s.foundation_year IS NULL END,
-                        CASE WHEN @SortBy = 1 THEN lower_ua(s.studio_name) END ASC,
-                        CASE WHEN @SortBy = 2 THEN lower_ua(s.studio_name) END DESC,
-                        CASE WHEN @SortBy = 3 THEN s.foundation_year END ASC,
-                        CASE WHEN @SortBy = 4 THEN s.foundation_year END DESC,
-                        s.studio_id",
+                    WHERE (@CountryCount = 0 OR s.country    IN @Countries)
+                      AND (@GenreCount   = 0 OR s.main_genre IN @GenreIds)
+                      AND (@YearFrom IS NULL OR s.foundation_year >= @YearFrom)
+                      AND (@YearTo   IS NULL OR s.foundation_year <= @YearTo)
+                    ORDER BY lower_ua(s.studio_name), s.studio_id",
                     new
                     {
-                        Search = filter.Search?.Trim() ?? string.Empty,
-                        Country = string.IsNullOrWhiteSpace(filter.Country) ? null : filter.Country,
-                        filter.MainGenreId,
+                        CountryCount = filter.Countries.Count,
+                        Countries = filter.Countries.ToArray(),
+                        GenreCount = filter.GenreIds.Count,
+                        GenreIds = filter.GenreIds.ToArray(),
                         filter.YearFrom,
-                        filter.YearTo,
-                        SortBy = (int)filter.SortBy
+                        filter.YearTo
                     }).AsList();
             });
 

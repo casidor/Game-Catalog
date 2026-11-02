@@ -24,6 +24,7 @@
                     <SolidColorBrush x:Key="ButtonBackground" Color="#2a2a3a"/>
                     <SolidColorBrush x:Key="ButtonBackgroundPointerOver" Color="#363650"/>
                     <SolidColorBrush x:Key="ButtonBackgroundPressed" Color="#4a4a70"/>
+                    <SolidColorBrush x:Key="OverlayScrim" Color="#80000000"/>
                 </ResourceDictionary>
 
                 <ResourceDictionary x:Key="Light">
@@ -37,6 +38,7 @@
                     <SolidColorBrush x:Key="ButtonBackground" Color="#d0d0e2"/>
                     <SolidColorBrush x:Key="ButtonBackgroundPointerOver" Color="#c0c0d6"/>
                     <SolidColorBrush x:Key="ButtonBackgroundPressed" Color="#adadc8"/>
+                    <SolidColorBrush x:Key="OverlayScrim" Color="#26000000"/>
                 </ResourceDictionary>
 
             </ResourceDictionary.ThemeDictionaries>
