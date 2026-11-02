@@ -25,4 +25,7 @@ public interface IDialogService
 
     /// <summary> Shows the tag editor and returns the entered tag, or null if cancelled. </summary>
     Task<Tag?> ShowTagEditorAsync(Tag? tag = null);
+
+    /// <summary> Shows the studio editor and returns the entered studio, or null if cancelled. </summary>
+    Task<Studio?> ShowStudioEditorAsync(Studio? studio = null);
 }

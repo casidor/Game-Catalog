@@ -11,6 +11,7 @@
 
     <Application.Resources>
         <ResourceDictionary>
+            <Thickness x:Key="ComboBoxPadding">12,6,0,6</Thickness>
             <ResourceDictionary.ThemeDictionaries>
 
                 <ResourceDictionary x:Key="Dark">

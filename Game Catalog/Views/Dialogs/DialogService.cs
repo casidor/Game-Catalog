@@ -5,6 +5,7 @@ using Game_Catalog.Models;
 using Game_Catalog.Services;
 using Game_Catalog.ViewModels;
 using System;
+using System.Linq;
 using System.Threading.Tasks;
 
 namespace Game_Catalog.Views;
@@ -12,8 +13,15 @@ namespace Game_Catalog.Views;
 /// <summary> Avalonia implementation of <see cref="IDialogService"/> based on the main window. </summary>
 public sealed class DialogService : IDialogService
 {
-    private static Window? Owner =>
-        (Application.Current?.ApplicationLifetime as IClassicDesktopStyleApplicationLifetime)?.MainWindow;
+    private static Window? Owner
+    {
+        get
+        {
+            if (Application.Current?.ApplicationLifetime is not IClassicDesktopStyleApplicationLifetime desktop)
+                return null;
+            return desktop.Windows.LastOrDefault(w => w.IsActive) ?? desktop.MainWindow;
+        }
+    }
 
     /// <inheritdoc/>
     public async Task<bool> ConfirmAsync(string title, string message,
@@ -70,5 +78,15 @@ public sealed class DialogService : IDialogService
         var vm = tag == null ? new AddTagViewModel() : new AddTagViewModel(tag);
         await new AddTagWindow { DataContext = vm }.ShowDialog(owner);
         return vm.Confirmed ? vm.BuildTag() : null;
+    }
+
+    /// <inheritdoc/>
+    public async Task<Studio?> ShowStudioEditorAsync(Studio? studio = null)
+    {
+        if (Owner is not { } owner) return null;
+
+        var vm = studio == null ? new AddStudioViewModel() : new AddStudioViewModel(studio);
+        await new AddStudioWindow { DataContext = vm }.ShowDialog(owner);
+        return vm.Confirmed ? vm.BuildStudio() : null;
     }
 }

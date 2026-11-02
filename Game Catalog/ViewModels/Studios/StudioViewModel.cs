@@ -187,6 +187,44 @@ namespace Game_Catalog.ViewModels
             Reload();
         }
 
+        /// <summary> Opens the editor and saves a new studio. </summary>
+        [RelayCommand]
+        private async Task AddAsync()
+        {
+            var studio = await Dialogs.Current.ShowStudioEditorAsync();
+            if (studio == null) return;
+
+            try
+            {
+                StudioRepository.Insert(studio);
+            }
+            catch (DatabaseException ex)
+            {
+                await ShowErrorAsync("Помилка збереження студії", ex);
+                return;
+            }
+            Load();
+        }
+
+        /// <summary> Opens the editor for the given studio and saves the changes. </summary>
+        [RelayCommand]
+        private async Task EditAsync(Studio studio)
+        {
+            var edited = await Dialogs.Current.ShowStudioEditorAsync(studio);
+            if (edited == null) return;
+
+            try
+            {
+                StudioRepository.Update(edited);
+            }
+            catch (DatabaseException ex)
+            {
+                await ShowErrorAsync("Помилка збереження студії", ex);
+                return;
+            }
+            Load();
+        }
+
         /// <summary> Deletes the studio after confirmation unless it still has games. </summary>
         [RelayCommand]
         private async Task DeleteAsync(Studio studio)
