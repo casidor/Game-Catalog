@@ -20,7 +20,7 @@ namespace Game_Catalog.Models
         /// <summary>
         /// Collection of all games in the library.
         /// </summary>
-        public ObservableCollection<Game> Games { get; } = new();
+        public ObservableCollection<LegacyGame> Games { get; } = new();
 
         /// <summary>
         /// Collection of all game development studios.
@@ -34,10 +34,10 @@ namespace Game_Catalog.Models
         public ObservableCollection<PlaySession> Sessions { get; } = new();
 
         /// <summary> Games that are not archived. Use this for statistics and disk checks. </summary>
-        public IEnumerable<Game> ActiveGames => Games.Where(g => !g.IsArchived);
+        public IEnumerable<LegacyGame> ActiveGames => Games.Where(g => !g.IsArchived);
 
         /// <summary> Removes a game and all its DLC and play sessions from the application data. </summary>
-        public void RemoveGameCascade(Game game)
+        public void RemoveGameCascade(LegacyGame game)
         {
             var ids = Games
                 .Where(g => g.ParentGameId == game.Id)

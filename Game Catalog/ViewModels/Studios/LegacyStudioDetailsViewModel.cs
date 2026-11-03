@@ -30,7 +30,7 @@ namespace Game_Catalog.ViewModels
         public event Action? BackRequested;
 
         /// <summary> Raised when the user selects a game to view details. </summary>
-        public event Action<Game>? GameSelected;
+        public event Action<LegacyGame>? GameSelected;
 
         /// <summary>
         /// Name of the studio.
@@ -50,7 +50,7 @@ namespace Game_Catalog.ViewModels
         public string DisplayWebsite => string.IsNullOrWhiteSpace(Studio.Website) ? "Невідомо" : Studio.Website;
 
         /// <summary> Games developed by this studio. </summary>
-        public IEnumerable<Game> StudioGames =>
+        public IEnumerable<LegacyGame> StudioGames =>
             AppData.Instance.Games.Where(g => g.Developer?.Id == Studio.Id);
 
         /// <summary> Indicates whether this studio has any games in the library. </summary>
@@ -121,6 +121,6 @@ namespace Game_Catalog.ViewModels
         }
 
         [RelayCommand]
-        private void SelectGame(Game game) => GameSelected?.Invoke(game);
+        private void SelectGame(LegacyGame game) => GameSelected?.Invoke(game);
     }
 }

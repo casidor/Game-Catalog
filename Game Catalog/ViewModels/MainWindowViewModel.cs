@@ -15,13 +15,13 @@ namespace Game_Catalog.ViewModels
         private ViewModelBase _currentPage;
 
         /// <summary> The game library page. </summary>
-        public LibraryViewModel LibraryPage { get; } = new();
+        public LegacyLibraryViewModel LibraryPage { get; } = new();
 
         /// <summary> The studio management page. </summary>
         public StudioViewModel StudioPage { get; } = new();
 
         /// <summary> The archive page. </summary>
-        public ArchiveViewModel ArchivePage { get; } = new();
+        public LegacyArchiveViewModel ArchivePage { get; } = new();
 
         /// <summary> The play sessions page. </summary>
         public SessionsViewModel SessionsPage { get; } = new();
@@ -62,9 +62,9 @@ namespace Game_Catalog.ViewModels
         /// <summary>
         /// Navigates to the game detail page.
         /// </summary>
-        public void NavigateToGame(Game game)
+        public void NavigateToGame(LegacyGame game)
         {
-            var detailVm = new GameDetailsViewModel(game);
+            var detailVm = new LegacyGameDetailsViewModel(game);
             detailVm.BackRequested += () => CurrentPage = game.IsArchived ? ArchivePage : LibraryPage;
             CurrentPage = detailVm;
         }

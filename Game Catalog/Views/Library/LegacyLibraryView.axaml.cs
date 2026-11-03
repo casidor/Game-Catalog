@@ -8,16 +8,16 @@ using Game_Catalog.ViewModels;
 
 namespace Game_Catalog.Views;
 
-public partial class LibraryView : UserControl
+public partial class LegacyLibraryView : UserControl
 {
-    public LibraryView()
+    public LegacyLibraryView()
     {
         InitializeComponent();
     }
     private async void OnAddGameClick(object sender, RoutedEventArgs e)
     {
-        var vm = new AddGameViewModel(AppData.Instance.Studios);
-        var window = new AddGameWindow { DataContext = vm };
+        var vm = new LegacyAddGameViewModel(AppData.Instance.Studios);
+        var window = new LegacyAddGameWindow { DataContext = vm };
 
         var parentWindow = TopLevel.GetTopLevel(this) as Window;
         await window.ShowDialog(parentWindow!);
@@ -38,7 +38,7 @@ public partial class LibraryView : UserControl
     }
     private void OnSelectionChanged(object sender, SelectionChangedEventArgs e)
     {
-        if (DataContext is LibraryViewModel vm && vm.SelectedGame != null)
+        if (DataContext is LegacyLibraryViewModel vm && vm.SelectedGame != null)
         {
             vm.SelectGameCommand.Execute(vm.SelectedGame);
             vm.SelectedGame = null;

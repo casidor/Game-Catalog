@@ -9,9 +9,9 @@ using System.Threading.Tasks;
 
 namespace Game_Catalog.Views;
 
-public partial class GameDetailsView : UserControl
+public partial class LegacyGameDetailsView : UserControl
 {
-    public GameDetailsView()
+    public LegacyGameDetailsView()
     {
         InitializeComponent();
     }
@@ -19,10 +19,10 @@ public partial class GameDetailsView : UserControl
     /// <summary>Opens the edit dialog and applies changes to the game on confirmation.</summary>
     private async void OnEditClick(object sender, RoutedEventArgs e)
     {
-        if (DataContext is not GameDetailsViewModel detailVm) return;
+        if (DataContext is not LegacyGameDetailsViewModel detailVm) return;
 
-        var vm = new AddGameViewModel(detailVm.Game, AppData.Instance.Studios);
-        var window = new AddGameWindow { DataContext = vm };
+        var vm = new LegacyAddGameViewModel(detailVm.Game, AppData.Instance.Studios);
+        var window = new LegacyAddGameWindow { DataContext = vm };
 
         var parentWindow = TopLevel.GetTopLevel(this) as Window;
         await window.ShowDialog(parentWindow!);
@@ -70,13 +70,13 @@ public partial class GameDetailsView : UserControl
     /// <summary>Shows a confirmation dialog and permanently deletes the game if confirmed.</summary>
     private void OnDeleteClick(object sender, RoutedEventArgs e)
     {
-        if (DataContext is not GameDetailsViewModel detailVm) return;
+        if (DataContext is not LegacyGameDetailsViewModel detailVm) return;
         var parent = TopLevel.GetTopLevel(this) as Window;
         _ = DeleteGameAsync(detailVm, parent!);
     }
 
     /// <summary>Shows a confirmation dialog and permanently deletes the game if confirmed.</summary>
-    private async Task DeleteGameAsync(GameDetailsViewModel detailVm, Window parent)
+    private async Task DeleteGameAsync(LegacyGameDetailsViewModel detailVm, Window parent)
     {
         var confirmed = await ConfirmationWindow.ShowAsync(
             parent,
@@ -108,7 +108,7 @@ public partial class GameDetailsView : UserControl
     /// <summary> Sets the archived status of the game and updates the database and main list accordingly. </summary>
     private async Task SetArchivedAsync(bool archived)
     {
-        if (DataContext is not GameDetailsViewModel detailVm) return;
+        if (DataContext is not LegacyGameDetailsViewModel detailVm) return;
         var parent = TopLevel.GetTopLevel(this) as Window;
         var game = detailVm.Game;
 

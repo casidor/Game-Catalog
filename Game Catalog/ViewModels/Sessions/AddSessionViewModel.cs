@@ -15,7 +15,7 @@ namespace Game_Catalog.ViewModels
         [Required(ErrorMessage = "Оберіть гру")]
         [NotifyDataErrorInfo]
         [ObservableProperty]
-        private Game? _selectedGame;
+        private LegacyGame? _selectedGame;
 
         /// <summary> Date the session started. </summary>
         [Required(ErrorMessage = "Вкажіть дату початку")]
@@ -54,7 +54,7 @@ namespace Game_Catalog.ViewModels
         public bool HasFormError => !string.IsNullOrEmpty(FormError);
 
         /// <summary> Games available for selection. </summary>
-        public ObservableCollection<Game> Games { get; }
+        public ObservableCollection<LegacyGame> Games { get; }
 
         /// <summary> Indicates whether the user confirmed the dialog. </summary>
         public bool Confirmed { get; private set; }
@@ -65,14 +65,14 @@ namespace Game_Catalog.ViewModels
         /// <summary> Title displayed in the window header. </summary>
         public string WindowTitle { get; }
 
-        public AddSessionViewModel(ObservableCollection<Game> games)
+        public AddSessionViewModel(ObservableCollection<LegacyGame> games)
         {
             Games = games;
             WindowTitle = "Додати сесію";
         }
 
         /// <summary> Initializes the dialog with an existing session for editing. </summary>
-        public AddSessionViewModel(PlaySession session, ObservableCollection<Game> games) : this(games)
+        public AddSessionViewModel(PlaySession session, ObservableCollection<LegacyGame> games) : this(games)
         {
             WindowTitle = "Редагувати сесію";
             SelectedGame = session.Game ?? games.FirstOrDefault(g => g.Id == session.GameId);

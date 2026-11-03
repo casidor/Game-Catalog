@@ -109,7 +109,7 @@ public partial class LegacyStudioDetailsView : UserControl
     private void OnGameSelectionChanged(object sender, SelectionChangedEventArgs e)
     {
         if (DataContext is not LegacyStudioDetailsViewModel vm) return;
-        if (sender is not ListBox lb || lb.SelectedItem is not Game game) return;
+        if (sender is not ListBox lb || lb.SelectedItem is not LegacyGame game) return;
         lb.SelectedItem = null;
         vm.SelectGameCommand.Execute(game);
     }

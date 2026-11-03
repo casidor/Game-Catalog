@@ -13,7 +13,7 @@ namespace Game_Catalog.ViewModels
     public abstract partial class FilterableGameViewModel : ViewModelBase
     {
         /// <summary> Source game collection provided by the derived class. </summary>
-        protected abstract ObservableCollection<Game> SourceGames { get; }
+        protected abstract ObservableCollection<LegacyGame> SourceGames { get; }
 
         /// <summary> Text used to search games by title. </summary>
         [ObservableProperty] private string _searchText = string.Empty;
@@ -31,11 +31,11 @@ namespace Game_Catalog.ViewModels
         [ObservableProperty] private GameStatus? _selectedStatusFilter;
 
         protected abstract bool ArchivedFilter { get; }
-        private IEnumerable<Game> RelevantGames =>
+        private IEnumerable<LegacyGame> RelevantGames =>
             SourceGames.Where(g => g.IsArchived == ArchivedFilter);
 
         /// <summary> Filtered and searched game list based on active criteria. </summary>
-        public IEnumerable<Game> FilteredGames => RelevantGames
+        public IEnumerable<LegacyGame> FilteredGames => RelevantGames
             .Where(g => string.IsNullOrWhiteSpace(SearchText) ||
             g.Title.Contains(SearchText, StringComparison.OrdinalIgnoreCase))
             .Where(g => SelectedGenre == null ||

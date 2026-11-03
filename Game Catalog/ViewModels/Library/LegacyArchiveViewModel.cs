@@ -8,23 +8,23 @@ using System.Linq;
 namespace Game_Catalog.ViewModels
 {
     /// <summary> ViewModel for the archived games page. </summary>
-    public partial class ArchiveViewModel : FilterableGameViewModel
+    public partial class LegacyArchiveViewModel : FilterableGameViewModel
     {
         /// <summary> Source collection for the filter base class. </summary>
-        protected override ObservableCollection<Game> SourceGames => AppData.Instance.Games;
+        protected override ObservableCollection<LegacyGame> SourceGames => AppData.Instance.Games;
         protected override bool ArchivedFilter => true;
 
         /// <summary> Currently selected archived game. </summary>
-        [ObservableProperty] private Game? _selectedGame;
+        [ObservableProperty] private LegacyGame? _selectedGame;
 
         /// <summary> Indicates whether the archive is empty. </summary>
         public bool IsEmpty => !AppData.Instance.Games.Any(g => g.IsArchived);
 
         /// <summary> Raised when the user selects a game to view details. </summary>
-        public event Action<Game>? GameSelected;
+        public event Action<LegacyGame>? GameSelected;
 
         /// <summary> Initializes the ViewModel and subscribes to collection changes. </summary>
-        public ArchiveViewModel()
+        public LegacyArchiveViewModel()
         {
             InitializeCollection();
             AppData.Instance.Games.CollectionChanged += (_, _) => OnPropertyChanged(nameof(IsEmpty));
@@ -32,6 +32,6 @@ namespace Game_Catalog.ViewModels
 
         /// <summary> Navigates to the game detail page. </summary>
         [RelayCommand]
-        private void SelectGame(Game game) => GameSelected?.Invoke(game);
+        private void SelectGame(LegacyGame game) => GameSelected?.Invoke(game);
     }
 }

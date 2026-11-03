@@ -3,8 +3,8 @@
 			 xmlns:vm="using:Game_Catalog.ViewModels"
 			 xmlns:models="using:Game_Catalog.Models"
 			 xmlns:conv="using:Game_Catalog.Converters"
-			 x:Class="Game_Catalog.Views.GameDetailsView"
-			 x:DataType="vm:GameDetailsViewModel">
+			 x:Class="Game_Catalog.Views.LegacyGameDetailsView"
+			 x:DataType="vm:LegacyGameDetailsViewModel">
 	<Grid>
 
 		<!-- Layer 1: blurred cover over the whole page, covered by a theme-colored veil -->

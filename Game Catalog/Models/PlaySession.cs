@@ -14,7 +14,7 @@ namespace Game_Catalog.Models
 
         /// <summary> Reference to the game this session belongs to. Excluded from JSON serialization. </summary>
         [JsonIgnore]
-        public Game? Game { get; set; }
+        public LegacyGame? Game { get; set; }
 
         /// <summary> Time the session started. </summary>
         public DateTime StartTime { get; set; }

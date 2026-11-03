@@ -197,10 +197,10 @@ namespace Game_Catalog.Services
 
         #region Game
 
-        public static List<Game> GetGames(IEnumerable<LegacyStudio> studios)
+        public static List<LegacyGame> GetGames(IEnumerable<LegacyStudio> studios)
         {
             var studioById = studios.ToDictionary(s => s.Id);
-            var result = new List<Game>();
+            var result = new List<LegacyGame>();
 
             using var connection = OpenConnection();
             using var cmd = connection.CreateCommand();
@@ -213,7 +213,7 @@ namespace Game_Catalog.Services
             using var reader = cmd.ExecuteReader();
             while (reader.Read())
             {
-                var game = new Game
+                var game = new LegacyGame
                 {
                     Id = reader.GetInt32(0),
                     DeveloperId = reader.GetInt32(1),
@@ -242,7 +242,7 @@ namespace Game_Catalog.Services
             return result;
         }
 
-        public static void InsertGame(Game game) =>
+        public static void InsertGame(LegacyGame game) =>
             Execute("Не вдалося зберегти гру", () =>
             {
                 if (game.Developer != null)
@@ -268,7 +268,7 @@ namespace Game_Catalog.Services
                 game.Id = (int)(long)cmd.ExecuteScalar()!;
             });
 
-        public static void UpdateGame(Game game) =>
+        public static void UpdateGame(LegacyGame game) =>
             Execute("Не вдалося оновити гру", () =>
             {
                 if (game.Developer != null)
@@ -312,7 +312,7 @@ namespace Game_Catalog.Services
                 cmd.ExecuteNonQuery();
             });
 
-        private static void AddGameParameters(SqliteCommand cmd, Game game)
+        private static void AddGameParameters(SqliteCommand cmd, LegacyGame game)
         {
             cmd.Parameters.AddWithValue("@developer_id", game.DeveloperId);
             cmd.Parameters.AddWithValue("@parent_game_id", (object?)game.ParentGameId ?? DBNull.Value);
@@ -335,7 +335,7 @@ namespace Game_Catalog.Services
 
         #region PlaySession
 
-        public static List<PlaySession> GetSessions(IEnumerable<Game> games)
+        public static List<PlaySession> GetSessions(IEnumerable<LegacyGame> games)
         {
             var gameById = games.ToDictionary(g => g.Id);
             var result = new List<PlaySession>();

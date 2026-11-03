@@ -20,7 +20,7 @@ namespace Game_Catalog.ViewModels
     /// <summary>
     /// ViewModel for the add game dialog window.
     /// </summary>
-    public partial class AddGameViewModel : ViewModelBase
+    public partial class LegacyAddGameViewModel : ViewModelBase
     {
         /// <summary>
         /// Game title entered by the user.
@@ -187,13 +187,13 @@ namespace Game_Catalog.ViewModels
         /// </summary>
         public string WindowTitle { get; }
 
-        private readonly Game? _editingGame;
+        private readonly LegacyGame? _editingGame;
         partial void OnSizeGBChanged(double value) => DiskOverflowError = string.Empty;
 
         private bool _isInitializing;
         private CancellationTokenSource? _searchCts;
 
-        public AddGameViewModel(ObservableCollection<LegacyStudio> studios)
+        public LegacyAddGameViewModel(ObservableCollection<LegacyStudio> studios)
         {
             Studios = studios;
             SuggestedDeveloperNames.CollectionChanged += (_, _) => OnPropertyChanged(nameof(HasSuggestedDevelopers));
@@ -201,7 +201,7 @@ namespace Game_Catalog.ViewModels
         }
 
         /// <summary>Builds and returns the game object from entered data.</summary>
-        public Game BuildGame() => new Game
+        public LegacyGame BuildGame() => new LegacyGame
         {
             Title = Title,
             Developer = SelectedStudio,
@@ -222,7 +222,7 @@ namespace Game_Catalog.ViewModels
         /// </summary>
         /// <param name="game">The game to edit.</param>
         /// <param name="studios">Available studios collection.</param>
-        public AddGameViewModel(Game game, ObservableCollection<LegacyStudio> studios)
+        public LegacyAddGameViewModel(LegacyGame game, ObservableCollection<LegacyStudio> studios)
         {
             _editingGame = game;
             WindowTitle = "Редагувати гру";

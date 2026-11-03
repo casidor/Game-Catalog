@@ -13,9 +13,9 @@ using System.Threading.Tasks;
 
 namespace Game_Catalog.Views;
 
-public partial class AddGameWindow : Window
+public partial class LegacyAddGameWindow : Window
 {
-    public AddGameWindow()
+    public LegacyAddGameWindow()
     {
         InitializeComponent();
     }
@@ -23,26 +23,26 @@ public partial class AddGameWindow : Window
     {
         base.OnDataContextChanged(e);
 
-        if (DataContext is AddGameViewModel vm)
+        if (DataContext is LegacyAddGameViewModel vm)
             vm.CloseRequested += Close;
     }
     protected override void OnKeyDown(KeyEventArgs e)
     {
-        if (DataContext is not AddGameViewModel vm) { base.OnKeyDown(e); return; }
+        if (DataContext is not LegacyAddGameViewModel vm) { base.OnKeyDown(e); return; }
         if (e.Key == Key.Escape) { vm.CancelCommand.Execute(null); e.Handled = true; }
         else if (e.Key == Key.Enter && !e.Handled) { vm.ConfirmCommand.Execute(null); e.Handled = true; }
         base.OnKeyDown(e);
     }
     private void OnSuggestionSelected(object sender, SelectionChangedEventArgs e)
     {
-        if (DataContext is not AddGameViewModel vm) return;
+        if (DataContext is not LegacyAddGameViewModel vm) return;
         if (sender is not ListBox lb) return;
         if (lb.SelectedItem is not RawgGameResult result) return;
 
         lb.SelectedItem = null;
         vm.SelectSuggestionCommand.Execute(result);
     }
-    private async Task AddStudioAsync(AddGameViewModel vm, string? name = null)
+    private async Task AddStudioAsync(LegacyAddGameViewModel vm, string? name = null)
     {
         var studioVm = new LegacyAddStudioViewModel();
         if (name != null) studioVm.Name = name;
@@ -65,12 +65,12 @@ public partial class AddGameWindow : Window
 
     private async void OnAddStudioClick(object sender, RoutedEventArgs e)
     {
-        if (DataContext is AddGameViewModel vm) await AddStudioAsync(vm);
+        if (DataContext is LegacyAddGameViewModel vm) await AddStudioAsync(vm);
     }
 
     private async void OnSuggestStudioClick(object sender, RoutedEventArgs e)
     {
-        if (DataContext is AddGameViewModel vm && sender is Button { Tag: string name })
+        if (DataContext is LegacyAddGameViewModel vm && sender is Button { Tag: string name })
             await AddStudioAsync(vm, name);
     }
     private async Task<string?> PickImageAsync(string title)
@@ -99,7 +99,7 @@ public partial class AddGameWindow : Window
 
     private async void OnPickCoverClick(object sender, RoutedEventArgs e)
     {
-        if (DataContext is not AddGameViewModel vm) return;
+        if (DataContext is not LegacyAddGameViewModel vm) return;
         var path = await PickImageAsync("Оберіть обкладинку");
         if (path == null) return;
         ImageCache.Invalidate(vm.CoverImagePath);
@@ -108,14 +108,14 @@ public partial class AddGameWindow : Window
 
     private void OnClearCoverClick(object sender, RoutedEventArgs e)
     {
-        if (DataContext is not AddGameViewModel vm) return;
+        if (DataContext is not LegacyAddGameViewModel vm) return;
         ImageCache.Invalidate(vm.CoverImagePath);
         vm.CoverImagePath = string.Empty;
     }
 
     private async void OnPickIconClick(object sender, RoutedEventArgs e)
     {
-        if (DataContext is not AddGameViewModel vm) return;
+        if (DataContext is not LegacyAddGameViewModel vm) return;
         var path = await PickImageAsync("Оберіть іконку");
         if (path == null) return;
         ImageCache.Invalidate(vm.IconPath);
@@ -124,13 +124,13 @@ public partial class AddGameWindow : Window
 
     private void OnClearIconClick(object sender, RoutedEventArgs e)
     {
-        if (DataContext is not AddGameViewModel vm) return;
+        if (DataContext is not LegacyAddGameViewModel vm) return;
         ImageCache.Invalidate(vm.IconPath);
         vm.IconPath = string.Empty;
     }
     private async void OnPickBackgroundClick(object sender, RoutedEventArgs e)
     {
-        if (DataContext is not AddGameViewModel vm) return;
+        if (DataContext is not LegacyAddGameViewModel vm) return;
         var path = await PickImageAsync("Оберіть фон");
         if (path == null) return;
         ImageCache.Invalidate(vm.BackgroundImagePath);
@@ -139,13 +139,13 @@ public partial class AddGameWindow : Window
 
     private void OnClearBackgroundClick(object sender, RoutedEventArgs e)
     {
-        if (DataContext is not AddGameViewModel vm) return;
+        if (DataContext is not LegacyAddGameViewModel vm) return;
         ImageCache.Invalidate(vm.BackgroundImagePath);
         vm.BackgroundImagePath = string.Empty;
     }
     private async void OnDownloadUrlClick(object sender, RoutedEventArgs e)
     {
-        if (DataContext is not AddGameViewModel vm) return;
+        if (DataContext is not LegacyAddGameViewModel vm) return;
         if (sender is not Button { Tag: string kind }) return;
 
         string? downloaded = null;

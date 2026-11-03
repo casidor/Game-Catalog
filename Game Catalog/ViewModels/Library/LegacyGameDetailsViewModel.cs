@@ -15,12 +15,12 @@ namespace Game_Catalog.ViewModels
     /// <summary>
     /// ViewModel for the game detail page.
     /// </summary>
-    public partial class GameDetailsViewModel : ViewModelBase, IDisposable
+    public partial class LegacyGameDetailsViewModel : ViewModelBase, IDisposable
     {
         /// <summary>
         /// The game being displayed.
         /// </summary>
-        public Game Game { get; }
+        public LegacyGame Game { get; }
 
         /// <summary>
         /// Raised when the user requests to go back to the previous page.
@@ -125,7 +125,7 @@ namespace Game_Catalog.ViewModels
         /// <summary>Indicates whether an icon is available for this game.</summary>
         public bool HasIcon => File.Exists(Game.IconPath);
 
-        public GameDetailsViewModel(Game game)
+        public LegacyGameDetailsViewModel(LegacyGame game)
         {
             Game = game;
             AppData.Instance.Sessions.CollectionChanged += OnSessionsChanged;

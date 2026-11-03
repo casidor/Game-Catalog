@@ -10,20 +10,20 @@ using System.Text;
 namespace Game_Catalog.ViewModels
 {
     /// <summary> ViewModel for the game library page. </summary>
-    public partial class LibraryViewModel : FilterableGameViewModel
+    public partial class LegacyLibraryViewModel : FilterableGameViewModel
     {
         /// <summary> Source collection for the filter base class. </summary>
-        protected override ObservableCollection<Game> SourceGames => AppData.Instance.Games;
+        protected override ObservableCollection<LegacyGame> SourceGames => AppData.Instance.Games;
         protected override bool ArchivedFilter => false;
 
         /// <summary> Collection of available studios for game assignment. </summary>
         public ObservableCollection<LegacyStudio> Studios => AppData.Instance.Studios;
 
         /// <summary> Currently selected game in the list. </summary>
-        [ObservableProperty] private Game? _selectedGame;
+        [ObservableProperty] private LegacyGame? _selectedGame;
 
         /// <summary> Raised when the user selects a game to view details. </summary>
-        public event Action<Game>? GameSelected;
+        public event Action<LegacyGame>? GameSelected;
 
         /// <summary>Indicates whether the game library is empty.</summary>
         public bool IsEmpty => !AppData.Instance.Games.Any(g => !g.IsArchived);
@@ -46,7 +46,7 @@ namespace Game_Catalog.ViewModels
         /// <summary>Whether to show the list view. Hidden when the library is empty.</summary>
         public bool ShowList => !IsGridView && !IsEmpty && !IsFilteredEmpty;
 
-        public LibraryViewModel()
+        public LegacyLibraryViewModel()
         {
             InitializeCollection();
             AppData.Instance.Games.CollectionChanged += (_, _) =>
@@ -59,7 +59,7 @@ namespace Game_Catalog.ViewModels
 
         /// <summary> Navigates to the game detail page. </summary>
         [RelayCommand]
-        private void SelectGame(Game game) => GameSelected?.Invoke(game);
+        private void SelectGame(LegacyGame game) => GameSelected?.Invoke(game);
         protected override void RefreshFilters()
         {
             base.RefreshFilters();

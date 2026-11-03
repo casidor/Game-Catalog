@@ -5,8 +5,8 @@
 			 xmlns:vm="using:Game_Catalog.ViewModels"
 			 xmlns:models="using:Game_Catalog.Models"
 			 xmlns:conv="using:Game_Catalog.Converters"
-			 x:Class="Game_Catalog.Views.LibraryView"
-			 x:DataType="vm:LibraryViewModel">
+			 x:Class="Game_Catalog.Views.LegacyLibraryView"
+			 x:DataType="vm:LegacyLibraryViewModel">
 
 	<Grid RowDefinitions="auto,auto,*">
 
@@ -114,11 +114,11 @@
 						</ItemsPanelTemplate>
 					</ItemsControl.ItemsPanel>
 					<ItemsControl.ItemTemplate>
-						<DataTemplate x:DataType="models:Game">
+						<DataTemplate x:DataType="models:LegacyGame">
 							<Button Padding="0"
 									Margin="0,0,12,12"
 									Background="Transparent"
-									Command="{Binding $parent[ItemsControl].((vm:LibraryViewModel)DataContext).SelectGameCommand}"
+									Command="{Binding $parent[ItemsControl].((vm:LegacyLibraryViewModel)DataContext).SelectGameCommand}"
 									CommandParameter="{Binding}">
 								<Border Width="160" Height="245"
 										CornerRadius="8"
@@ -161,7 +161,7 @@
 					 SelectionChanged="OnSelectionChanged"
 					 IsVisible="{Binding ShowList}">
 				<ListBox.ItemTemplate>
-					<DataTemplate x:DataType="models:Game">
+					<DataTemplate x:DataType="models:LegacyGame">
 						<Grid ColumnDefinitions="*,150,100,80">
 							<StackPanel Grid.Column="0" Spacing="2">
 								<TextBlock Text="{Binding Title}" FontWeight="SemiBold"/>

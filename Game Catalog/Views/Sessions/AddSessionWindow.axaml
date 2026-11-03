@@ -17,7 +17,7 @@
 				  SelectedItem="{Binding SelectedGame}"
 				  HorizontalAlignment="Stretch">
 			<ComboBox.ItemTemplate>
-				<DataTemplate x:DataType="models:Game">
+				<DataTemplate x:DataType="models:LegacyGame">
 					<TextBlock Text="{Binding Title}"/>
 				</DataTemplate>
 			</ComboBox.ItemTemplate>

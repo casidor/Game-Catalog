@@ -77,7 +77,7 @@
 							 IsVisible="{Binding HasGames}"
 							 SelectionChanged="OnGameSelectionChanged">
 						<ListBox.ItemTemplate>
-							<DataTemplate x:DataType="models:Game">
+							<DataTemplate x:DataType="models:LegacyGame">
 								<Grid ColumnDefinitions="*,150,100">
 									<StackPanel Grid.Column="0" Spacing="2">
 										<TextBlock Text="{Binding Title}" FontWeight="SemiBold"/>

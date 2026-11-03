@@ -3,8 +3,8 @@
 			 xmlns:vm="using:Game_Catalog.ViewModels"
 			 xmlns:models="using:Game_Catalog.Models"
 			 xmlns:conv="using:Game_Catalog.Converters"
-			 x:Class="Game_Catalog.Views.ArchiveView"
-			 x:DataType="vm:ArchiveViewModel">
+			 x:Class="Game_Catalog.Views.LegacyArchiveView"
+			 x:DataType="vm:LegacyArchiveViewModel">
 
 	<Grid RowDefinitions="auto,auto,*">
 
@@ -97,7 +97,7 @@
 					 SelectionChanged="OnSelectionChanged"
 					 IsVisible="{Binding !IsEmpty}">
 				<ListBox.ItemTemplate>
-					<DataTemplate x:DataType="models:Game">
+					<DataTemplate x:DataType="models:LegacyGame">
 						<Grid ColumnDefinitions="*,150,100">
 							<StackPanel Grid.Column="0" Spacing="2">
 								<TextBlock Text="{Binding Title}" FontWeight="SemiBold"/>
