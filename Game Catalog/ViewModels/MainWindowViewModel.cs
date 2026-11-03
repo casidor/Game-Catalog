@@ -37,6 +37,7 @@ namespace Game_Catalog.ViewModels
         public MainWindowViewModel()
         {
             _currentPage = LibraryPage;
+            StudioPage.StudioSelected += studio => NavigateToStudio(studio);
             LibraryPage.GameSelected += game => NavigateToGame(game);
             ArchivePage.GameSelected += game => NavigateToGame(game);
         }
@@ -65,6 +66,14 @@ namespace Game_Catalog.ViewModels
         {
             var detailVm = new GameDetailsViewModel(game);
             detailVm.BackRequested += () => CurrentPage = game.IsArchived ? ArchivePage : LibraryPage;
+            CurrentPage = detailVm;
+        }
+
+        /// <summary> Navigates to the studio details page. </summary>
+        public void NavigateToStudio(Studio studio)
+        {
+            var detailVm = new StudioDetailsViewModel(studio);
+            detailVm.BackRequested += () => CurrentPage = StudioPage;
             CurrentPage = detailVm;
         }
     }

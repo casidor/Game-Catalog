@@ -48,7 +48,8 @@
 				  BorderThickness="0"
 				  Background="Transparent"
 				  RowHeight="44"
-				  Margin="8,0">
+				  Margin="8,0"
+				  DoubleTapped="OnRowDoubleTapped">
 
 			<DataGrid.Styles>
 				<Style Selector="DataGridColumnHeader">

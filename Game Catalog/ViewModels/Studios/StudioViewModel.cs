@@ -187,6 +187,13 @@ namespace Game_Catalog.ViewModels
             Reload();
         }
 
+        /// <summary> Raised when the user opens a studio to view its details. </summary>
+        public event Action<Studio>? StudioSelected;
+
+        /// <summary> Opens the details page of the studio. </summary>
+        [RelayCommand]
+        private void OpenStudio(Studio studio) => StudioSelected?.Invoke(studio);
+
         /// <summary> Opens the editor and saves a new studio. </summary>
         [RelayCommand]
         private async Task AddAsync()

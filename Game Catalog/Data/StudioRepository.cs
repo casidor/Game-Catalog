@@ -35,6 +35,20 @@ namespace Game_Catalog.Data.Repositories
                     }).AsList();
             });
 
+        /// <summary> Returns the studio with the given id, or null if it no longer exists. </summary>
+        public static Studio? GetById(int studioId) =>
+            Db.Run("Не вдалося завантажити студію", () =>
+            {
+                using var connection = Db.Open();
+                return connection.QuerySingleOrDefault<Studio>(@"
+            SELECT s.studio_id, s.studio_name, s.country, s.foundation_year,
+                   s.main_genre, g.genre_name AS main_genre_name, s.website
+            FROM Studio s
+            LEFT JOIN Genre g ON g.genre_id = s.main_genre
+            WHERE s.studio_id = @studioId",
+                    new { studioId });
+            });
+
         /// <summary> Returns distinct countries that studios actually have, for the filter dropdown. </summary>
         public static List<string> GetCountries() =>
             Db.Run("Не вдалося завантажити країни", () =>
