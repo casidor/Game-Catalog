@@ -1,0 +1,353 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+			 xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+			 xmlns:vm="using:Game_Catalog.ViewModels"
+			 xmlns:models="using:Game_Catalog.Models"
+			 xmlns:conv="using:Game_Catalog.Converters"
+			 x:Class="Game_Catalog.Views.GamesListView"
+			 x:DataType="vm:GamesListViewModel">
+
+	<Grid RowDefinitions="Auto,*">
+
+		<!-- Toolbar -->
+		<Border Grid.Row="0" Padding="16,12">
+			<Grid ColumnDefinitions="Auto,*">
+				<TextBlock Grid.Column="0" Text="{Binding PageTitle}"
+						   FontSize="20" FontWeight="Bold" VerticalAlignment="Center"/>
+				<StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="8"
+							HorizontalAlignment="Right" VerticalAlignment="Center">
+					<TextBox Text="{Binding SearchText}"
+							 PlaceholderText="🔍 Пошук гри..."
+							 Width="220" VerticalAlignment="Center"/>
+
+					<!-- Sort menu -->
+					<DropDownButton Content="⇅ Сортування" VerticalAlignment="Center">
+						<DropDownButton.Flyout>
+							<MenuFlyout Placement="BottomEdgeAlignedRight">
+								<MenuItem Header="Назва" ToggleType="Radio" GroupName="SortField"
+										  Command="{Binding SetSortFieldCommand}"
+										  CommandParameter="{x:Static models:GameSortField.Title}"
+										  IsChecked="{Binding SortField, Mode=OneWay, Converter={x:Static conv:EqualsParameterConverter.Instance}, ConverterParameter={x:Static models:GameSortField.Title}}"/>
+								<MenuItem Header="Рік випуску" ToggleType="Radio" GroupName="SortField"
+										  Command="{Binding SetSortFieldCommand}"
+										  CommandParameter="{x:Static models:GameSortField.Year}"
+										  IsChecked="{Binding SortField, Mode=OneWay, Converter={x:Static conv:EqualsParameterConverter.Instance}, ConverterParameter={x:Static models:GameSortField.Year}}"/>
+								<MenuItem Header="Оцінка" ToggleType="Radio" GroupName="SortField"
+										  Command="{Binding SetSortFieldCommand}"
+										  CommandParameter="{x:Static models:GameSortField.Rating}"
+										  IsChecked="{Binding SortField, Mode=OneWay, Converter={x:Static conv:EqualsParameterConverter.Instance}, ConverterParameter={x:Static models:GameSortField.Rating}}"/>
+								<MenuItem Header="Розмір на диску" ToggleType="Radio" GroupName="SortField"
+										  Command="{Binding SetSortFieldCommand}"
+										  CommandParameter="{x:Static models:GameSortField.Size}"
+										  IsChecked="{Binding SortField, Mode=OneWay, Converter={x:Static conv:EqualsParameterConverter.Instance}, ConverterParameter={x:Static models:GameSortField.Size}}"/>
+								<MenuItem Header="Час гри" ToggleType="Radio" GroupName="SortField"
+										  Command="{Binding SetSortFieldCommand}"
+										  CommandParameter="{x:Static models:GameSortField.Hours}"
+										  IsChecked="{Binding SortField, Mode=OneWay, Converter={x:Static conv:EqualsParameterConverter.Instance}, ConverterParameter={x:Static models:GameSortField.Hours}}"/>
+								<Separator/>
+								<MenuItem Header="За зростанням" ToggleType="Radio" GroupName="SortDirection"
+										  Command="{Binding SetAscendingCommand}"
+										  IsChecked="{Binding !SortDescending, Mode=OneWay}"/>
+								<MenuItem Header="За спаданням" ToggleType="Radio" GroupName="SortDirection"
+										  Command="{Binding SetDescendingCommand}"
+										  IsChecked="{Binding SortDescending, Mode=OneWay}"/>
+							</MenuFlyout>
+						</DropDownButton.Flyout>
+					</DropDownButton>
+
+					<DropDownButton Content="{Binding ViewModeText}" VerticalAlignment="Center">
+						<DropDownButton.Flyout>
+							<MenuFlyout Placement="BottomEdgeAlignedRight">
+								<MenuItem Header="Сітка" ToggleType="Radio" GroupName="ViewMode"
+										  Command="{Binding SetGridViewCommand}"
+										  IsChecked="{Binding IsGridView, Mode=OneWay}"/>
+								<MenuItem Header="Список" ToggleType="Radio" GroupName="ViewMode"
+										  Command="{Binding SetListViewCommand}"
+										  IsChecked="{Binding !IsGridView, Mode=OneWay}"/>
+							</MenuFlyout>
+						</DropDownButton.Flyout>
+					</DropDownButton>
+					<Button Content="{Binding FiltersButtonText}"
+							Command="{Binding OpenFiltersCommand}"
+							VerticalAlignment="Center"/>
+					<Button Content="✕ Скинути"
+							Command="{Binding ResetFiltersCommand}"
+							IsVisible="{Binding HasActiveFilter}"
+							VerticalAlignment="Center"/>
+				</StackPanel>
+			</Grid>
+		</Border>
+
+		<!-- Content -->
+		<Grid Grid.Row="1">
+
+			<!-- Grid view -->
+			<ScrollViewer IsVisible="{Binding ShowGrid}">
+				<ItemsControl ItemsSource="{Binding Rows}">
+					<ItemsControl.ItemsPanel>
+						<ItemsPanelTemplate>
+							<WrapPanel Orientation="Horizontal" Margin="16"/>
+						</ItemsPanelTemplate>
+					</ItemsControl.ItemsPanel>
+					<ItemsControl.ItemTemplate>
+						<DataTemplate x:DataType="vm:GameRow">
+							<Button Padding="0" Margin="0,0,12,12" Background="Transparent"
+									Command="{Binding $parent[ItemsControl].((vm:GamesListViewModel)DataContext).OpenGameCommand}"
+									CommandParameter="{Binding Game}">
+								<Border Width="160" Height="245" CornerRadius="8" ClipToBounds="True"
+										Background="{DynamicResource CardBackground}">
+									<Grid RowDefinitions="*,Auto">
+										<Panel Grid.Row="0">
+											<Image Width="160" Height="215" Stretch="UniformToFill"
+												   Source="{Binding CoverImagePath, Converter={x:Static conv:PathToBitmapConverter.Instance}, ConverterParameter=640}"
+												   IsVisible="{Binding CoverImagePath, Converter={x:Static StringConverters.IsNotNullOrEmpty}}"/>
+											<TextBlock Text="🎮" FontSize="48"
+													   HorizontalAlignment="Center" VerticalAlignment="Center"
+													   IsVisible="{Binding CoverImagePath, Converter={x:Static StringConverters.IsNullOrEmpty}}"/>
+										</Panel>
+										<Border Grid.Row="1" Padding="8,6"
+												Background="{Binding IsMatch, Converter={x:Static conv:SearchMatchBrushConverter.Instance}}">
+											<TextBlock Text="{Binding Title}" FontWeight="SemiBold" FontSize="12"
+													   TextWrapping="Wrap" MaxLines="2"
+													   TextTrimming="CharacterEllipsis"/>
+										</Border>
+									</Grid>
+								</Border>
+							</Button>
+						</DataTemplate>
+					</ItemsControl.ItemTemplate>
+				</ItemsControl>
+			</ScrollViewer>
+
+			<!-- Table view -->
+			<DataGrid ItemsSource="{Binding Rows}"
+					  IsVisible="{Binding ShowList}"
+					  AutoGenerateColumns="False"
+					  IsReadOnly="True"
+					  CanUserSortColumns="True"
+					  CanUserResizeColumns="True"
+					  CanUserReorderColumns="False"
+					  GridLinesVisibility="None"
+					  HeadersVisibility="Column"
+					  BorderThickness="0"
+					  Background="Transparent"
+					  RowHeight="44"
+					  Margin="8,0"
+					  DoubleTapped="OnRowDoubleTapped"
+					  Sorting="OnColumnSorting"
+					  x:Name="GamesGrid">
+
+				<DataGrid.Styles>
+					<Style Selector="DataGridColumnHeader">
+						<Setter Property="Background" Value="Transparent"/>
+						<Setter Property="FontSize" Value="12"/>
+					</Style>
+					<Style Selector="DataGridColumnHeader:not(:sortascending):not(:sortdescending) /template/ ContentPresenter#PART_ContentPresenter">
+						<Setter Property="Grid.ColumnSpan" Value="2"/>
+					</Style>
+					<Style Selector="DataGridColumnHeader /template/ Path#SortIcon">
+						<Setter Property="IsVisible" Value="False"/>
+						<Setter Property="Width" Value="0"/>
+						<Setter Property="Margin" Value="0"/>
+					</Style>
+					<Style Selector="DataGridRow">
+						<Setter Property="Background"
+								Value="{ReflectionBinding IsMatch, Converter={x:Static conv:SearchMatchBrushConverter.Instance}}"/>
+					</Style>
+				</DataGrid.Styles>
+
+
+				<DataGrid.Columns>
+					<DataGridTextColumn Header="Назва" Width="2*" Binding="{ReflectionBinding Title}"
+										Tag="{x:Static models:GameSortField.Title}"/>
+					<DataGridTextColumn Header="Студія" Width="*" Binding="{ReflectionBinding DeveloperName}"
+										CanUserSort="False"/>
+					<DataGridTextColumn Header="Платформи" Width="*" Binding="{ReflectionBinding PlatformsText}"
+										CanUserSort="False"/>
+					<DataGridTextColumn Header="Рік" Width="80" Binding="{ReflectionBinding YearText}"
+										Tag="{x:Static models:GameSortField.Year}"/>
+					<DataGridTextColumn Header="Статус" Width="110"
+										Binding="{ReflectionBinding Status, Mode=OneWay, Converter={x:Static conv:GameStatusConverter.Instance}}"
+										CanUserSort="False"/>
+					<DataGridTextColumn Header="Оцінка" Width="80" Binding="{ReflectionBinding RatingText}"
+										Tag="{x:Static models:GameSortField.Rating}"/>
+					<DataGridTextColumn Header="Час гри" Width="110"
+										Binding="{ReflectionBinding TotalHours, Mode=OneWay, Converter={x:Static conv:DurationConverter.Instance}}"
+										Tag="{x:Static models:GameSortField.Hours}"/>
+					<DataGridTextColumn Header="Розмір" Width="110" Binding="{ReflectionBinding SizeText}"
+										Tag="{x:Static models:GameSortField.Size}"/>
+				</DataGrid.Columns>
+			</DataGrid>
+
+			<!-- Empty state -->
+			<StackPanel IsVisible="{Binding IsEmpty}"
+						HorizontalAlignment="Center" VerticalAlignment="Center" Spacing="16">
+				<TextBlock Text="🎮" FontSize="48" HorizontalAlignment="Center"/>
+				<TextBlock Text="{Binding EmptyTitle}" FontSize="18" FontWeight="SemiBold" HorizontalAlignment="Center"/>
+				<TextBlock Text="{Binding EmptyHint}" Opacity="0.6" HorizontalAlignment="Center"/>
+			</StackPanel>
+
+			<!-- Filtered empty state -->
+			<StackPanel IsVisible="{Binding IsFilteredEmpty}"
+						HorizontalAlignment="Center" VerticalAlignment="Center" Spacing="12">
+				<TextBlock Text="🔍" FontSize="48" HorizontalAlignment="Center"/>
+				<TextBlock Text="Ігор не знайдено" FontSize="18" FontWeight="SemiBold" HorizontalAlignment="Center"/>
+				<TextBlock Text="Спробуйте змінити фільтр" Opacity="0.6" HorizontalAlignment="Center"/>
+			</StackPanel>
+		</Grid>
+
+		<!-- Filter side panel with a dimmed, click-blocking backdrop -->
+		<Grid Grid.Row="0" Grid.RowSpan="2" IsVisible="{Binding IsFilterPanelOpen}">
+			<Border Background="{DynamicResource OverlayScrim}" PointerPressed="OnOverlayPressed"/>
+			<Border HorizontalAlignment="Right" Width="340"
+					Background="{DynamicResource SidebarBackground}"
+					BorderBrush="{DynamicResource SidebarBorder}"
+					BorderThickness="1,0,0,0"
+					BoxShadow="-6 0 20 0 #40000000">
+				<Grid RowDefinitions="Auto,*,Auto">
+
+					<Border Grid.Row="0" Padding="12,12"
+							BorderBrush="{DynamicResource SidebarBorder}" BorderThickness="0,0,0,1">
+						<Grid ColumnDefinitions="Auto,*,Auto">
+							<Button Grid.Column="0" Content="✕"
+									Command="{Binding CancelFiltersCommand}"
+									Background="Transparent" Padding="10,4"/>
+							<TextBlock Grid.Column="1" Text="Фільтри"
+									   FontSize="18" FontWeight="Bold"
+									   Margin="12,0" VerticalAlignment="Center"/>
+							<Button Grid.Column="2" Content="Скинути"
+									Command="{Binding ClearDraftCommand}"
+									Background="Transparent" Padding="10,4"/>
+						</Grid>
+					</Border>
+
+					<ScrollViewer Grid.Row="1">
+						<StackPanel>
+
+							<StackPanel Spacing="8" Margin="20,16">
+								<TextBlock Text="Статус" FontSize="15" FontWeight="SemiBold"/>
+								<ItemsControl ItemsSource="{Binding StatusOptions}">
+									<ItemsControl.ItemTemplate>
+										<DataTemplate x:DataType="vm:FilterOption">
+											<CheckBox Content="{Binding Name}" IsChecked="{Binding IsChecked}"/>
+										</DataTemplate>
+									</ItemsControl.ItemTemplate>
+								</ItemsControl>
+							</StackPanel>
+							<Border Height="1" Background="{DynamicResource SidebarBorder}"/>
+
+							<StackPanel Spacing="8" Margin="20,16">
+								<TextBlock Text="Жанр" FontSize="15" FontWeight="SemiBold"/>
+								<ItemsControl ItemsSource="{Binding GenreOptions}">
+									<ItemsControl.ItemTemplate>
+										<DataTemplate x:DataType="vm:FilterOption">
+											<CheckBox Content="{Binding Name}" IsChecked="{Binding IsChecked}"/>
+										</DataTemplate>
+									</ItemsControl.ItemTemplate>
+								</ItemsControl>
+							</StackPanel>
+							<Border Height="1" Background="{DynamicResource SidebarBorder}"/>
+
+							<StackPanel Spacing="8" Margin="20,16">
+								<TextBlock Text="Платформа" FontSize="15" FontWeight="SemiBold"/>
+								<ItemsControl ItemsSource="{Binding PlatformOptions}">
+									<ItemsControl.ItemTemplate>
+										<DataTemplate x:DataType="vm:FilterOption">
+											<CheckBox Content="{Binding Name}" IsChecked="{Binding IsChecked}"/>
+										</DataTemplate>
+									</ItemsControl.ItemTemplate>
+								</ItemsControl>
+							</StackPanel>
+							<Border Height="1" Background="{DynamicResource SidebarBorder}"/>
+
+							<StackPanel Spacing="8" Margin="20,16">
+								<TextBlock Text="Тег" FontSize="15" FontWeight="SemiBold"/>
+								<ItemsControl ItemsSource="{Binding TagOptions}">
+									<ItemsControl.ItemTemplate>
+										<DataTemplate x:DataType="vm:FilterOption">
+											<CheckBox Content="{Binding Name}" IsChecked="{Binding IsChecked}"/>
+										</DataTemplate>
+									</ItemsControl.ItemTemplate>
+								</ItemsControl>
+							</StackPanel>
+							<Border Height="1" Background="{DynamicResource SidebarBorder}"/>
+
+							<StackPanel Spacing="8" Margin="20,16">
+								<TextBlock Text="Студія" FontSize="15" FontWeight="SemiBold"/>
+								<ItemsControl ItemsSource="{Binding DeveloperOptions}">
+									<ItemsControl.ItemTemplate>
+										<DataTemplate x:DataType="vm:FilterOption">
+											<CheckBox Content="{Binding Name}" IsChecked="{Binding IsChecked}"/>
+										</DataTemplate>
+									</ItemsControl.ItemTemplate>
+								</ItemsControl>
+							</StackPanel>
+							<Border Height="1" Background="{DynamicResource SidebarBorder}"/>
+
+							<StackPanel Spacing="8" Margin="20,16">
+								<TextBlock Text="Рік випуску" FontSize="15" FontWeight="SemiBold"/>
+								<Grid ColumnDefinitions="Auto,8,*,16,Auto,8,*">
+									<TextBlock Grid.Column="0" Text="від" VerticalAlignment="Center"/>
+									<NumericUpDown Grid.Column="2" FormatString="0"
+												   Value="{Binding DraftYearFrom, Converter={x:Static conv:DecimalToNullableIntConverter.Instance}}"/>
+									<TextBlock Grid.Column="4" Text="до" VerticalAlignment="Center"/>
+									<NumericUpDown Grid.Column="6" FormatString="0"
+												   Value="{Binding DraftYearTo, Converter={x:Static conv:DecimalToNullableIntConverter.Instance}}"/>
+								</Grid>
+							</StackPanel>
+							<Border Height="1" Background="{DynamicResource SidebarBorder}"/>
+
+							<StackPanel Spacing="8" Margin="20,16">
+								<TextBlock Text="Особиста оцінка" FontSize="15" FontWeight="SemiBold"/>
+								<Grid ColumnDefinitions="Auto,8,*,16,Auto,8,*">
+									<TextBlock Grid.Column="0" Text="від" VerticalAlignment="Center"/>
+									<NumericUpDown Grid.Column="2" FormatString="0" Minimum="1" Maximum="10"
+												   Value="{Binding DraftRatingFrom, Converter={x:Static conv:DecimalToNullableIntConverter.Instance}}"/>
+									<TextBlock Grid.Column="4" Text="до" VerticalAlignment="Center"/>
+									<NumericUpDown Grid.Column="6" FormatString="0" Minimum="1" Maximum="10"
+												   Value="{Binding DraftRatingTo, Converter={x:Static conv:DecimalToNullableIntConverter.Instance}}"/>
+								</Grid>
+							</StackPanel>
+							<Border Height="1" Background="{DynamicResource SidebarBorder}"/>
+
+							<StackPanel Spacing="8" Margin="20,16">
+								<TextBlock Text="Розмір на диску (ГБ)" FontSize="15" FontWeight="SemiBold"/>
+								<Grid ColumnDefinitions="Auto,8,*,16,Auto,8,*">
+									<TextBlock Grid.Column="0" Text="від" VerticalAlignment="Center"/>
+									<NumericUpDown Grid.Column="2" FormatString="0.##" Minimum="0" Increment="0.5"
+												   Value="{Binding DraftSizeFrom, Converter={x:Static conv:DecimalToNullableDoubleConverter.Instance}}"/>
+									<TextBlock Grid.Column="4" Text="до" VerticalAlignment="Center"/>
+									<NumericUpDown Grid.Column="6" FormatString="0.##" Minimum="0" Increment="0.5"
+												   Value="{Binding DraftSizeTo, Converter={x:Static conv:DecimalToNullableDoubleConverter.Instance}}"/>
+								</Grid>
+							</StackPanel>
+							<Border Height="1" Background="{DynamicResource SidebarBorder}"/>
+
+							<StackPanel Spacing="8" Margin="20,16">
+								<TextBlock Text="Час гри (год)" FontSize="15" FontWeight="SemiBold"/>
+								<Grid ColumnDefinitions="Auto,8,*,16,Auto,8,*">
+									<TextBlock Grid.Column="0" Text="від" VerticalAlignment="Center"/>
+									<NumericUpDown Grid.Column="2" FormatString="0.##" Minimum="0" Increment="1"
+												   Value="{Binding DraftHoursFrom, Converter={x:Static conv:DecimalToNullableDoubleConverter.Instance}}"/>
+									<TextBlock Grid.Column="4" Text="до" VerticalAlignment="Center"/>
+									<NumericUpDown Grid.Column="6" FormatString="0.##" Minimum="0" Increment="1"
+												   Value="{Binding DraftHoursTo, Converter={x:Static conv:DecimalToNullableDoubleConverter.Instance}}"/>
+								</Grid>
+							</StackPanel>
+
+						</StackPanel>
+					</ScrollViewer>
+
+					<Border Grid.Row="2" Padding="20,12"
+							BorderBrush="{DynamicResource SidebarBorder}" BorderThickness="0,1,0,0">
+						<Button Content="Застосувати"
+								Command="{Binding ApplyFiltersCommand}"
+								HorizontalAlignment="Stretch"
+								Padding="0,10"/>
+					</Border>
+
+				</Grid>
+			</Border>
+		</Grid>
+
+	</Grid>
+</UserControl>
