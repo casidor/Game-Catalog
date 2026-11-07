@@ -1,10 +1,12 @@
 ﻿using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Controls.ApplicationLifetimes;
+using Avalonia.Platform.Storage;
 using Game_Catalog.Models;
 using Game_Catalog.Services;
 using Game_Catalog.ViewModels;
 using System;
+using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 
@@ -88,5 +90,69 @@ public sealed class DialogService : IDialogService
         var vm = studio == null ? new AddStudioViewModel() : new AddStudioViewModel(studio);
         await new AddStudioWindow { DataContext = vm }.ShowDialog(owner);
         return vm.Confirmed ? vm.BuildStudio() : null;
+    }
+
+    /// <inheritdoc/>
+    public async Task<string?> PickImageAsync(string title)
+    {
+        if (Owner is not { } owner) return null;
+
+        var files = await owner.StorageProvider.OpenFilePickerAsync(new FilePickerOpenOptions
+        {
+            Title = title,
+            AllowMultiple = false,
+            FileTypeFilter = [new("Зображення") { Patterns = ["*.jpg", "*.jpeg", "*.png", "*.webp"] }]
+        });
+        if (files.Count == 0) return null;
+
+        var source = files[0].Path.LocalPath;
+        if (!ImageInspector.IsReadable(source))
+        {
+            await AlertAsync("Файл не підтримується",
+                "Не вдалося прочитати зображення. Оберіть JPG, PNG або WEBP.");
+            return null;
+        }
+
+        try
+        {
+            // The covers folder still lives in RawgService; move it out when RAWG is removed.
+            Directory.CreateDirectory(RawgService.CoversFolder);
+            var dest = Path.Combine(RawgService.CoversFolder, $"{Guid.NewGuid()}{Path.GetExtension(source)}");
+            File.Copy(source, dest, overwrite: true);
+            return dest;
+        }
+        catch (Exception ex) when (ex is IOException or UnauthorizedAccessException)
+        {
+            await ErrorAsync("Не вдалося скопіювати зображення", "Файл не збережено.", ex);
+            return null;
+        }
+    }
+
+    /// <inheritdoc/>
+    public async Task<string?> DownloadImageAsync()
+    {
+        if (Owner is not { } owner) return null;
+
+        string? downloaded = null;
+        var dialog = new InputWindow(
+            title: "Завантажити за URL",
+            prompt: "Адреса зображення",
+            placeholder: "https://...",
+            confirmText: "Завантажити",
+            handler: async url =>
+            {
+                try
+                {
+                    downloaded = await ImageDownloader.DownloadAsync(url);
+                    return null;
+                }
+                catch (InvalidOperationException ex)
+                {
+                    return ex.Message;
+                }
+            });
+
+        await dialog.ShowDialog(owner);
+        return downloaded;
     }
 }

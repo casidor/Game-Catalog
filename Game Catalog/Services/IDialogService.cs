@@ -28,4 +28,10 @@ public interface IDialogService
 
     /// <summary> Shows the studio editor and returns the entered studio, or null if cancelled. </summary>
     Task<Studio?> ShowStudioEditorAsync(Studio? studio = null);
+
+    /// <summary> Lets the user pick an image file, copies it to the covers folder and returns the copy path, or null if cancelled or unusable. </summary>
+    Task<string?> PickImageAsync(string title);
+
+    /// <summary> Asks for an image address, downloads it into the covers folder and returns the file path, or null if cancelled. </summary>
+    Task<string?> DownloadImageAsync();
 }
