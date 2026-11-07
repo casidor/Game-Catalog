@@ -34,4 +34,7 @@ public interface IDialogService
 
     /// <summary> Asks for an image address, downloads it into the covers folder and returns the file path, or null if cancelled. </summary>
     Task<string?> DownloadImageAsync();
+
+    /// <summary> Shows the game editor. The editor saves the game itself; returns the saved game, or null if cancelled. </summary>
+    Task<Game?> ShowGameEditorAsync(Game? game = null);
 }

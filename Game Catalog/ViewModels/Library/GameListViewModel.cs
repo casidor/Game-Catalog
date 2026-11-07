@@ -208,6 +208,7 @@ namespace Game_Catalog.ViewModels
             OnPropertyChanged(nameof(IsFilteredEmpty));
             OnPropertyChanged(nameof(ShowGrid));
             OnPropertyChanged(nameof(ShowList));
+            OnPropertyChanged(nameof(ShowAddInEmpty));
         }
 
         /// <summary> Orders games by the chosen field. Games without a value always go last. </summary>
@@ -346,7 +347,29 @@ namespace Game_Catalog.ViewModels
             IsFilterPanelOpen = false;
             Reload();
         }
+        /// <summary> True when games can be added from this page (the library, not the archive). </summary>
+        public bool CanAdd => !_isArchive;
 
+        /// <summary> True when the empty state should offer the add button. </summary>
+        public bool ShowAddInEmpty => IsEmpty && !_isArchive;
+
+        /// <summary> Opens the editor for a new game; the editor saves it, then the page reloads. </summary>
+        [RelayCommand]
+        private async Task AddAsync()
+        {
+            var game = await Dialogs.Current.ShowGameEditorAsync();
+            if (game == null) return;
+            Load();
+        }
+
+        /// <summary> Opens the editor for the given game; the editor saves it, then the page reloads. </summary>
+        [RelayCommand]
+        private async Task EditAsync(Game game)
+        {
+            var edited = await Dialogs.Current.ShowGameEditorAsync(game);
+            if (edited == null) return;
+            Load();
+        }
         /// <summary> Opens the game. The details page arrives in a later commit. </summary>
         [RelayCommand]
         private void OpenGame(Game game) => GameSelected?.Invoke(game);

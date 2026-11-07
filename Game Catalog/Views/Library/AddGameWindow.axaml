@@ -1,0 +1,363 @@
+<Window xmlns="https://github.com/avaloniaui"
+		xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+		xmlns:vm="using:Game_Catalog.ViewModels"
+		xmlns:models="using:Game_Catalog.Models"
+		xmlns:svc="using:Game_Catalog.Services"
+		xmlns:conv="using:Game_Catalog.Converters"
+		x:Class="Game_Catalog.Views.AddGameWindow"
+		x:DataType="vm:AddGameViewModel"
+		Title="{Binding WindowTitle}"
+		Width="640"
+		Height="600"
+		WindowStartupLocation="CenterOwner"
+		CanResize="False">
+
+	<Window.Styles>
+		<Style Selector="TabStripItem">
+			<Setter Property="FontSize" Value="14"/>
+			<Setter Property="Padding" Value="16,8"/>
+			<Setter Property="Margin" Value="0,0,0,-1"/>
+			<Setter Property="Background" Value="Transparent"/>
+			<Setter Property="Foreground" Value="{DynamicResource NavForeground}"/>
+			<Setter Property="BorderThickness" Value="1"/>
+			<Setter Property="BorderBrush" Value="Transparent"/>
+			<Setter Property="CornerRadius" Value="0"/>
+		</Style>
+		<Style Selector="TabStripItem:selected">
+			<Setter Property="Background" Value="{DynamicResource CardBackground}"/>
+			<Setter Property="BorderBrush" Value="{DynamicResource SidebarBorder}"/>
+			<Setter Property="Foreground" Value="{DynamicResource LogoForeground}"/>
+		</Style>
+		<Style Selector="Button.media">
+			<Setter Property="Width" Value="36"/>
+			<Setter Property="Padding" Value="0"/>
+			<Setter Property="FontSize" Value="14"/>
+		</Style>
+
+		<!-- DropDownButton styled like the other dropdowns -->
+		<Style Selector="DropDownButton.field">
+			<Setter Property="Background" Value="{DynamicResource ComboBoxBackground}"/>
+			<Setter Property="BorderBrush" Value="{DynamicResource ComboBoxBorderBrush}"/>
+			<Setter Property="BorderThickness" Value="{DynamicResource ComboBoxBorderThemeThickness}"/>
+			<Setter Property="Padding" Value="{DynamicResource ComboBoxPadding}"/>
+			<Setter Property="Foreground" Value="{DynamicResource ComboBoxForeground}"/>
+			<Setter Property="CornerRadius" Value="{DynamicResource ControlCornerRadius}"/>
+		</Style>
+		<Style Selector="DropDownButton.field:pointerover /template/ Border#RootBorder">
+			<Setter Property="Background" Value="{DynamicResource ComboBoxBackgroundPointerOver}"/>
+			<Setter Property="BorderBrush" Value="{DynamicResource ComboBoxBorderBrushPointerOver}"/>
+		</Style>
+		<Style Selector="DropDownButton.field:pressed">
+			<Setter Property="RenderTransform" Value="none"/>
+		</Style>
+		<Style Selector="DropDownButton.field:pressed /template/ Border#RootBorder">
+			<Setter Property="Background" Value="{DynamicResource ComboBoxBackgroundPressed}"/>
+			<Setter Property="BorderBrush" Value="{DynamicResource ComboBoxBorderBrushPressed}"/>
+		</Style>
+
+		<!-- Error state of the dropdown field -->
+		<Style Selector="DropDownButton.field.error">
+			<Setter Property="BorderBrush" Value="{DynamicResource SystemControlErrorTextForegroundBrush}"/>
+		</Style>
+		<Style Selector="DropDownButton.field.error:pointerover /template/ Border#RootBorder">
+			<Setter Property="BorderBrush" Value="{DynamicResource SystemControlErrorTextForegroundBrush}"/>
+		</Style>
+		<Style Selector="DropDownButton.field.error:pressed /template/ Border#RootBorder">
+			<Setter Property="BorderBrush" Value="{DynamicResource SystemControlErrorTextForegroundBrush}"/>
+		</Style>
+	</Window.Styles>
+
+	<Grid RowDefinitions="Auto,*,Auto">
+
+		<!-- Tabs -->
+		<Border Grid.Row="0"
+				BorderBrush="{DynamicResource SidebarBorder}"
+				BorderThickness="0,0,0,1">
+			<TabStrip SelectedIndex="{Binding SelectedTabIndex}">
+				<TabStripItem Content="Деталі"/>
+				<TabStripItem Content="Медіа"/>
+			</TabStrip>
+		</Border>
+
+		<!-- Details tab -->
+		<ScrollViewer Grid.Row="1" IsVisible="{Binding IsDetailsTab}">
+			<StackPanel Margin="24" Spacing="12">
+
+				<TextBlock Text="Назва гри"/>
+				<TextBox Text="{Binding Title}" PlaceholderText="Введіть назву..."/>
+
+				<TextBlock Text="Студія-розробник"/>
+				<DropDownButton x:Name="StudioButton"
+								Classes="field"
+								Classes.error="{Binding HasStudioError}"
+								HorizontalAlignment="Stretch"
+								HorizontalContentAlignment="Left">
+					<TextBlock Text="{Binding StudioButtonText}" TextTrimming="CharacterEllipsis"/>
+					<DropDownButton.Flyout>
+						<Flyout Placement="Bottom" Opened="OnFlyoutOpened">
+							<StackPanel Width="320" Spacing="8">
+								<TextBox Text="{Binding StudioSearchText}"
+										 PlaceholderText="🔍 Пошук студії..."/>
+								<ListBox ItemsSource="{Binding FilteredStudios}"
+										 SelectionChanged="OnStudioSelected"
+										 MaxHeight="220">
+									<ListBox.ItemTemplate>
+										<DataTemplate x:DataType="models:Studio">
+											<TextBlock Text="{Binding StudioName}" Padding="4,2"/>
+										</DataTemplate>
+									</ListBox.ItemTemplate>
+								</ListBox>
+								<Button Content="+ Додати студію"
+										Command="{Binding AddStudioCommand}"
+										HorizontalAlignment="Stretch"/>
+							</StackPanel>
+						</Flyout>
+					</DropDownButton.Flyout>
+				</DropDownButton>
+				<TextBlock Text="{Binding StudioError}"
+						   IsVisible="{Binding HasStudioError}"
+						   Margin="0,-6,0,0"
+						   Foreground="{DynamicResource SystemControlErrorTextForegroundBrush}"/>
+
+				<!-- Genres, platforms, tags -->
+				<Grid ColumnDefinitions="*,12,*,12,*">
+
+					<StackPanel Grid.Column="0" Spacing="4">
+						<TextBlock Text="Жанри"/>
+						<DropDownButton Classes="field"
+										HorizontalAlignment="Stretch"
+										HorizontalContentAlignment="Left">
+							<TextBlock Text="{Binding Genres.Summary}" TextTrimming="CharacterEllipsis"/>
+							<DropDownButton.Flyout>
+								<Flyout Placement="Bottom" Opened="OnFlyoutOpened">
+									<StackPanel Width="260" Spacing="8">
+										<TextBox Text="{Binding Genres.SearchText}"
+												 PlaceholderText="🔍 Пошук жанру..."/>
+										<ScrollViewer MaxHeight="200">
+											<ItemsControl ItemsSource="{Binding Genres.FilteredOptions}">
+												<ItemsControl.ItemTemplate>
+													<DataTemplate x:DataType="vm:FilterOption">
+														<CheckBox Content="{Binding Name}" IsChecked="{Binding IsChecked}"/>
+													</DataTemplate>
+												</ItemsControl.ItemTemplate>
+											</ItemsControl>
+										</ScrollViewer>
+										<Button Content="+ Додати жанр"
+												Command="{Binding AddGenreCommand}"
+												HorizontalAlignment="Stretch"/>
+									</StackPanel>
+								</Flyout>
+							</DropDownButton.Flyout>
+						</DropDownButton>
+					</StackPanel>
+
+					<StackPanel Grid.Column="2" Spacing="4">
+						<TextBlock Text="Платформи"/>
+						<DropDownButton Classes="field"
+										HorizontalAlignment="Stretch"
+										HorizontalContentAlignment="Left">
+							<TextBlock Text="{Binding Platforms.Summary}" TextTrimming="CharacterEllipsis"/>
+							<DropDownButton.Flyout>
+								<Flyout Placement="Bottom" Opened="OnFlyoutOpened">
+									<StackPanel Width="260" Spacing="8">
+										<TextBox Text="{Binding Platforms.SearchText}"
+												 PlaceholderText="🔍 Пошук платформи..."/>
+										<ScrollViewer MaxHeight="200">
+											<ItemsControl ItemsSource="{Binding Platforms.FilteredOptions}">
+												<ItemsControl.ItemTemplate>
+													<DataTemplate x:DataType="vm:FilterOption">
+														<CheckBox Content="{Binding Name}" IsChecked="{Binding IsChecked}"/>
+													</DataTemplate>
+												</ItemsControl.ItemTemplate>
+											</ItemsControl>
+										</ScrollViewer>
+										<Button Content="+ Додати платформу"
+												Command="{Binding AddPlatformCommand}"
+												HorizontalAlignment="Stretch"/>
+									</StackPanel>
+								</Flyout>
+							</DropDownButton.Flyout>
+						</DropDownButton>
+					</StackPanel>
+
+					<StackPanel Grid.Column="4" Spacing="4">
+						<TextBlock Text="Теги"/>
+						<DropDownButton Classes="field"
+										HorizontalAlignment="Stretch"
+										HorizontalContentAlignment="Left">
+							<TextBlock Text="{Binding Tags.Summary}" TextTrimming="CharacterEllipsis"/>
+							<DropDownButton.Flyout>
+								<Flyout Placement="Bottom" Opened="OnFlyoutOpened">
+									<StackPanel Width="260" Spacing="8">
+										<TextBox Text="{Binding Tags.SearchText}"
+												 PlaceholderText="🔍 Пошук тегу..."/>
+										<ScrollViewer MaxHeight="200">
+											<ItemsControl ItemsSource="{Binding Tags.FilteredOptions}">
+												<ItemsControl.ItemTemplate>
+													<DataTemplate x:DataType="vm:FilterOption">
+														<CheckBox Content="{Binding Name}" IsChecked="{Binding IsChecked}"/>
+													</DataTemplate>
+												</ItemsControl.ItemTemplate>
+											</ItemsControl>
+										</ScrollViewer>
+										<Button Content="+ Додати тег"
+												Command="{Binding AddTagCommand}"
+												HorizontalAlignment="Stretch"/>
+									</StackPanel>
+								</Flyout>
+							</DropDownButton.Flyout>
+						</DropDownButton>
+					</StackPanel>
+				</Grid>
+
+				<Grid ColumnDefinitions="*,12,*,12,*">
+					<StackPanel Grid.Column="0" Spacing="4">
+						<TextBlock Text="Рік випуску"/>
+						<NumericUpDown FormatString="0"
+									   Value="{Binding ReleaseYear, Converter={x:Static conv:DecimalToNullableIntConverter.Instance}}"/>
+					</StackPanel>
+					<StackPanel Grid.Column="2" Spacing="4">
+						<TextBlock Text="Статус"/>
+						<ComboBox ItemsSource="{Binding Statuses}"
+								  SelectedItem="{Binding Status}"
+								  HorizontalAlignment="Stretch">
+							<ComboBox.ItemTemplate>
+								<DataTemplate x:DataType="models:GameStatus">
+									<TextBlock Text="{Binding, Converter={x:Static conv:GameStatusConverter.Instance}}"/>
+								</DataTemplate>
+							</ComboBox.ItemTemplate>
+						</ComboBox>
+					</StackPanel>
+					<StackPanel Grid.Column="4" Spacing="4">
+						<TextBlock Text="Оцінка (1-10)"/>
+						<NumericUpDown FormatString="0" Minimum="1" Maximum="10"
+									   Value="{Binding PersonalRating, Converter={x:Static conv:DecimalToNullableIntConverter.Instance}}"/>
+					</StackPanel>
+				</Grid>
+
+				<TextBlock Text="Опис"/>
+				<TextBox Text="{Binding Description}"
+						 PlaceholderText="Необов'язково (до 1000 символів)..."
+						 TextWrapping="Wrap"
+						 AcceptsReturn="True"
+						 Height="110"/>
+			</StackPanel>
+		</ScrollViewer>
+
+		<!-- Media tab -->
+		<ScrollViewer Grid.Row="1" IsVisible="{Binding IsMediaTab}">
+			<Grid ColumnDefinitions="200,24,*" Margin="24">
+
+				<StackPanel Grid.Column="0" Spacing="20">
+
+					<StackPanel Spacing="6">
+						<TextBlock Text="Іконка" FontWeight="SemiBold"/>
+						<StackPanel Orientation="Horizontal" Spacing="4">
+							<Button Classes="media" Content="➕" ToolTip.Tip="Обрати файл"
+									Command="{Binding PickImageCommand}"
+									CommandParameter="{x:Static svc:ImageKind.Icon}"/>
+							<Button Classes="media" Content="🔗" ToolTip.Tip="Завантажити за URL"
+									Command="{Binding DownloadImageCommand}"
+									CommandParameter="{x:Static svc:ImageKind.Icon}"/>
+							<Button Classes="media" Content="🗑" ToolTip.Tip="Видалити"
+									Command="{Binding ClearImageCommand}"
+									CommandParameter="{x:Static svc:ImageKind.Icon}"
+									IsEnabled="{Binding IconPath, Converter={x:Static StringConverters.IsNotNullOrEmpty}}"/>
+						</StackPanel>
+						<TextBlock Text="{Binding IconReport.Info}" FontSize="12"/>
+						<TextBlock Text="Рекомендовано: 256×256" FontSize="11" Opacity="0.5"/>
+						<Border Width="96" Height="96" HorizontalAlignment="Left"
+								Background="{DynamicResource CardBackground}">
+							<Panel>
+								<TextBlock Text="🎮" FontSize="32"
+										   HorizontalAlignment="Center" VerticalAlignment="Center" Opacity="0.5"
+										   IsVisible="{Binding IconPath, Converter={x:Static StringConverters.IsNullOrEmpty}}"/>
+								<Image Source="{Binding IconPath, Converter={x:Static conv:PathToBitmapConverter.Instance}, ConverterParameter=128}"
+									   Stretch="Uniform"
+									   IsVisible="{Binding IconPath, Converter={x:Static StringConverters.IsNotNullOrEmpty}}"/>
+							</Panel>
+						</Border>
+						<TextBlock Text="{Binding IconReport.Warning}"
+								   IsVisible="{Binding IconReport.HasWarning}"
+								   Foreground="#e0a030" FontSize="11" TextWrapping="Wrap"/>
+					</StackPanel>
+
+					<StackPanel Spacing="6">
+						<TextBlock Text="Обкладинка" FontWeight="SemiBold"/>
+						<StackPanel Orientation="Horizontal" Spacing="4">
+							<Button Classes="media" Content="➕" ToolTip.Tip="Обрати файл"
+									Command="{Binding PickImageCommand}"
+									CommandParameter="{x:Static svc:ImageKind.Cover}"/>
+							<Button Classes="media" Content="🔗" ToolTip.Tip="Завантажити за URL"
+									Command="{Binding DownloadImageCommand}"
+									CommandParameter="{x:Static svc:ImageKind.Cover}"/>
+							<Button Classes="media" Content="🗑" ToolTip.Tip="Видалити"
+									Command="{Binding ClearImageCommand}"
+									CommandParameter="{x:Static svc:ImageKind.Cover}"
+									IsEnabled="{Binding CoverImagePath, Converter={x:Static StringConverters.IsNotNullOrEmpty}}"/>
+						</StackPanel>
+						<TextBlock Text="{Binding CoverReport.Info}" FontSize="12"/>
+						<TextBlock Text="Рекомендовано: 600×800" FontSize="11" Opacity="0.5"/>
+						<Border Width="150" Height="200" HorizontalAlignment="Left"
+								CornerRadius="8" ClipToBounds="True"
+								Background="{DynamicResource CardBackground}">
+							<Panel>
+								<TextBlock Text="🎮" FontSize="36"
+										   HorizontalAlignment="Center" VerticalAlignment="Center" Opacity="0.5"
+										   IsVisible="{Binding CoverImagePath, Converter={x:Static StringConverters.IsNullOrEmpty}}"/>
+								<Image Source="{Binding CoverImagePath, Converter={x:Static conv:PathToBitmapConverter.Instance}, ConverterParameter=640}"
+									   Stretch="UniformToFill"
+									   IsVisible="{Binding CoverImagePath, Converter={x:Static StringConverters.IsNotNullOrEmpty}}"/>
+							</Panel>
+						</Border>
+						<TextBlock Text="{Binding CoverReport.Warning}"
+								   IsVisible="{Binding CoverReport.HasWarning}"
+								   Foreground="#e0a030" FontSize="11" TextWrapping="Wrap"/>
+					</StackPanel>
+				</StackPanel>
+
+				<StackPanel Grid.Column="2" Spacing="6">
+					<TextBlock Text="Фон" FontWeight="SemiBold"/>
+					<StackPanel Orientation="Horizontal" Spacing="4">
+						<Button Classes="media" Content="➕" ToolTip.Tip="Обрати файл"
+								Command="{Binding PickImageCommand}"
+								CommandParameter="{x:Static svc:ImageKind.Background}"/>
+						<Button Classes="media" Content="🔗" ToolTip.Tip="Завантажити за URL"
+								Command="{Binding DownloadImageCommand}"
+								CommandParameter="{x:Static svc:ImageKind.Background}"/>
+						<Button Classes="media" Content="🗑" ToolTip.Tip="Видалити"
+								Command="{Binding ClearImageCommand}"
+								CommandParameter="{x:Static svc:ImageKind.Background}"
+								IsEnabled="{Binding BackgroundImagePath, Converter={x:Static StringConverters.IsNotNullOrEmpty}}"/>
+					</StackPanel>
+					<TextBlock Text="{Binding BackgroundReport.Info}" FontSize="12"/>
+					<TextBlock Text="Рекомендовано: 1920×1080" FontSize="11" Opacity="0.5"/>
+					<Border Width="380" Height="214" HorizontalAlignment="Left"
+							CornerRadius="8" ClipToBounds="True"
+							Background="{DynamicResource CardBackground}">
+						<Panel>
+							<TextBlock Text="🎮" FontSize="36"
+									   HorizontalAlignment="Center" VerticalAlignment="Center" Opacity="0.5"
+									   IsVisible="{Binding BackgroundImagePath, Converter={x:Static StringConverters.IsNullOrEmpty}}"/>
+							<Image Source="{Binding BackgroundImagePath, Converter={x:Static conv:PathToBitmapConverter.Instance}, ConverterParameter=640}"
+								   Stretch="UniformToFill"
+								   IsVisible="{Binding BackgroundImagePath, Converter={x:Static StringConverters.IsNotNullOrEmpty}}"/>
+						</Panel>
+					</Border>
+					<TextBlock Text="{Binding BackgroundReport.Warning}"
+							   IsVisible="{Binding BackgroundReport.HasWarning}"
+							   Foreground="#e0a030" FontSize="11" TextWrapping="Wrap" MaxWidth="380"/>
+				</StackPanel>
+			</Grid>
+		</ScrollViewer>
+
+		<!-- Bottom action buttons -->
+		<Border Grid.Row="2" Padding="24,12"
+				BorderBrush="{DynamicResource SidebarBorder}" BorderThickness="0,1,0,0">
+			<StackPanel Orientation="Horizontal" Spacing="8" HorizontalAlignment="Right">
+				<Button Content="Скасувати" Command="{Binding CancelCommand}"/>
+				<Button Content="Зберегти" Command="{Binding ConfirmCommand}"/>
+			</StackPanel>
+		</Border>
+	</Grid>
+</Window>

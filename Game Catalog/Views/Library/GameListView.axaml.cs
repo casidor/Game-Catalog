@@ -114,6 +114,7 @@ public partial class GamesListView : UserControl
     {
         if (e.Source is not Visual source) return;
         if (source.FindAncestorOfType<DataGridRow>(includeSelf: true) is not { DataContext: GameRow row }) return;
+        if (source.FindAncestorOfType<Button>(includeSelf: true) != null) return;
 
         if (DataContext is GamesListViewModel vm)
             vm.OpenGameCommand.Execute(row.Game);

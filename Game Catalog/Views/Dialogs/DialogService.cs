@@ -155,4 +155,14 @@ public sealed class DialogService : IDialogService
         await dialog.ShowDialog(owner);
         return downloaded;
     }
+
+    /// <inheritdoc/>
+    public async Task<Game?> ShowGameEditorAsync(Game? game = null)
+    {
+        if (Owner is not { } owner) return null;
+
+        var vm = game == null ? new AddGameViewModel() : new AddGameViewModel(game);
+        await new AddGameWindow { DataContext = vm }.ShowDialog(owner);
+        return vm.SavedGame;
+    }
 }
