@@ -1,0 +1,207 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+			 xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+			 xmlns:vm="using:Game_Catalog.ViewModels"
+			 xmlns:models="using:Game_Catalog.Models"
+			 xmlns:conv="using:Game_Catalog.Converters"
+			 x:Class="Game_Catalog.Views.GameDetailsView"
+			 x:DataType="vm:GameDetailsViewModel">
+	<Grid>
+
+		<!-- Layer 1: blurred background over the whole page, covered by a theme-colored veil -->
+		<Panel ClipToBounds="True">
+			<Image Source="{Binding BlurImage}"
+				   Stretch="UniformToFill"
+				   Effect="blur(60)"
+				   IsVisible="{Binding HasBackground}"/>
+			<Border Background="{DynamicResource AppBackground}" Opacity="0.85"/>
+		</Panel>
+
+		<!-- Layer 2: page content -->
+		<Grid RowDefinitions="Auto,*">
+
+			<!-- Top bar -->
+			<Grid Grid.Row="0" ColumnDefinitions="Auto,Auto,*,Auto" Margin="16,16,16,12">
+				<Button Grid.Column="0" Content="← Назад"
+						Command="{Binding GoBackCommand}" Padding="8,4"/>
+				<Border Grid.Column="1" Width="32" Height="32" Margin="16,0,0,0"
+						IsVisible="{Binding HasIcon}">
+					<Image Source="{Binding IconImage}" Stretch="Uniform"
+						   RenderOptions.BitmapInterpolationMode="HighQuality"/>
+				</Border>
+				<TextBlock Grid.Column="2" Text="{Binding Title}"
+						   FontSize="24" FontWeight="Bold"
+						   VerticalAlignment="Center"
+						   TextTrimming="CharacterEllipsis"
+						   Margin="12,0,16,0"/>
+				<StackPanel Grid.Column="3" Orientation="Horizontal" Spacing="8">
+					<Button Content="✏ Редагувати" Command="{Binding EditCommand}"/>
+					<Button Content="📦 В архів" Command="{Binding ArchiveCommand}"
+							IsVisible="{Binding !IsArchived}"/>
+					<Button Content="♻ Відновити" Command="{Binding RestoreCommand}"
+							IsVisible="{Binding IsArchived}"/>
+					<Button Content="🗑 Видалити" Command="{Binding DeleteCommand}"/>
+				</StackPanel>
+			</Grid>
+
+			<ScrollViewer Grid.Row="1">
+				<StackPanel>
+
+					<!-- Background banner -->
+					<Panel Height="550">
+						<Image Source="{Binding BackgroundImage}"
+							   Stretch="UniformToFill"
+							   VerticalAlignment="Center"
+							   IsVisible="{Binding HasBackground}">
+							<Image.OpacityMask>
+								<LinearGradientBrush StartPoint="0%,0%" EndPoint="0%,100%">
+									<GradientStop Offset="0.0" Color="#FFFFFFFF"/>
+									<GradientStop Offset="0.8" Color="#FFFFFFFF"/>
+									<GradientStop Offset="1.0" Color="#00FFFFFF"/>
+								</LinearGradientBrush>
+							</Image.OpacityMask>
+						</Image>
+						<Border Background="{DynamicResource CardBackground}"
+								IsVisible="{Binding !HasBackground}">
+							<TextBlock Text="🎮" FontSize="64"
+									   HorizontalAlignment="Center" VerticalAlignment="Center"/>
+						</Border>
+					</Panel>
+
+					<!-- Tabs: only details for now -->
+					<TabStrip Margin="16,8,16,0" SelectedIndex="{Binding SelectedTabIndex}">
+						<TabStripItem Content="Деталі"/>
+					</TabStrip>
+
+					<!-- Details tab -->
+					<Grid ColumnDefinitions="280,16,*"
+						  Margin="16" IsVisible="{Binding IsDetailsTab}">
+
+						<!-- Left: cover and fields -->
+						<StackPanel Grid.Row="0" Grid.Column="0" Spacing="8">
+							<Border Width="240" Height="320" CornerRadius="8" ClipToBounds="True"
+									HorizontalAlignment="Left"
+									Background="{DynamicResource CardBackground}">
+								<Panel>
+									<Image Source="{Binding CoverImage}" Stretch="UniformToFill"
+										   IsVisible="{Binding HasCover}"/>
+									<TextBlock Text="🎮" FontSize="48"
+											   HorizontalAlignment="Center" VerticalAlignment="Center"
+											   IsVisible="{Binding !HasCover}"/>
+								</Panel>
+							</Border>
+
+							<TextBlock Text="Деталі" FontSize="14" FontWeight="SemiBold"/>
+							<Border Height="1" Background="{DynamicResource SidebarBorder}"/>
+
+							<Grid ColumnDefinitions="130,*">
+								<TextBlock Grid.Column="0" Text="Статус" Opacity="0.6"/>
+								<TextBlock Grid.Column="1"
+										   Text="{Binding Status, Converter={x:Static conv:GameStatusConverter.Instance}}"/>
+							</Grid>
+							<Grid ColumnDefinitions="130,*">
+								<TextBlock Grid.Column="0" Text="Оцінка" Opacity="0.6"/>
+								<TextBlock Grid.Column="1" Text="{Binding RatingText}"/>
+							</Grid>
+							<Grid ColumnDefinitions="130,*">
+								<TextBlock Grid.Column="0" Text="Студія" Opacity="0.6"/>
+								<TextBlock Grid.Column="1" Text="{Binding DeveloperName}" TextWrapping="Wrap"/>
+							</Grid>
+							<Grid ColumnDefinitions="130,*">
+								<TextBlock Grid.Column="0" Text="Рік випуску" Opacity="0.6"/>
+								<TextBlock Grid.Column="1" Text="{Binding YearText}"/>
+							</Grid>
+							<Grid ColumnDefinitions="130,*">
+								<TextBlock Grid.Column="0" Text="Розмір на диску" Opacity="0.6"/>
+								<TextBlock Grid.Column="1" Text="{Binding SizeText}"/>
+							</Grid>
+							<Grid ColumnDefinitions="130,*">
+								<TextBlock Grid.Column="0" Text="Часу зіграно" Opacity="0.6"/>
+								<TextBlock Grid.Column="1"
+										   Text="{Binding TotalHours, Converter={x:Static conv:DurationConverter.Instance}}"/>
+							</Grid>
+							<Grid ColumnDefinitions="130,*">
+								<TextBlock Grid.Column="0" Text="У бібліотеці" Opacity="0.6"/>
+								<TextBlock Grid.Column="1" Text="{Binding DaysInLibraryText}"/>
+							</Grid>
+							<Grid ColumnDefinitions="130,*">
+								<TextBlock Grid.Column="0" Text="Додано" Opacity="0.6"/>
+								<TextBlock Grid.Column="1"
+										   Text="{Binding AddedAt, StringFormat='{}{0:dd.MM.yyyy}'}"/>
+							</Grid>
+							<Grid ColumnDefinitions="130,*">
+								<TextBlock Grid.Column="0" Text="Жанри" Opacity="0.6"/>
+								<TextBlock Grid.Column="1" Text="{Binding GenresText}" TextWrapping="Wrap"/>
+							</Grid>
+						</StackPanel>
+
+						<!-- Right: tags and platforms as badges -->
+						<StackPanel Grid.Row="0" Grid.Column="2" Spacing="8">
+
+							<TextBlock Text="Теги" FontSize="14" FontWeight="SemiBold"/>
+							<Border Height="1" Background="{DynamicResource SidebarBorder}"/>
+							<ItemsControl ItemsSource="{Binding Tags}" IsVisible="{Binding HasTags}">
+								<ItemsControl.ItemsPanel>
+									<ItemsPanelTemplate>
+										<WrapPanel Orientation="Horizontal"/>
+									</ItemsPanelTemplate>
+								</ItemsControl.ItemsPanel>
+								<ItemsControl.ItemTemplate>
+									<DataTemplate x:DataType="models:Tag">
+										<Border CornerRadius="12" Padding="10,3" Margin="0,0,6,6"
+												Background="{Binding Color, Converter={x:Static conv:TagBadgeBrushConverter.Instance}, ConverterParameter=Background}">
+											<TextBlock Text="{Binding TagName}"
+													   FontSize="12" FontWeight="SemiBold"
+													   Foreground="{Binding Color, Converter={x:Static conv:TagBadgeBrushConverter.Instance}, ConverterParameter=Foreground}"/>
+										</Border>
+									</DataTemplate>
+								</ItemsControl.ItemTemplate>
+							</ItemsControl>
+							<TextBlock Text="Тегів немає" Opacity="0.5"
+									   IsVisible="{Binding !HasTags}"/>
+
+							<TextBlock Text="Платформи" FontSize="14" FontWeight="SemiBold" Margin="0,12,0,0"/>
+							<Border Height="1" Background="{DynamicResource SidebarBorder}"/>
+							<ItemsControl ItemsSource="{Binding Platforms}" IsVisible="{Binding HasPlatforms}">
+								<ItemsControl.ItemsPanel>
+									<ItemsPanelTemplate>
+										<WrapPanel Orientation="Horizontal"/>
+									</ItemsPanelTemplate>
+								</ItemsControl.ItemsPanel>
+								<ItemsControl.ItemTemplate>
+									<DataTemplate x:DataType="models:Platform">
+										<Border CornerRadius="12" Padding="6,3,10,3" Margin="0,0,6,6"
+												Background="#30808080">
+											<StackPanel Orientation="Horizontal" Spacing="6">
+												<!-- Placeholder until platforms get real icons -->
+												<Border Width="16" Height="16" CornerRadius="8"
+														Background="#40808080" VerticalAlignment="Center">
+													<TextBlock Text="?" FontSize="10" FontWeight="Bold"
+															   HorizontalAlignment="Center" VerticalAlignment="Center"/>
+												</Border>
+												<TextBlock Text="{Binding PlatformName}"
+														   FontSize="12" FontWeight="SemiBold"
+														   VerticalAlignment="Center"/>
+											</StackPanel>
+										</Border>
+									</DataTemplate>
+								</ItemsControl.ItemTemplate>
+							</ItemsControl>
+							<TextBlock Text="Платформ немає" Opacity="0.5"
+									   IsVisible="{Binding !HasPlatforms}"/>
+
+							<TextBlock Text="Опис" FontSize="14" FontWeight="SemiBold" Margin="0,12,0,0"/>
+							<Border Height="1" Background="{DynamicResource SidebarBorder}"/>
+							<TextBlock Text="{Binding Description}"
+									   IsVisible="{Binding HasDescription}"
+									   TextWrapping="Wrap" LineHeight="22" Opacity="0.85"/>
+							<TextBlock Text="Опис відсутній"
+									   IsVisible="{Binding !HasDescription}" Opacity="0.5"/>
+						</StackPanel>
+					</Grid>
+
+				</StackPanel>
+			</ScrollViewer>
+
+		</Grid>
+	</Grid>
+</UserControl>

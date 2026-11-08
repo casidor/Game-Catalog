@@ -38,6 +38,8 @@ namespace Game_Catalog.ViewModels
         {
             _currentPage = LibraryPage;
             StudioPage.StudioSelected += studio => NavigateToStudio(studio);
+            LibraryPage.GameSelected += game => NavigateToGame(game, LibraryPage);
+            ArchivePage.GameSelected += game => NavigateToGame(game, ArchivePage);
         }
 
         /// <summary> Disposes the previous page when navigating away from it. </summary>
@@ -57,13 +59,11 @@ namespace Game_Catalog.ViewModels
             CurrentPage = page;
         }
 
-        /// <summary>
-        /// Navigates to the game detail page.
-        /// </summary>
-        public void NavigateToGame(LegacyGame game)
+        /// <summary> Navigates to the game details page. "Back" returns to the page the user came from. </summary>
+        public void NavigateToGame(Game game, ViewModelBase backPage)
         {
-            var detailVm = new LegacyGameDetailsViewModel(game);
-            detailVm.BackRequested += () => CurrentPage = game.IsArchived ? ArchivePage : LibraryPage;
+            var detailVm = new GameDetailsViewModel(game);
+            detailVm.BackRequested += () => CurrentPage = backPage;
             CurrentPage = detailVm;
         }
 
