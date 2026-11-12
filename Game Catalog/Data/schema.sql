@@ -32,7 +32,7 @@ CREATE TABLE Tag (
     tag_id   INTEGER PRIMARY KEY AUTOINCREMENT,
     tag_name TEXT NOT NULL COLLATE NOCASE UNIQUE,
     color    TEXT,
-    CHECK (length(trim(tag_name)) > 0)
+    CHECK (length(trim(tag_name)) > 0),
     CHECK (color IS NULL OR color IN (
     'Red', 'Orange', 'Amber', 'Yellow', 'Lime', 'Green', 'Teal', 'Cyan',
     'Sky', 'Blue', 'Indigo', 'Violet', 'Fuchsia', 'Pink', 'Brown', 'Olive', 'Gray'))
@@ -136,7 +136,7 @@ CREATE TABLE GameExternalId (
     last_synced_at          TEXT,
     page_url                TEXT,
     source_playtime_minutes INTEGER,
-    CHECK (provider_name IN ('RAWG', 'IGDB', 'Steam')),
+    CHECK (provider_name IN ('IGDB', 'Steam')),
     CHECK (source_playtime_minutes IS NULL OR source_playtime_minutes >= 0),
     UNIQUE (game_id, provider_name),
     UNIQUE (provider_name, external_id),

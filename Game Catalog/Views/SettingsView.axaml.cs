@@ -11,12 +11,4 @@ public partial class SettingsView : UserControl
     {
         InitializeComponent();
     }
-    protected override void OnAttachedToVisualTree(VisualTreeAttachmentEventArgs e)
-    {
-        base.OnAttachedToVisualTree(e);
-        if (DataContext is SettingsViewModel vm)
-        {
-            vm.Reload();
-        }
-    }
 }

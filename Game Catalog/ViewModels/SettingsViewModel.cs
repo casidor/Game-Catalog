@@ -2,10 +2,7 @@
 using Avalonia.Styling;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
-using Game_Catalog.Models;
 using Game_Catalog.Services;
-using System.ComponentModel.DataAnnotations;
-using System.Linq;
 using System.Threading.Tasks;
 
 namespace Game_Catalog.ViewModels
@@ -22,12 +19,6 @@ namespace Game_Catalog.ViewModels
         /// <summary>Currently selected theme.</summary>
         [ObservableProperty]
         private string _selectedTheme = SettingsService.Current.Theme;
-
-        /// <summary>Disk capacity in GB for the statistics progress bar.</summary>
-        [Range(100, 100000, ErrorMessage = "Розмір диску має бути від 100 до 100 000 ГБ")]
-        [NotifyDataErrorInfo]
-        [ObservableProperty]
-        private double _diskCapacityGB = SettingsService.Current.DiskCapacityGB;
 
         /// <summary>RAWG API key used for game metadata fetch. Empty string disables RAWG features.</summary>
         [ObservableProperty]
@@ -55,13 +46,6 @@ namespace Game_Catalog.ViewModels
 
         /// <summary>True if RAWG server is reachable with the saved API key.</summary>
         public bool IsOnline => IsKeyValidated;
-
-        [ObservableProperty]
-        [NotifyPropertyChangedFor(nameof(HasDiskOverflowError))]
-        private string _diskOverflowError = string.Empty;
-
-        /// <summary>True if the entered disk capacity is less than the total size of existing games.</summary>
-        public bool HasDiskOverflowError => !string.IsNullOrEmpty(DiskOverflowError);
 
         /// <summary>
         /// Initializes the ViewModel and checks RAWG availability in the background
@@ -124,28 +108,6 @@ namespace Game_Catalog.ViewModels
                 value == "Light" ? ThemeVariant.Light : ThemeVariant.Dark;
             SettingsService.Current.Theme = value;
             SettingsService.Save();
-        }
-
-        partial void OnDiskCapacityGBChanged(double value)
-        {
-            double usedGB = AppData.Instance.ActiveGames.Sum(g => g.SizeGB);
-            if (value < usedGB)
-            {
-                DiskOverflowError = $"Неможливо встановити менше {usedGB:0.0} ГБ (вже зайнято)";
-                return;
-            }
-            DiskOverflowError = string.Empty;
-            ValidateProperty(value, nameof(DiskCapacityGB));
-            if (HasErrors)
-                return;
-            SettingsService.UpdateDiskCapacity(value);
-        }
-
-        /// <summary> Reloads the settings from the persistent storage, refreshing the UI and clearing any validation errors. </summary>
-        public void Reload()
-        {
-            DiskCapacityGB = SettingsService.Current.DiskCapacityGB;
-            ClearErrors();
         }
     }
 }

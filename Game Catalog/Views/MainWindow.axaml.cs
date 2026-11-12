@@ -3,7 +3,6 @@ using Avalonia.Input;
 using Avalonia.Interactivity;
 using Avalonia.Platform.Storage;
 using Game_Catalog.Data;
-using Game_Catalog.Models;
 using Game_Catalog.Services;
 using Game_Catalog.ViewModels;
 using System;
@@ -36,7 +35,7 @@ namespace Game_Catalog.Views
             base.OnLoaded(e);
 
             SettingsService.SaveFailed += OnSettingsSaveFailed;
-            if (!SettingsService.LoadSucceeded && File.Exists(DatabaseService.DefaultPath))
+            if (!SettingsService.LoadSucceeded && File.Exists(Db.DefaultPath))
                 _ = ConfirmationWindow.ShowAlertAsync(this,
                     "Помилка налаштувань",
                     "Файл налаштувань пошкоджений або відсутній. Застосовано стандартні налаштування.");
@@ -44,7 +43,6 @@ namespace Game_Catalog.Views
             try
             {
                 DatabaseInitializer.Initialize();
-                LoadData();
             }
             catch (Exception ex)
             {
@@ -53,22 +51,6 @@ namespace Game_Catalog.Views
                 Close();
             }
         }
-        private static void LoadData()
-        {
-            DatabaseService.Initialize();
-
-            var studios = DatabaseService.GetStudios();
-            foreach (var studio in studios)
-                AppData.Instance.Studios.Add(studio);
-
-            var games = DatabaseService.GetGames(studios);
-            foreach (var game in games)
-                AppData.Instance.Games.Add(game);
-
-            foreach (var session in DatabaseService.GetSessions(games))
-                AppData.Instance.Sessions.Add(session);
-        }
-
         /// <summary>Unsubscribes from service events when the window is closed.</summary>
         protected override void OnUnloaded(RoutedEventArgs e)
         {
@@ -98,9 +80,7 @@ namespace Game_Catalog.Views
                 "пошук, фільтрація за жанром, платформою, розробником і статусом.\n\n" +
                 "🏢 Студії — база розробників. Перед додаванням гри потрібно додати студію.\n\n" +
                 "📦 Архів — ігри, які ви перенесли з бібліотеки. Можна відновити або видалити.\n\n" +
-                "📊 Статистика — кількість ігор, зіграні години, зайнятий простір на диску " +
-                "та середня оцінка колекції.\n\n" +
-                "⚙ Налаштування — тема інтерфейсу, розмір диску та ключ RAWG API " +
+                "⚙ Налаштування — тема інтерфейсу та ключ RAWG API " +
                 "для автоматичного підбору інформації про гру.\n\n" +
                 "КЛАВІШІ\n" +
                 "F1 — ця довідка\n" +

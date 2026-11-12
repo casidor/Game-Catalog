@@ -8,7 +8,6 @@ using Game_Catalog.Data;
 using Game_Catalog.Services;
 using Game_Catalog.ViewModels;
 using Game_Catalog.Views;
-using System.IO;
 using System.Linq;
 
 namespace Game_Catalog
@@ -34,27 +33,10 @@ namespace Game_Catalog
                         ? ThemeVariant.Light
                         : ThemeVariant.Dark;
 
-                if (SettingsService.Current.IsFirstRun && !File.Exists(DatabaseService.DefaultPath))
+                desktop.MainWindow = new MainWindow
                 {
-                    var onboarding = new OnboardingWindow();
-                    desktop.MainWindow = onboarding;
-                    onboarding.Closed += (_, _) =>
-                    {
-                        var mainWindow = new MainWindow
-                        {
-                            DataContext = new MainWindowViewModel()
-                        };
-                        desktop.MainWindow = mainWindow;
-                        mainWindow.Show();
-                    };
-                }
-                else
-                {
-                    desktop.MainWindow = new MainWindow
-                    {
-                        DataContext = new MainWindowViewModel()
-                    };
-                }
+                    DataContext = new MainWindowViewModel()
+                };
             }
             base.OnFrameworkInitializationCompleted();
         }

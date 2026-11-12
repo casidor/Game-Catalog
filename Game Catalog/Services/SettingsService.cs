@@ -30,9 +30,6 @@ namespace Game_Catalog.Services
         /// <summary>Raised when a save operation fails. Provides a human-readable error message.</summary>
         public static event Action<string>? SaveFailed;
 
-        /// <summary>Raised when the disk capacity value changes.</summary>
-        public static event Action? DiskCapacityChanged;
-
         /// <summary>
         /// Saves the current settings to disk.
         /// Fires <see cref="SaveFailed"/> if the write operation fails.
@@ -84,14 +81,6 @@ namespace Game_Catalog.Services
                 LoadSucceeded = false;
                 Save();
             }
-        }
-
-        /// <summary>Updates the disk capacity, saves, and notifies subscribers.</summary>
-        public static void UpdateDiskCapacity(double gb)
-        {
-            Current.DiskCapacityGB = gb;
-            Save();
-            DiskCapacityChanged?.Invoke();
         }
     }
 }

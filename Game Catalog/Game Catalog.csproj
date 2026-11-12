@@ -27,20 +27,6 @@
     <PackageReference Include="Microsoft.Data.Sqlite" Version="10.0.14" />
   </ItemGroup>
 
-  <ItemGroup>
-    <Compile Update="Views\Library\LegacyGameDetailsView.axaml.cs">
-      <DependentUpon>LegacyGameDetailsView.axaml</DependentUpon>
-    </Compile>
-    <Compile Update="Views\Library\LegacyArchiveView.axaml.cs">
-      <DependentUpon>LegacyArchiveView.axaml</DependentUpon>
-    </Compile>
-    <Compile Update="Views\Library\LegacyAddGameWindow.axaml.cs">
-      <DependentUpon>LegacyAddGameWindow.axaml</DependentUpon>
-    </Compile>
-    <Compile Update="Views\Library\LegacyLibraryView.axaml.cs">
-      <DependentUpon>LegacyLibraryView.axaml</DependentUpon>
-    </Compile>
-  </ItemGroup>
 
   <ItemGroup>
     <None Update="Data\schema.sql">
