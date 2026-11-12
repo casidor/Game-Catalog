@@ -115,9 +115,7 @@ public sealed class DialogService : IDialogService
 
         try
         {
-            // The covers folder still lives in RawgService; move it out when RAWG is removed.
-            Directory.CreateDirectory(RawgService.CoversFolder);
-            var dest = Path.Combine(RawgService.CoversFolder, $"{Guid.NewGuid()}{Path.GetExtension(source)}");
+            var dest = MediaStore.NewFilePath(Path.GetExtension(source));
             File.Copy(source, dest, overwrite: true);
             return dest;
         }

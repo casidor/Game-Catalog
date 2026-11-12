@@ -18,30 +18,5 @@
 					  HorizontalAlignment="Stretch"/>
 		</StackPanel>
 
-		<!-- RAWG API key -->
-		<StackPanel Spacing="8">
-			<TextBlock Text="RAWG API Key" FontSize="14" Opacity="0.6"/>
-			<TextBlock Text="Отримати ключ: rawg.io/apidocs" FontSize="11" Opacity="0.4"/>
-			<TextBox Text="{Binding RawgApiKey}"
-					 PlaceholderText="Вставте API ключ або залиште порожнім..."/>
-			<Button Content="Перевірити ключ"
-					Command="{Binding ValidateRawgKeyCommand}"
-					IsEnabled="{Binding !IsValidatingKey}"/>
-			<TextBlock Text="{Binding RawgKeyStatusMessage}"
-					   FontSize="12"
-					   IsVisible="{Binding RawgKeyStatusMessage, Converter={x:Static StringConverters.IsNotNullOrEmpty}}"/>
-		</StackPanel>
-
-		<!-- Connection status indicator -->
-		<StackPanel Orientation="Horizontal" Spacing="6">
-			<TextBlock Text="●" FontSize="10" VerticalAlignment="Center"
-					   Foreground="#4caf50" IsVisible="{Binding IsOnline}"/>
-			<TextBlock Text="●" FontSize="10" VerticalAlignment="Center"
-					   Foreground="#888" IsVisible="{Binding !IsOnline}"/>
-			<TextBlock Text="{Binding ConnectionStatus}"
-					   FontSize="12" Opacity="0.6"
-					   VerticalAlignment="Center"/>
-		</StackPanel>
-
 	</StackPanel>
 </UserControl>

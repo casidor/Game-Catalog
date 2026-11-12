@@ -45,8 +45,7 @@ namespace Game_Catalog.Services
                 var ext = DetectExtension(bytes)
                     ?? throw new InvalidOperationException("За цією адресою не знайдено зображення JPG, PNG або WEBP.");
 
-                Directory.CreateDirectory(RawgService.CoversFolder);
-                var dest = Path.Combine(RawgService.CoversFolder, $"{Guid.NewGuid()}{ext}");
+                var dest = MediaStore.NewFilePath(ext);
                 await File.WriteAllBytesAsync(dest, bytes, ct);
 
                 if (!ImageInspector.IsReadable(dest))
