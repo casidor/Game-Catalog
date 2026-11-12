@@ -66,6 +66,18 @@ namespace Game_Catalog.Data
                 19 when ex.SqliteExtendedErrorCode is 2067 or 1555
                     => new(DatabaseErrorKind.Duplicate,
                            $"{action}: такий запис уже існує.", ex),
+                19 when ex.Message.Contains("session_overlap")
+                    => new(DatabaseErrorKind.Constraint,
+                           $"{action}: сесія перетинається з іншою сесією цієї гри.", ex),
+                19 when ex.Message.Contains("session_in_future")
+                    => new(DatabaseErrorKind.Constraint,
+                           $"{action}: сесія не може починатися чи завершуватися в майбутньому.", ex),
+                19 when ex.Message.Contains("end_time > start_time")
+                    => new(DatabaseErrorKind.Constraint,
+                           $"{action}: сесія має завершуватися пізніше, ніж починається.", ex),
+                19 when ex.Message.Contains("604800")
+                    => new(DatabaseErrorKind.Constraint,
+                           $"{action}: сесія не може тривати понад 7 діб.", ex),
                 19 => new(DatabaseErrorKind.Constraint,
                            $"{action}: порушено обмеження бази даних.", ex),
                 5 or 6 => new(DatabaseErrorKind.Unavailable,

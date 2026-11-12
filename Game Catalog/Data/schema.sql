@@ -97,13 +97,19 @@ CREATE TABLE GameTag (
 -- Player activity
 
 CREATE TABLE PlaySession (
-    play_session_id INTEGER PRIMARY KEY AUTOINCREMENT,
-    game_id         INTEGER NOT NULL,
-    start_time      TEXT NOT NULL,
-    end_time        TEXT,
-    entry_method    TEXT NOT NULL DEFAULT 'Manual',
-    note            TEXT,
-    CHECK (end_time IS NULL OR end_time >= start_time),
+    play_session_id  INTEGER PRIMARY KEY AUTOINCREMENT,
+    game_id          INTEGER NOT NULL,
+    start_time       TEXT NOT NULL,
+    end_time         TEXT,
+    entry_method     TEXT NOT NULL DEFAULT 'Manual',
+    note             TEXT,
+    duration_seconds INTEGER GENERATED ALWAYS AS (
+        CAST(strftime('%s', end_time) AS INTEGER) - CAST(strftime('%s', start_time) AS INTEGER)
+    ) VIRTUAL,
+    CHECK (datetime(start_time) IS start_time),
+    CHECK (end_time IS NULL OR datetime(end_time) IS end_time),
+    CHECK (end_time IS NULL OR end_time > start_time),
+    CHECK (end_time IS NULL OR duration_seconds <= 604800),
     CHECK (entry_method IN ('Manual', 'Auto')),
     FOREIGN KEY (game_id) REFERENCES Game(game_id) ON DELETE CASCADE ON UPDATE CASCADE
 ) STRICT;
@@ -169,8 +175,77 @@ CREATE INDEX ix_game_archived      ON Game (is_archived);
 CREATE INDEX ix_gamegenre_genre    ON GameGenre (genre_id);
 CREATE INDEX ix_gameplatform_plat  ON GamePlatform (platform_id);
 CREATE INDEX ix_gametag_tag        ON GameTag (tag_id);
-CREATE INDEX ix_session_game       ON PlaySession (game_id);
+CREATE INDEX ix_session_game_duration ON PlaySession (game_id, duration_seconds);
+CREATE INDEX ix_session_game_start    ON PlaySession (game_id, start_time);
 CREATE INDEX ix_session_start_time ON PlaySession (start_time);
 CREATE INDEX ix_goal_game          ON Goal (game_id);
 CREATE INDEX ix_goal_due_date      ON Goal (due_date);
 CREATE INDEX ix_achievement_game   ON Achievement (game_id);
+
+-- Triggers
+
+CREATE TRIGGER trg_session_no_overlap_insert
+BEFORE INSERT ON PlaySession
+BEGIN
+    SELECT RAISE(ABORT, 'session_overlap')
+    WHERE EXISTS (
+        SELECT 1
+        FROM PlaySession s
+        WHERE s.game_id = NEW.game_id
+          AND s.start_time < COALESCE(NEW.end_time, '9999-12-31 23:59:59')
+          AND COALESCE(s.end_time, '9999-12-31 23:59:59') > NEW.start_time
+    );
+END;
+
+CREATE TRIGGER trg_session_no_overlap_update
+BEFORE UPDATE OF game_id, start_time, end_time ON PlaySession
+BEGIN
+    SELECT RAISE(ABORT, 'session_overlap')
+    WHERE EXISTS (
+        SELECT 1
+        FROM PlaySession s
+        WHERE s.game_id = NEW.game_id
+          AND s.play_session_id <> NEW.play_session_id
+          AND s.start_time < COALESCE(NEW.end_time, '9999-12-31 23:59:59')
+          AND COALESCE(s.end_time, '9999-12-31 23:59:59') > NEW.start_time
+    );
+END;
+
+CREATE TRIGGER trg_session_not_in_future_insert
+BEFORE INSERT ON PlaySession
+WHEN NEW.start_time > strftime('%Y-%m-%d %H:%M:%S', 'now', 'localtime')
+  OR NEW.end_time   > strftime('%Y-%m-%d %H:%M:%S', 'now', 'localtime')
+BEGIN
+    SELECT RAISE(ABORT, 'session_in_future');
+END;
+
+CREATE TRIGGER trg_session_not_in_future_update
+BEFORE UPDATE OF start_time, end_time ON PlaySession
+WHEN NEW.start_time > strftime('%Y-%m-%d %H:%M:%S', 'now', 'localtime')
+  OR NEW.end_time   > strftime('%Y-%m-%d %H:%M:%S', 'now', 'localtime')
+BEGIN
+    SELECT RAISE(ABORT, 'session_in_future');
+END;
+
+-- Views
+
+CREATE VIEW v_game AS
+SELECT g.game_id, g.developer_id, s.studio_name AS developer_name, g.parent_game_id,
+       g.game_title, g.game_description, g.release_year, g.game_status, g.size_gb,
+       g.personal_rating, g.cover_image_path, g.background_image_path,
+       g.executable_path, g.install_path, g.icon_path, g.added_at, g.is_archived,
+       COALESCE(t.total_seconds, 0) / 3600.0 AS total_hours,
+       CAST(julianday('now', 'localtime') - julianday(g.added_at) AS INTEGER) AS days_in_library
+FROM Game g
+JOIN Studio s ON s.studio_id = g.developer_id
+LEFT JOIN (
+    SELECT game_id, SUM(duration_seconds) AS total_seconds
+    FROM PlaySession
+    GROUP BY game_id
+) t ON t.game_id = g.game_id;
+
+CREATE VIEW v_play_session AS
+SELECT ps.play_session_id, ps.game_id, g.game_title, ps.start_time, ps.end_time,
+       ps.duration_seconds, ps.entry_method, ps.note
+FROM PlaySession ps
+JOIN Game g ON g.game_id = ps.game_id;

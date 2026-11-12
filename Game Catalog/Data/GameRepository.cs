@@ -6,29 +6,16 @@ using System.Linq;
 
 namespace Game_Catalog.Data.Repositories
 {
-    /// <summary> Data access for the Game table and its genre, platform and tag links. </summary>
+    /// <summary> Data access for games (read through the v_game view) and their genre, platform and tag links. </summary>
     public static class GameRepository
     {
-        /// <summary> Base select: the game, its studio name, total hours and days in the library. </summary>
-        private const string BaseSelect = @"
-            SELECT g.game_id, g.developer_id, s.studio_name AS developer_name, g.parent_game_id,
-                   g.game_title, g.game_description, g.release_year, g.game_status, g.size_gb,
-                   g.personal_rating, g.cover_image_path, g.background_image_path,
-                   g.executable_path, g.install_path, g.icon_path, g.added_at, g.is_archived,
-                   COALESCE((SELECT SUM((julianday(ps.end_time) - julianday(ps.start_time)) * 24.0)
-                             FROM PlaySession ps
-                             WHERE ps.game_id = g.game_id AND ps.end_time IS NOT NULL), 0) AS total_hours,
-                   CAST(julianday('now', 'localtime') - julianday(g.added_at) AS INTEGER) AS days_in_library
-            FROM Game g
-            JOIN Studio s ON s.studio_id = g.developer_id";
-
         /// <summary> Returns games matching the filter, ordered by title. Filtering is done by the database. </summary>
         public static List<Game> GetAll(GameFilter filter) =>
             Db.Run("Не вдалося завантажити ігри", () =>
             {
                 using var connection = Db.Open();
-                var games = connection.Query<Game>($@"
-                    SELECT * FROM ({BaseSelect}) x
+                var games = connection.Query<Game>(@"
+                    SELECT * FROM v_game x
                     WHERE (@IsArchived IS NULL OR x.is_archived = @IsArchived)
                       AND (@GenreCount = 0 OR EXISTS (
                             SELECT 1 FROM GameGenre l WHERE l.game_id = x.game_id AND l.genre_id IN @GenreIds))
@@ -80,7 +67,7 @@ namespace Game_Catalog.Data.Repositories
             {
                 using var connection = Db.Open();
                 var game = connection.QuerySingleOrDefault<Game>(
-                    BaseSelect + " WHERE g.game_id = @gameId", new { gameId });
+                    "SELECT * FROM v_game WHERE game_id = @gameId", new { gameId });
                 if (game != null)
                     LoadLinks(connection, new List<Game> { game });
                 return game;

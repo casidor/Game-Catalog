@@ -29,6 +29,10 @@ namespace Game_Catalog.Data
                 cmd.CommandText = schemaSql;
                 cmd.ExecuteNonQuery();
                 transaction.Commit();
+
+                using var walCmd = connection.CreateCommand();
+                walCmd.CommandText = "PRAGMA journal_mode = WAL;";
+                walCmd.ExecuteNonQuery();
             }
             catch (Exception ex)
             {
