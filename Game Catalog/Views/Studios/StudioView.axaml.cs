@@ -13,13 +13,6 @@ public partial class StudioView : UserControl
         InitializeComponent();
     }
 
-    protected override void OnAttachedToVisualTree(VisualTreeAttachmentEventArgs e)
-    {
-        base.OnAttachedToVisualTree(e);
-        if (DataContext is StudioViewModel vm)
-            vm.Load();
-    }
-
     /// <summary> Closes the filter panel without applying when the dimmed backdrop is clicked. </summary>
     private void OnOverlayPressed(object? sender, PointerPressedEventArgs e)
     {

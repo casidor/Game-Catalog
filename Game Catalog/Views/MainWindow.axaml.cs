@@ -30,7 +30,7 @@ namespace Game_Catalog.Views
         }
 
         /// <summary>Loads saved data and enables auto-save when the window first appears.</summary>
-        protected override async void OnLoaded(RoutedEventArgs e)
+        protected override void OnLoaded(RoutedEventArgs e)
         {
             base.OnLoaded(e);
 
@@ -40,17 +40,13 @@ namespace Game_Catalog.Views
                     "Помилка налаштувань",
                     "Файл налаштувань пошкоджений або відсутній. Застосовано стандартні налаштування.");
 
-            try
+            if (DataContext is MainWindowViewModel vm)
             {
-                DatabaseInitializer.Initialize();
-            }
-            catch (Exception ex)
-            {
-                await ConfirmationWindow.ShowErrorAsync(this, "Помилка бази даних",
-                    "Не вдалося ініціалізувати або прочитати базу даних. Застосунок буде закрито.", ex);
-                Close();
+                vm.CloseRequested += Close;
+                vm.Start();
             }
         }
+
         /// <summary>Unsubscribes from service events when the window is closed.</summary>
         protected override void OnUnloaded(RoutedEventArgs e)
         {

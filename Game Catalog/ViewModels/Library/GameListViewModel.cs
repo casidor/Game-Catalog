@@ -134,6 +134,9 @@ namespace Game_Catalog.ViewModels
         partial void OnSortFieldChanged(GameSortField value) => Rebuild();
         partial void OnSortDescendingChanged(bool value) => Rebuild();
 
+        /// <summary> Loads the page data when the page is shown. </summary>
+        public override void OnNavigatedTo() => Load();
+
         /// <summary> Refreshes filter lists and the games. Called when the page is shown. </summary>
         public void Load()
         {

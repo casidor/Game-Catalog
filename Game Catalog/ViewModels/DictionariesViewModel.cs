@@ -30,6 +30,9 @@ namespace Game_Catalog.ViewModels
         /// <summary> True when the tags tab is selected. </summary>
         public bool IsTagsTab => SelectedTabIndex == 2;
 
+        /// <summary> Loads the page data when the page is shown. </summary>
+        public override void OnNavigatedTo() => Load();
+
         /// <summary> Loads data of all tabs. Called when the page is shown. </summary>
         public void Load()
         {

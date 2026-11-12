@@ -59,6 +59,9 @@ namespace Game_Catalog.ViewModels
 
         partial void OnSearchTextChanged(string value) => UpdateMatches();
 
+        /// <summary> Loads the page data when the page is shown. </summary>
+        public override void OnNavigatedTo() => Load();
+
         /// <summary> Refreshes filter lists and the table. Called when the page is shown. </summary>
         public void Load()
         {

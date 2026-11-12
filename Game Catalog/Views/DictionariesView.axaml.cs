@@ -10,11 +10,4 @@ public partial class DictionariesView : UserControl
     {
         InitializeComponent();
     }
-
-    protected override void OnAttachedToVisualTree(VisualTreeAttachmentEventArgs e)
-    {
-        base.OnAttachedToVisualTree(e);
-        if (DataContext is DictionariesViewModel vm)
-            vm.Load();
-    }
 }

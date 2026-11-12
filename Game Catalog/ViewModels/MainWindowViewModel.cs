@@ -1,7 +1,10 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using Game_Catalog.Data;
 using Game_Catalog.Models;
+using Game_Catalog.Services;
 using System;
+using System.Threading.Tasks;
 
 namespace Game_Catalog.ViewModels
 {
@@ -36,12 +39,38 @@ namespace Game_Catalog.ViewModels
             ArchivePage.GameSelected += game => NavigateToGame(game, ArchivePage);
         }
 
+        /// <summary> Raised when the application cannot continue and the window must close. </summary>
+        public event Action? CloseRequested;
+
+        /// <summary> Creates the database if needed and shows the first page. Called once after the window is loaded. </summary>
+        public void Start()
+        {
+            try { DatabaseInitializer.Initialize(); }
+            catch (Exception ex)
+            {
+                _ = FailStartAsync(ex);
+                return;
+            }
+
+            CurrentPage.OnNavigatedTo();
+        }
+
+        private async Task FailStartAsync(Exception ex)
+        {
+            await Dialogs.Current.ErrorAsync("Помилка бази даних",
+                "Не вдалося ініціалізувати або прочитати базу даних. Застосунок буде закрито.", ex);
+            CloseRequested?.Invoke();
+        }
+
         /// <summary> Disposes the previous page when navigating away from it. </summary>
         partial void OnCurrentPageChanging(ViewModelBase value)
         {
             if (CurrentPage is IDisposable disposable && !ReferenceEquals(CurrentPage, value))
                 disposable.Dispose();
         }
+
+        /// <summary> Lets the page that was just shown load its data. </summary>
+        partial void OnCurrentPageChanged(ViewModelBase value) => value.OnNavigatedTo();
 
         /// <summary>
         /// Navigates to the specified page.

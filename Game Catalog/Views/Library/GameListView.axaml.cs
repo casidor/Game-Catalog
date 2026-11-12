@@ -23,7 +23,6 @@ public partial class GamesListView : UserControl
         if (DataContext is GamesListViewModel vm)
         {
             vm.PropertyChanged += OnViewModelPropertyChanged;
-            vm.Load();
             UpdateSortArrows();
         }
     }
