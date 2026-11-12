@@ -37,4 +37,9 @@ public interface IDialogService
 
     /// <summary> Shows the game editor. The editor saves the game itself; returns the saved game, or null if cancelled. </summary>
     Task<Game?> ShowGameEditorAsync(Game? game = null);
+
+    /// <summary> Shows the session editor. The editor saves the session itself; returns the saved session, or null if cancelled. </summary>
+    /// <param name="session"> Session to edit, or null to add a new one. </param>
+    /// <param name="presetGameId"> Game preselected for a new session, or null. </param>
+    Task<PlaySession?> ShowSessionEditorAsync(PlaySession? session = null, int? presetGameId = null);
 }

@@ -1,0 +1,120 @@
+<Window xmlns="https://github.com/avaloniaui"
+		xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+		xmlns:vm="using:Game_Catalog.ViewModels"
+		xmlns:models="using:Game_Catalog.Models"
+		x:Class="Game_Catalog.Views.SessionEditorWindow"
+		x:DataType="vm:SessionEditorViewModel"
+		Title="{Binding WindowTitle}"
+		Width="450"
+		SizeToContent="Height"
+		WindowStartupLocation="CenterOwner"
+		CanResize="False">
+
+	<Window.Styles>
+		<Style Selector="DropDownButton.field">
+			<Setter Property="Background" Value="{DynamicResource ComboBoxBackground}"/>
+			<Setter Property="BorderBrush" Value="{DynamicResource ComboBoxBorderBrush}"/>
+			<Setter Property="BorderThickness" Value="{DynamicResource ComboBoxBorderThemeThickness}"/>
+			<Setter Property="Padding" Value="{DynamicResource ComboBoxPadding}"/>
+			<Setter Property="Foreground" Value="{DynamicResource ComboBoxForeground}"/>
+			<Setter Property="CornerRadius" Value="{DynamicResource ControlCornerRadius}"/>
+		</Style>
+		<Style Selector="DropDownButton.field:pointerover /template/ Border#RootBorder">
+			<Setter Property="Background" Value="{DynamicResource ComboBoxBackgroundPointerOver}"/>
+			<Setter Property="BorderBrush" Value="{DynamicResource ComboBoxBorderBrushPointerOver}"/>
+		</Style>
+		<Style Selector="DropDownButton.field:pressed">
+			<Setter Property="RenderTransform" Value="none"/>
+		</Style>
+		<Style Selector="DropDownButton.field:pressed /template/ Border#RootBorder">
+			<Setter Property="Background" Value="{DynamicResource ComboBoxBackgroundPressed}"/>
+			<Setter Property="BorderBrush" Value="{DynamicResource ComboBoxBorderBrushPressed}"/>
+		</Style>
+	</Window.Styles>
+
+	<StackPanel Spacing="12" Margin="24">
+
+		<TextBlock Text="Гра"/>
+		<DropDownButton x:Name="GameButton"
+						Classes="field"
+						IsEnabled="{Binding IsGameEditable}"
+						HorizontalAlignment="Stretch"
+						HorizontalContentAlignment="Left">
+			<TextBlock Text="{Binding GameButtonText}" TextTrimming="CharacterEllipsis"/>
+			<DropDownButton.Flyout>
+				<Flyout Placement="Bottom" Opened="OnFlyoutOpened">
+					<StackPanel Width="320" Spacing="8">
+						<TextBox Text="{Binding GameSearchText}"
+								 PlaceholderText="🔍 Пошук гри..."/>
+						<ListBox ItemsSource="{Binding FilteredGames}"
+								 SelectionChanged="OnGameSelected"
+								 MaxHeight="220">
+							<ListBox.ItemTemplate>
+								<DataTemplate x:DataType="models:Game">
+									<StackPanel Margin="4,2">
+										<TextBlock Text="{Binding GameTitle}"/>
+										<TextBlock Text="{Binding DeveloperName}" FontSize="11" Opacity="0.6"/>
+									</StackPanel>
+								</DataTemplate>
+							</ListBox.ItemTemplate>
+						</ListBox>
+						<Button Content="+ Додати гру"
+								Command="{Binding AddGameCommand}"
+								HorizontalAlignment="Stretch"/>
+					</StackPanel>
+				</Flyout>
+			</DropDownButton.Flyout>
+		</DropDownButton>
+
+		<TextBlock Text="Початок"/>
+		<Grid ColumnDefinitions="*,8,Auto">
+			<CalendarDatePicker Grid.Column="0"
+								SelectedDate="{Binding StartDate}"
+								SelectedDateFormat="Custom"
+								CustomDateFormatString="dd.MM.yyyy"
+								HorizontalAlignment="Stretch"/>
+			<TimePicker Grid.Column="2"
+						SelectedTime="{Binding StartTime}"
+						ClockIdentifier="24HourClock"
+						MinuteIncrement="1"/>
+		</Grid>
+
+		<CheckBox Content="Сесія ще триває" IsChecked="{Binding IsOngoing}"/>
+
+		<StackPanel Spacing="12" IsVisible="{Binding !IsOngoing}">
+			<TextBlock Text="Завершення"/>
+			<Grid ColumnDefinitions="*,8,Auto">
+				<CalendarDatePicker Grid.Column="0"
+									SelectedDate="{Binding EndDate}"
+									SelectedDateFormat="Custom"
+									CustomDateFormatString="dd.MM.yyyy"
+									HorizontalAlignment="Stretch"/>
+				<TimePicker Grid.Column="2"
+							SelectedTime="{Binding EndTime}"
+							ClockIdentifier="24HourClock"
+							MinuteIncrement="1"/>
+			</Grid>
+		</StackPanel>
+
+		<TextBlock Text="Нотатка"/>
+		<TextBox Text="{Binding Note}"
+				 PlaceholderText="Необов'язково"
+				 AcceptsReturn="True"
+				 TextWrapping="Wrap"
+				 Height="80"/>
+
+		<TextBlock Text="{Binding ErrorMessage}"
+				   IsVisible="{Binding HasErrorMessage}"
+				   TextWrapping="Wrap"
+				   Foreground="{DynamicResource SystemControlErrorTextForegroundBrush}"/>
+
+		<StackPanel Orientation="Horizontal"
+					Spacing="8"
+					HorizontalAlignment="Right"
+					Margin="0,8,0,0">
+			<Button Content="Скасувати" Command="{Binding CancelCommand}"/>
+			<Button Content="Зберегти" Command="{Binding ConfirmCommand}"/>
+		</StackPanel>
+
+	</StackPanel>
+</Window>

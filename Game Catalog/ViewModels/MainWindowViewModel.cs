@@ -23,6 +23,9 @@ namespace Game_Catalog.ViewModels
         /// <summary> The studio management page. </summary>
         public StudioViewModel StudioPage { get; } = new();
 
+        /// <summary> The play sessions page. </summary>
+        public SessionsViewModel SessionsPage { get; } = new();
+
         /// <summary> The archive page. </summary>
         public GamesListViewModel ArchivePage { get; } = new(isArchive: true);
 

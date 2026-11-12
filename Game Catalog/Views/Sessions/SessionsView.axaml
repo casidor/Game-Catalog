@@ -1,0 +1,255 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+			 xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+			 xmlns:vm="using:Game_Catalog.ViewModels"
+			 xmlns:models="using:Game_Catalog.Models"
+			 xmlns:conv="using:Game_Catalog.Converters"
+			 x:Class="Game_Catalog.Views.SessionsView"
+			 x:DataType="vm:SessionsViewModel">
+
+	<UserControl.Styles>
+		<Style Selector="DropDownButton.field">
+			<Setter Property="Background" Value="{DynamicResource ComboBoxBackground}"/>
+			<Setter Property="BorderBrush" Value="{DynamicResource ComboBoxBorderBrush}"/>
+			<Setter Property="BorderThickness" Value="{DynamicResource ComboBoxBorderThemeThickness}"/>
+			<Setter Property="Padding" Value="{DynamicResource ComboBoxPadding}"/>
+			<Setter Property="Foreground" Value="{DynamicResource ComboBoxForeground}"/>
+			<Setter Property="CornerRadius" Value="{DynamicResource ControlCornerRadius}"/>
+		</Style>
+		<Style Selector="DropDownButton.field:pointerover /template/ Border#RootBorder">
+			<Setter Property="Background" Value="{DynamicResource ComboBoxBackgroundPointerOver}"/>
+			<Setter Property="BorderBrush" Value="{DynamicResource ComboBoxBorderBrushPointerOver}"/>
+		</Style>
+		<Style Selector="DropDownButton.field:pressed">
+			<Setter Property="RenderTransform" Value="none"/>
+		</Style>
+		<Style Selector="DropDownButton.field:pressed /template/ Border#RootBorder">
+			<Setter Property="Background" Value="{DynamicResource ComboBoxBackgroundPressed}"/>
+			<Setter Property="BorderBrush" Value="{DynamicResource ComboBoxBorderBrushPressed}"/>
+		</Style>
+	</UserControl.Styles>
+
+	<Grid RowDefinitions="Auto,*">
+
+		<!-- Toolbar -->
+		<Border Grid.Row="0" Padding="16,12">
+			<Grid ColumnDefinitions="Auto,*">
+				<StackPanel Grid.Column="0" Orientation="Horizontal" Spacing="8" VerticalAlignment="Center">
+					<TextBlock Text="Сесії"
+							   FontSize="20" FontWeight="Bold"
+							   VerticalAlignment="Center"/>
+					<Button Content="+ Додати сесію"
+							Command="{Binding AddCommand}"
+							VerticalAlignment="Center"/>
+				</StackPanel>
+				<StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="8"
+							HorizontalAlignment="Right" VerticalAlignment="Center">
+					<Button Content="{Binding FiltersButtonText}"
+							Command="{Binding OpenFiltersCommand}"
+							VerticalAlignment="Center"/>
+					<Button Content="✕ Скинути"
+							Command="{Binding ResetFiltersCommand}"
+							IsVisible="{Binding HasActiveFilter}"
+							VerticalAlignment="Center"/>
+				</StackPanel>
+			</Grid>
+		</Border>
+
+		<!-- Sessions table -->
+		<DataGrid Grid.Row="1"
+				  ItemsSource="{Binding Rows}"
+				  IsVisible="{Binding !IsEmpty}"
+				  AutoGenerateColumns="False"
+				  IsReadOnly="True"
+				  CanUserSortColumns="True"
+				  CanUserResizeColumns="True"
+				  CanUserReorderColumns="False"
+				  GridLinesVisibility="None"
+				  HeadersVisibility="Column"
+				  BorderThickness="0"
+				  Background="Transparent"
+				  RowHeight="44"
+				  Margin="8,0"
+				  DoubleTapped="OnRowDoubleTapped">
+
+			<DataGrid.Styles>
+				<Style Selector="DataGridColumnHeader">
+					<Setter Property="Background" Value="Transparent"/>
+					<Setter Property="FontSize" Value="12"/>
+				</Style>
+			</DataGrid.Styles>
+
+			<DataGrid.Columns>
+				<DataGridTextColumn Header="Гра" Width="2*"
+									Binding="{ReflectionBinding GameTitle}"/>
+				<DataGridTextColumn Header="Початок" Width="160"
+									Binding="{ReflectionBinding StartTime, StringFormat='dd.MM.yyyy HH:mm'}"/>
+				<DataGridTextColumn Header="Завершення" Width="160"
+									Binding="{ReflectionBinding EndTime, StringFormat='dd.MM.yyyy HH:mm', TargetNullValue='триває'}"/>
+				<DataGridTextColumn Header="Тривалість" Width="120"
+									Binding="{ReflectionBinding DurationSeconds, Mode=OneWay, Converter={x:Static conv:DurationConverter.Instance}}"/>
+				<DataGridTextColumn Header="Спосіб" Width="100"
+									Binding="{ReflectionBinding EntryMethod, Mode=OneWay, Converter={x:Static conv:EntryMethodConverter.Instance}}"/>
+				<DataGridTextColumn Header="Нотатка" Width="*"
+									Binding="{ReflectionBinding Note}"/>
+				<DataGridTemplateColumn Header="" Width="100" CanUserSort="False" CanUserResize="False">
+					<DataGridTemplateColumn.CellTemplate>
+						<DataTemplate x:DataType="models:PlaySession">
+							<StackPanel Orientation="Horizontal" Spacing="4" HorizontalAlignment="Center">
+								<Button Content="✏" ToolTip.Tip="Редагувати"
+										Command="{Binding $parent[DataGrid].((vm:SessionsViewModel)DataContext).EditCommand}"
+										CommandParameter="{Binding}"/>
+								<Button Content="🗑" ToolTip.Tip="Видалити"
+										Command="{Binding $parent[DataGrid].((vm:SessionsViewModel)DataContext).DeleteCommand}"
+										CommandParameter="{Binding}"/>
+							</StackPanel>
+						</DataTemplate>
+					</DataGridTemplateColumn.CellTemplate>
+				</DataGridTemplateColumn>
+			</DataGrid.Columns>
+		</DataGrid>
+
+		<!-- Empty state -->
+		<StackPanel Grid.Row="1"
+					IsVisible="{Binding IsEmpty}"
+					HorizontalAlignment="Center" VerticalAlignment="Center" Spacing="16">
+			<TextBlock Text="⏱" FontSize="48" HorizontalAlignment="Center"/>
+			<TextBlock Text="Сесій немає" FontSize="18" FontWeight="SemiBold" HorizontalAlignment="Center"/>
+			<TextBlock Text="Додайте першу сесію" Opacity="0.6" HorizontalAlignment="Center"/>
+			<Button Content="+ Додати сесію"
+					Command="{Binding AddCommand}"
+					HorizontalAlignment="Center"
+					Padding="24,10" FontSize="14"/>
+		</StackPanel>
+
+		<!-- Filtered empty state -->
+		<StackPanel Grid.Row="1"
+					IsVisible="{Binding IsFilteredEmpty}"
+					HorizontalAlignment="Center" VerticalAlignment="Center" Spacing="12">
+			<TextBlock Text="🔍" FontSize="48" HorizontalAlignment="Center"/>
+			<TextBlock Text="Сесій не знайдено" FontSize="18" FontWeight="SemiBold" HorizontalAlignment="Center"/>
+			<TextBlock Text="Спробуйте змінити фільтр" Opacity="0.6" HorizontalAlignment="Center"/>
+		</StackPanel>
+
+		<!-- Filter side panel with a dimmed, click-blocking backdrop -->
+		<Grid Grid.Row="0" Grid.RowSpan="2" IsVisible="{Binding IsFilterPanelOpen}">
+			<Border Background="{DynamicResource OverlayScrim}" PointerPressed="OnOverlayPressed"/>
+			<Border HorizontalAlignment="Right" Width="340"
+					Background="{DynamicResource SidebarBackground}"
+					BorderBrush="{DynamicResource SidebarBorder}"
+					BorderThickness="1,0,0,0"
+					BoxShadow="-6 0 20 0 #40000000">
+				<Grid RowDefinitions="Auto,*,Auto">
+
+					<!-- Header -->
+					<Border Grid.Row="0" Padding="12,12"
+							BorderBrush="{DynamicResource SidebarBorder}" BorderThickness="0,0,0,1">
+						<Grid ColumnDefinitions="Auto,*,Auto">
+							<Button Grid.Column="0" Content="✕"
+									Command="{Binding CancelFiltersCommand}"
+									Background="Transparent" Padding="10,4"/>
+							<TextBlock Grid.Column="1" Text="Фільтри"
+									   FontSize="18" FontWeight="Bold"
+									   Margin="12,0" VerticalAlignment="Center"/>
+							<Button Grid.Column="2" Content="Скинути"
+									Command="{Binding ClearDraftCommand}"
+									Background="Transparent" Padding="10,4"/>
+						</Grid>
+					</Border>
+
+					<!-- Filter groups -->
+					<ScrollViewer Grid.Row="1">
+						<StackPanel>
+
+							<StackPanel Spacing="8" Margin="20,16">
+								<TextBlock Text="Гра" FontSize="15" FontWeight="SemiBold"/>
+								<DropDownButton Classes="field"
+												HorizontalAlignment="Stretch"
+												HorizontalContentAlignment="Left">
+									<TextBlock Text="{Binding Games.Summary}" TextTrimming="CharacterEllipsis"/>
+									<DropDownButton.Flyout>
+										<Flyout Placement="Bottom" Opened="OnFlyoutOpened">
+											<StackPanel Width="280" Spacing="8">
+												<TextBox Text="{Binding Games.SearchText}"
+														 PlaceholderText="🔍 Пошук гри..."/>
+												<ScrollViewer MaxHeight="220">
+													<ItemsControl ItemsSource="{Binding Games.FilteredOptions}">
+														<ItemsControl.ItemTemplate>
+															<DataTemplate x:DataType="vm:FilterOption">
+																<CheckBox Content="{Binding Name}" IsChecked="{Binding IsChecked}"/>
+															</DataTemplate>
+														</ItemsControl.ItemTemplate>
+													</ItemsControl>
+												</ScrollViewer>
+											</StackPanel>
+										</Flyout>
+									</DropDownButton.Flyout>
+								</DropDownButton>
+							</StackPanel>
+
+							<Border Height="1" Background="{DynamicResource SidebarBorder}"/>
+
+							<StackPanel Spacing="8" Margin="20,16">
+								<TextBlock Text="Спосіб додавання" FontSize="15" FontWeight="SemiBold"/>
+								<ComboBox ItemsSource="{Binding MethodOptions}"
+										  SelectedItem="{Binding DraftMethod}"
+										  HorizontalAlignment="Stretch">
+									<ComboBox.ItemTemplate>
+										<DataTemplate x:DataType="vm:MethodOption">
+											<TextBlock Text="{Binding Name}"/>
+										</DataTemplate>
+									</ComboBox.ItemTemplate>
+								</ComboBox>
+							</StackPanel>
+
+							<Border Height="1" Background="{DynamicResource SidebarBorder}"/>
+
+							<StackPanel Spacing="8" Margin="20,16">
+								<TextBlock Text="Дата початку" FontSize="15" FontWeight="SemiBold"/>
+								<Grid ColumnDefinitions="Auto,8,*" RowDefinitions="Auto,8,Auto">
+									<TextBlock Grid.Row="0" Grid.Column="0" Text="від" VerticalAlignment="Center"/>
+									<CalendarDatePicker Grid.Row="0" Grid.Column="2"
+														SelectedDate="{Binding DraftDateFrom}"
+														SelectedDateFormat="Custom"
+														CustomDateFormatString="dd.MM.yyyy"
+														HorizontalAlignment="Stretch"/>
+									<TextBlock Grid.Row="2" Grid.Column="0" Text="до" VerticalAlignment="Center"/>
+									<CalendarDatePicker Grid.Row="2" Grid.Column="2"
+														SelectedDate="{Binding DraftDateTo}"
+														SelectedDateFormat="Custom"
+														CustomDateFormatString="dd.MM.yyyy"
+														HorizontalAlignment="Stretch"/>
+								</Grid>
+							</StackPanel>
+
+							<Border Height="1" Background="{DynamicResource SidebarBorder}"/>
+
+							<StackPanel Spacing="8" Margin="20,16">
+								<TextBlock Text="Тривалість (год)" FontSize="15" FontWeight="SemiBold"/>
+								<Grid ColumnDefinitions="Auto,8,*,16,Auto,8,*">
+									<TextBlock Grid.Column="0" Text="від" VerticalAlignment="Center"/>
+									<NumericUpDown Grid.Column="2" FormatString="0.##" Minimum="0" Increment="0.5"
+												   Value="{Binding DraftHoursFrom, Converter={x:Static conv:DecimalToNullableDoubleConverter.Instance}}"/>
+									<TextBlock Grid.Column="4" Text="до" VerticalAlignment="Center"/>
+									<NumericUpDown Grid.Column="6" FormatString="0.##" Minimum="0" Increment="0.5"
+												   Value="{Binding DraftHoursTo, Converter={x:Static conv:DecimalToNullableDoubleConverter.Instance}}"/>
+								</Grid>
+							</StackPanel>
+
+						</StackPanel>
+					</ScrollViewer>
+
+					<!-- Apply -->
+					<Border Grid.Row="2" Padding="20,12"
+							BorderBrush="{DynamicResource SidebarBorder}" BorderThickness="0,1,0,0">
+						<Button Content="Застосувати"
+								Command="{Binding ApplyFiltersCommand}"
+								HorizontalAlignment="Stretch"
+								Padding="0,10"/>
+					</Border>
+
+				</Grid>
+			</Border>
+		</Grid>
+
+	</Grid>
+</UserControl>
