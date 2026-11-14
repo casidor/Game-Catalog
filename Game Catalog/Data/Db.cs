@@ -1,6 +1,7 @@
 ﻿using Dapper;
 using Microsoft.Data.Sqlite;
 using System;
+using System.Globalization;
 using System.IO;
 
 namespace Game_Catalog.Data
@@ -15,6 +16,9 @@ namespace Game_Catalog.Data
 
         private static string ConnectionString => $"Data Source={DefaultPath}";
 
+        /// <summary> Ukrainian comparison rules used by the UKR_NOCASE collation. </summary>
+        private static readonly CompareInfo UkrainianCompare = CultureInfo.GetCultureInfo("uk-UA").CompareInfo;
+
         /// <summary> One-time Dapper setup. Call once at application start. </summary>
         public static void Configure()
         {
@@ -27,12 +31,25 @@ namespace Game_Catalog.Data
             var connection = new SqliteConnection(ConnectionString);
             connection.Open();
 
-            connection.CreateFunction("lower_ua", (string? s) => s?.ToLowerInvariant(), isDeterministic: true);
+            RegisterExtensions(connection);
 
             using var cmd = connection.CreateCommand();
             cmd.CommandText = "PRAGMA foreign_keys = ON;";
             cmd.ExecuteNonQuery();
             return connection;
+        }
+
+        /// <summary>
+        /// Registers the application's SQL extensions on a connection:
+        /// lower_ua() lowercases any text (the built-in lower() handles ASCII only),
+        /// UKR_NOCASE orders and compares text by the Ukrainian alphabet, ignoring case.
+        /// They exist only on connections opened by the application; the schema does not depend on them.
+        /// </summary>
+        public static void RegisterExtensions(SqliteConnection connection)
+        {
+            connection.CreateFunction("lower_ua", (string? s) => s?.ToLowerInvariant(), isDeterministic: true);
+            connection.CreateCollation("UKR_NOCASE",
+                (a, b) => UkrainianCompare.Compare(a, b, CompareOptions.IgnoreCase));
         }
 
         /// <summary> Runs an action and converts SqliteException into DatabaseException. </summary>

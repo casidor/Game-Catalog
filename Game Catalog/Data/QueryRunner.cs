@@ -26,7 +26,7 @@ namespace Game_Catalog.Data
             using var connection = new SqliteConnection(connString);
             connection.Open();
 
-            connection.CreateFunction("lower_ua", (string? s) => s?.ToLowerInvariant(), isDeterministic: true);
+            Db.RegisterExtensions(connection);
 
             using (var pragma = connection.CreateCommand())
             {
