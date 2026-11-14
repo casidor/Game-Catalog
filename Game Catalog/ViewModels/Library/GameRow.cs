@@ -13,6 +13,7 @@ namespace Game_Catalog.ViewModels
         public string Title => Game.GameTitle;
         public string DeveloperName => Game.DeveloperName;
         public string PlatformsText => string.Join(", ", Game.Platforms.Select(p => p.PlatformName));
+        public string GenresText => string.Join(", ", Game.Genres.Select(g => g.GenreName));
         public string YearText => Game.ReleaseYear?.ToString() ?? "—";
         public GameStatus Status => Game.GameStatus;
         public string RatingText => Game.PersonalRating is { } r ? $"{r}/10" : "—";

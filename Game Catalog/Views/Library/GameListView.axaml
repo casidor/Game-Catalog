@@ -12,13 +12,13 @@
 		<Border Grid.Row="0" Padding="16,12">
 			<Grid ColumnDefinitions="Auto,*">
 				<StackPanel Grid.Column="0" Orientation="Horizontal" Spacing="8" VerticalAlignment="Center">
-	<TextBlock Text="{Binding PageTitle}"
-			   FontSize="20" FontWeight="Bold" VerticalAlignment="Center"/>
-	<Button Content="+ Додати гру"
-			Command="{Binding AddCommand}"
-			IsVisible="{Binding CanAdd}"
-			VerticalAlignment="Center"/>
-</StackPanel>
+					<TextBlock Text="{Binding PageTitle}"
+							   FontSize="20" FontWeight="Bold" VerticalAlignment="Center"/>
+					<Button Content="+ Додати гру"
+							Command="{Binding AddCommand}"
+							IsVisible="{Binding CanAdd}"
+							VerticalAlignment="Center"/>
+				</StackPanel>
 				<StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="8"
 							HorizontalAlignment="Right" VerticalAlignment="Center">
 					<TextBlock Text="{Binding SearchSummary}"
@@ -112,14 +112,14 @@
 											<TextBlock Text="🎮" FontSize="48"
 													   HorizontalAlignment="Center" VerticalAlignment="Center"
 													   IsVisible="{Binding CoverImagePath, Converter={x:Static StringConverters.IsNullOrEmpty}}"/>
-                                            <Button Content="✏"
-		HorizontalAlignment="Right" VerticalAlignment="Top"
-		Margin="6" Padding="8,4"
-		Background="{DynamicResource ButtonBackground}"
-		ToolTip.Tip="Редагувати"
-		IsVisible="{Binding $parent[Button].IsPointerOver}"
-		Command="{Binding $parent[ItemsControl].((vm:GamesListViewModel)DataContext).EditCommand}"
-		CommandParameter="{Binding Game}"/>
+											<Button Content="✏"
+													HorizontalAlignment="Right" VerticalAlignment="Top"
+													Margin="6" Padding="8,4"
+													Background="{DynamicResource ButtonBackground}"
+													ToolTip.Tip="Редагувати"
+													IsVisible="{Binding $parent[Button].IsPointerOver}"
+													Command="{Binding $parent[ItemsControl].((vm:GamesListViewModel)DataContext).EditCommand}"
+													CommandParameter="{Binding Game}"/>
 										</Panel>
 										<Border Grid.Row="1" Padding="8,6"
 												Background="{Binding IsMatch, Converter={x:Static conv:SearchMatchBrushConverter.Instance}}">
@@ -178,6 +178,8 @@
 										Tag="{x:Static models:GameSortField.Title}"/>
 					<DataGridTextColumn Header="Студія" Width="*" Binding="{ReflectionBinding DeveloperName}"
 										CanUserSort="False"/>
+					<DataGridTextColumn Header="Жанри" Width="*" Binding="{ReflectionBinding GenresText}"
+										CanUserSort="False"/>
 					<DataGridTextColumn Header="Платформи" Width="*" Binding="{ReflectionBinding PlatformsText}"
 										CanUserSort="False"/>
 					<DataGridTextColumn Header="Рік" Width="80" Binding="{ReflectionBinding YearText}"
@@ -192,17 +194,17 @@
 										Tag="{x:Static models:GameSortField.Hours}"/>
 					<DataGridTextColumn Header="Розмір" Width="110" Binding="{ReflectionBinding SizeText}"
 										Tag="{x:Static models:GameSortField.Size}"/>
-<DataGridTemplateColumn Header="" Width="70" CanUserSort="False" CanUserResize="False">
-	<DataGridTemplateColumn.CellTemplate>
-		<DataTemplate x:DataType="vm:GameRow">
-			<StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
-				<Button Content="✏" ToolTip.Tip="Редагувати"
-						Command="{Binding $parent[DataGrid].((vm:GamesListViewModel)DataContext).EditCommand}"
-						CommandParameter="{Binding Game}"/>
-			</StackPanel>
-		</DataTemplate>
-	</DataGridTemplateColumn.CellTemplate>
-</DataGridTemplateColumn>
+					<DataGridTemplateColumn Header="" Width="70" CanUserSort="False" CanUserResize="False">
+						<DataGridTemplateColumn.CellTemplate>
+							<DataTemplate x:DataType="vm:GameRow">
+								<StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
+									<Button Content="✏" ToolTip.Tip="Редагувати"
+											Command="{Binding $parent[DataGrid].((vm:GamesListViewModel)DataContext).EditCommand}"
+											CommandParameter="{Binding Game}"/>
+								</StackPanel>
+							</DataTemplate>
+						</DataGridTemplateColumn.CellTemplate>
+					</DataGridTemplateColumn>
 				</DataGrid.Columns>
 			</DataGrid>
 
@@ -211,11 +213,11 @@
 						HorizontalAlignment="Center" VerticalAlignment="Center" Spacing="16">
 				<TextBlock Text="🎮" FontSize="48" HorizontalAlignment="Center"/>
 				<TextBlock Text="{Binding EmptyTitle}" FontSize="18" FontWeight="SemiBold" HorizontalAlignment="Center"/>
-<Button Content="+ Додати гру"
-		Command="{Binding AddCommand}"
-		IsVisible="{Binding ShowAddInEmpty}"
-		HorizontalAlignment="Center"
-		Padding="24,10" FontSize="14"/>
+				<Button Content="+ Додати гру"
+						Command="{Binding AddCommand}"
+						IsVisible="{Binding ShowAddInEmpty}"
+						HorizontalAlignment="Center"
+						Padding="24,10" FontSize="14"/>
 				<TextBlock Text="{Binding EmptyHint}" Opacity="0.6" HorizontalAlignment="Center"/>
 			</StackPanel>
 
