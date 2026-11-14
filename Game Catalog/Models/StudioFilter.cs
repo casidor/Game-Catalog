@@ -3,9 +3,15 @@ using System.Collections.Generic;
 
 namespace Game_Catalog.Models
 {
-    /// <summary> Filter criteria for the studio list. Empty lists and null bounds mean "not set". </summary>
+    /// <summary> Filter criteria and sort order for the studio list. Empty lists and null bounds mean "not set". </summary>
     public sealed record StudioFilter
     {
+        /// <summary> Field the list is ordered by. Not a criterion. </summary>
+        public StudioSortField SortField { get; init; } = StudioSortField.Name;
+
+        /// <summary> True for descending order. Not a criterion. </summary>
+        public bool SortDescending { get; init; }
+
         /// <summary> Countries to keep. Empty means any country. </summary>
         public IReadOnlyList<string> Countries { get; init; } = Array.Empty<string>();
 

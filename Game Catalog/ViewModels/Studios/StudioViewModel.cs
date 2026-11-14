@@ -4,6 +4,7 @@ using Game_Catalog.Data.Repositories;
 using Game_Catalog.Models;
 using Game_Catalog.Services;
 using System;
+using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
 using System.Threading.Tasks;
@@ -11,7 +12,7 @@ using DatabaseException = Game_Catalog.Data.DatabaseException;
 
 namespace Game_Catalog.ViewModels
 {
-    /// <summary> ViewModel for the studios page: database filtering, in-memory search highlight and deletion. </summary>
+    /// <summary> ViewModel for the studios page: filtering, sorting and search done by the database, plus deletion. </summary>
     public partial class StudioViewModel : ViewModelBase
     {
         /// <summary> Filter currently applied to the list. </summary>
@@ -28,6 +29,15 @@ namespace Game_Catalog.ViewModels
 
         /// <summary> Text whose matches are highlighted in the table. </summary>
         [ObservableProperty] private string _searchText = string.Empty;
+
+        /// <summary> "Found N of M" text shown next to the search box; empty when nothing is searched. </summary>
+        [ObservableProperty] private string _searchSummary = string.Empty;
+
+        /// <summary> Field of the current sort order; the sorting itself is done by the database. </summary>
+        [ObservableProperty] private StudioSortField _sortField = StudioSortField.Name;
+
+        /// <summary> True for descending order. </summary>
+        [ObservableProperty] private bool _sortDescending;
 
         /// <summary> Draft lower bound of the foundation year, edited in the panel. </summary>
         [ObservableProperty] private int? _draftYearFrom;
@@ -58,6 +68,21 @@ namespace Game_Catalog.ViewModels
         public bool IsFilteredEmpty => Rows.Count == 0 && HasActiveFilter;
 
         partial void OnSearchTextChanged(string value) => UpdateMatches();
+
+        /// <summary> Sorts by the clicked table column: same column flips the direction. </summary>
+        public void SortByColumn(StudioSortField field)
+        {
+            if (SortField == field)
+            {
+                SortDescending = !SortDescending;
+            }
+            else
+            {
+                SortField = field;
+                SortDescending = false;
+            }
+            Reload();
+        }
 
         /// <summary> Loads the page data when the page is shown. </summary>
         public override void OnNavigatedTo() => Load();
@@ -95,12 +120,16 @@ namespace Game_Catalog.ViewModels
             Reload();
         }
 
-        /// <summary> Loads studios matching the applied filter from the database. </summary>
+        /// <summary> Loads studios matching the applied filter from the database, already in the chosen order. </summary>
         private void Reload()
         {
             try
             {
-                var studios = StudioRepository.GetAll(_applied);
+                var studios = StudioRepository.GetAll(_applied with
+                {
+                    SortField = SortField,
+                    SortDescending = SortDescending
+                });
                 Rows.Clear();
                 foreach (var studio in studios)
                     Rows.Add(new StudioRow(studio));
@@ -118,16 +147,33 @@ namespace Game_Catalog.ViewModels
             OnPropertyChanged(nameof(FiltersButtonText));
         }
 
-        /// <summary> Marks rows whose name or country contains the search text. </summary>
+        /// <summary> Marks rows found by the database search and updates the "found" counter. </summary>
         private void UpdateMatches()
         {
-            var query = SearchText.Trim();
-            foreach (var row in Rows)
+            // Nothing to search for or nothing to mark: reset without asking the database.
+            if (string.IsNullOrWhiteSpace(SearchText) || Rows.Count == 0)
             {
-                row.IsMatch = query.Length > 0 &&
-                    (row.StudioName.Contains(query, StringComparison.OrdinalIgnoreCase) ||
-                     row.Studio.Country.Contains(query, StringComparison.OrdinalIgnoreCase));
+                foreach (var row in Rows)
+                    row.IsMatch = false;
+                SearchSummary = string.Empty;
+                return;
             }
+
+            HashSet<int> matches;
+            try
+            {
+                matches = StudioRepository.GetMatchIds(SearchText);
+            }
+            catch (DatabaseException ex)
+            {
+                matches = new HashSet<int>();
+                _ = ShowErrorAsync("Помилка пошуку студій", ex);
+            }
+
+            foreach (var row in Rows)
+                row.IsMatch = matches.Contains(row.Studio.StudioId);
+
+            SearchSummary = $"Знайдено: {Rows.Count(r => r.IsMatch)} з {Rows.Count}";
         }
 
         /// <summary> Copies the applied filter into the panel controls. </summary>

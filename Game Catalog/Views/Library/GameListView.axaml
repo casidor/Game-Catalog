@@ -168,21 +168,13 @@
 					  RowHeight="44"
 					  Margin="8,0"
 					  DoubleTapped="OnRowDoubleTapped"
-					  Sorting="OnColumnSorting"
+					  Classes="dbSort"
 					  x:Name="GamesGrid">
 
 				<DataGrid.Styles>
 					<Style Selector="DataGridColumnHeader">
 						<Setter Property="Background" Value="Transparent"/>
 						<Setter Property="FontSize" Value="12"/>
-					</Style>
-					<Style Selector="DataGridColumnHeader:not(:sortascending):not(:sortdescending) /template/ ContentPresenter#PART_ContentPresenter">
-						<Setter Property="Grid.ColumnSpan" Value="2"/>
-					</Style>
-					<Style Selector="DataGridColumnHeader /template/ Path#SortIcon">
-						<Setter Property="IsVisible" Value="False"/>
-						<Setter Property="Width" Value="0"/>
-						<Setter Property="Margin" Value="0"/>
 					</Style>
 					<Style Selector="DataGridRow">
 						<Setter Property="Background"

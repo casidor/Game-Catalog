@@ -9,12 +9,27 @@ namespace Game_Catalog.Data.Repositories
     /// <summary> Data access for the Studio table. </summary>
     public static class StudioRepository
     {
-        /// <summary> Returns studios matching the filter, ordered by name. Filtering is done by the database. </summary>
-        public static List<Studio> GetAll(StudioFilter filter) =>
-            Db.Run("Не вдалося завантажити студії", () =>
+        /// <summary>
+        /// Returns studios matching the filter in the order chosen in it.
+        /// Filtering and sorting are done by the database; studios without a foundation year go last.
+        /// </summary>
+        public static List<Studio> GetAll(StudioFilter filter)
+        {
+            // ORDER BY cannot be a query parameter, so the clause is chosen from fixed literals (no user text).
+            var orderBy = (filter.SortField, filter.SortDescending) switch
+            {
+                (StudioSortField.Year, false) =>
+                    "s.foundation_year ASC NULLS LAST, s.studio_name COLLATE UKR_NOCASE ASC, s.studio_id ASC",
+                (StudioSortField.Year, true) =>
+                    "s.foundation_year DESC NULLS LAST, s.studio_name COLLATE UKR_NOCASE ASC, s.studio_id ASC",
+                (_, true) => "s.studio_name COLLATE UKR_NOCASE DESC, s.studio_id ASC",
+                _ => "s.studio_name COLLATE UKR_NOCASE ASC, s.studio_id ASC"
+            };
+
+            return Db.Run("Не вдалося завантажити студії", () =>
             {
                 using var connection = Db.Open();
-                return connection.Query<Studio>(@"
+                return connection.Query<Studio>($@"
                     SELECT s.studio_id, s.studio_name, s.country, s.foundation_year,
                            s.main_genre, g.genre_name AS main_genre_name, s.website
                     FROM Studio s
@@ -23,7 +38,7 @@ namespace Game_Catalog.Data.Repositories
                       AND (@GenreCount   = 0 OR s.main_genre IN @GenreIds)
                       AND (@YearFrom IS NULL OR s.foundation_year >= @YearFrom)
                       AND (@YearTo   IS NULL OR s.foundation_year <= @YearTo)
-                    ORDER BY lower_ua(s.studio_name), s.studio_id",
+                    ORDER BY {orderBy}",
                     new
                     {
                         CountryCount = filter.Countries.Count,
@@ -34,6 +49,28 @@ namespace Game_Catalog.Data.Repositories
                         filter.YearTo
                     }).AsList();
             });
+        }
+
+        /// <summary>
+        /// Returns ids of the studios whose name or country contains the search text, ignoring case.
+        /// The match is decided by the database; an empty text matches nothing.
+        /// </summary>
+        public static HashSet<int> GetMatchIds(string? search)
+        {
+            var text = search?.Trim() ?? string.Empty;
+            if (text.Length == 0) return new HashSet<int>();
+
+            return Db.Run("Не вдалося виконати пошук студій", () =>
+            {
+                using var connection = Db.Open();
+                return connection.Query<int>(@"
+                    SELECT studio_id
+                    FROM Studio
+                    WHERE instr(lower_ua(studio_name), lower_ua(@Search)) > 0
+                       OR instr(lower_ua(country), lower_ua(@Search)) > 0",
+                    new { Search = text }).ToHashSet();
+            });
+        }
 
         /// <summary> Returns the studio with the given id, or null if it no longer exists. </summary>
         public static Studio? GetById(int studioId) =>
@@ -58,7 +95,7 @@ namespace Game_Catalog.Data.Repositories
                     SELECT DISTINCT country
                     FROM Studio
                     WHERE country IS NOT NULL
-                    ORDER BY lower_ua(country)").AsList();
+                    ORDER BY country COLLATE UKR_NOCASE").AsList();
             });
 
         /// <summary> Inserts the studio and sets its generated id. </summary>
