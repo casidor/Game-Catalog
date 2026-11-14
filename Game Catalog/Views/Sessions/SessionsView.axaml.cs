@@ -12,9 +12,34 @@ namespace Game_Catalog.Views;
 
 public partial class SessionsView : UserControl
 {
+    /// <summary> Header clicks and sort arrows of the sessions table. </summary>
+    private readonly DataGridSortHeaders _sortHeaders;
+
     public SessionsView()
     {
         InitializeComponent();
+
+        _sortHeaders = new DataGridSortHeaders(SessionsGrid,
+            () => DataContext is SessionsViewModel vm
+                ? ((object?)vm.SortField, vm.SortDescending)
+                : ((object?)null, false),
+            field =>
+            {
+                if (DataContext is SessionsViewModel vm && field is SessionSortField sortField)
+                    vm.SortByColumn(sortField);
+            });
+    }
+
+    protected override void OnAttachedToVisualTree(VisualTreeAttachmentEventArgs e)
+    {
+        base.OnAttachedToVisualTree(e);
+        _sortHeaders.Attach(DataContext);
+    }
+
+    protected override void OnDetachedFromVisualTree(VisualTreeAttachmentEventArgs e)
+    {
+        _sortHeaders.Detach();
+        base.OnDetachedFromVisualTree(e);
     }
 
     /// <summary> Closes the filter panel without applying when the dimmed backdrop is clicked. </summary>

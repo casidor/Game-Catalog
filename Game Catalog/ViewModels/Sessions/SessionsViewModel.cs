@@ -11,7 +11,7 @@ using DatabaseException = Game_Catalog.Data.DatabaseException;
 
 namespace Game_Catalog.ViewModels
 {
-    /// <summary> ViewModel for the sessions page: database filtering, editing and deletion of play sessions. </summary>
+    /// <summary> ViewModel for the sessions page: filtering and sorting done by the database, editing and deletion of play sessions. </summary>
     public partial class SessionsViewModel : ViewModelBase
     {
         /// <summary> Filter currently applied to the list. </summary>
@@ -49,6 +49,12 @@ namespace Game_Catalog.ViewModels
         /// <summary> Indicates whether the filter panel is open. </summary>
         [ObservableProperty] private bool _isFilterPanelOpen;
 
+        /// <summary> Field of the current sort order; the sorting itself is done by the database. </summary>
+        [ObservableProperty] private SessionSortField _sortField = SessionSortField.Start;
+
+        /// <summary> True for descending order. The page opens with the newest sessions first. </summary>
+        [ObservableProperty] private bool _sortDescending = true;
+
         /// <summary> True when a filter is applied to the list. </summary>
         public bool HasActiveFilter => !_applied.IsEmpty;
 
@@ -70,6 +76,21 @@ namespace Game_Catalog.ViewModels
         public bool IsFilteredEmpty => Rows.Count == 0 && HasActiveFilter;
 
         public SessionsViewModel() => _draftMethod = MethodOptions[0];
+
+        /// <summary> Sorts by the clicked table column: same column flips the direction. </summary>
+        public void SortByColumn(SessionSortField field)
+        {
+            if (SortField == field)
+            {
+                SortDescending = !SortDescending;
+            }
+            else
+            {
+                SortField = field;
+                SortDescending = false;
+            }
+            Reload();
+        }
 
         /// <summary> Loads the page data when the page is shown. </summary>
         public override void OnNavigatedTo() => Load();
@@ -98,12 +119,16 @@ namespace Game_Catalog.ViewModels
             Reload();
         }
 
-        /// <summary> Loads sessions matching the applied filter from the database. </summary>
+        /// <summary> Loads sessions matching the applied filter from the database, already in the chosen order. </summary>
         private void Reload()
         {
             try
             {
-                var sessions = SessionRepository.GetAll(_applied);
+                var sessions = SessionRepository.GetAll(_applied with
+                {
+                    SortField = SortField,
+                    SortDescending = SortDescending
+                });
                 Rows.Clear();
                 foreach (var session in sessions)
                     Rows.Add(session);

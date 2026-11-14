@@ -12,12 +12,31 @@ namespace Game_Catalog.Data.Repositories
     {
         private const string DateFormat = "yyyy-MM-dd HH:mm:ss";
 
-        /// <summary> Returns sessions matching the filter, newest first. Filtering is done by the database. </summary>
-        public static List<PlaySession> GetAll(SessionFilter filter) =>
-            Db.Run("Не вдалося завантажити сесії", () =>
+        /// <summary>
+        /// Returns sessions matching the filter in the order chosen in it (newest first by default).
+        /// Filtering and sorting are done by the database; sessions still in progress have no duration and go last.
+        /// </summary>
+        public static List<PlaySession> GetAll(SessionFilter filter)
+        {
+            // ORDER BY cannot be a query parameter, so the clause is chosen from fixed literals (no user text).
+            var orderBy = (filter.SortField, filter.SortDescending) switch
+            {
+                (SessionSortField.Duration, false) =>
+                    "duration_seconds ASC NULLS LAST, start_time DESC, play_session_id DESC",
+                (SessionSortField.Duration, true) =>
+                    "duration_seconds DESC NULLS LAST, start_time DESC, play_session_id DESC",
+                (SessionSortField.Game, false) =>
+                    "game_title COLLATE UKR_NOCASE ASC, start_time DESC, play_session_id DESC",
+                (SessionSortField.Game, true) =>
+                    "game_title COLLATE UKR_NOCASE DESC, start_time DESC, play_session_id DESC",
+                (_, false) => "start_time ASC, play_session_id ASC",
+                _ => "start_time DESC, play_session_id DESC"
+            };
+
+            return Db.Run("Не вдалося завантажити сесії", () =>
             {
                 using var connection = Db.Open();
-                return connection.Query<PlaySession>(@"
+                return connection.Query<PlaySession>($@"
                     SELECT play_session_id, game_id, game_title, start_time, end_time,
                            duration_seconds, entry_method, note
                     FROM v_play_session
@@ -27,9 +46,10 @@ namespace Game_Catalog.Data.Repositories
                       AND (@DurationFrom IS NULL OR duration_seconds >= @DurationFrom)
                       AND (@DurationTo IS NULL OR duration_seconds <= @DurationTo)
                       AND (@Method IS NULL OR entry_method = @Method)
-                    ORDER BY start_time DESC, play_session_id DESC",
+                    ORDER BY {orderBy}",
                     ToFilterParams(filter)).AsList();
             });
+        }
 
         /// <summary> Returns the open session of the game, or null if the game is not being played. </summary>
         public static PlaySession? GetActive(int gameId) =>

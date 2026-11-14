@@ -69,7 +69,9 @@
 				  Background="Transparent"
 				  RowHeight="44"
 				  Margin="8,0"
-				  DoubleTapped="OnRowDoubleTapped">
+				  DoubleTapped="OnRowDoubleTapped"
+				  Classes="dbSort"
+				  x:Name="SessionsGrid">
 
 			<DataGrid.Styles>
 				<Style Selector="DataGridColumnHeader">
@@ -80,17 +82,23 @@
 
 			<DataGrid.Columns>
 				<DataGridTextColumn Header="Гра" Width="2*"
-									Binding="{ReflectionBinding GameTitle}"/>
+									Binding="{ReflectionBinding GameTitle}"
+									Tag="{x:Static models:SessionSortField.Game}"/>
 				<DataGridTextColumn Header="Початок" Width="160"
-									Binding="{ReflectionBinding StartTime, StringFormat='dd.MM.yyyy HH:mm'}"/>
+									Binding="{ReflectionBinding StartTime, StringFormat='dd.MM.yyyy HH:mm'}"
+									Tag="{x:Static models:SessionSortField.Start}"/>
 				<DataGridTextColumn Header="Завершення" Width="160"
-									Binding="{ReflectionBinding EndTime, StringFormat='dd.MM.yyyy HH:mm', TargetNullValue='триває'}"/>
+									Binding="{ReflectionBinding EndTime, StringFormat='dd.MM.yyyy HH:mm', TargetNullValue='триває'}"
+									CanUserSort="False"/>
 				<DataGridTextColumn Header="Тривалість" Width="120"
-									Binding="{ReflectionBinding DurationSeconds, Mode=OneWay, Converter={x:Static conv:DurationConverter.Instance}}"/>
+									Binding="{ReflectionBinding DurationSeconds, Mode=OneWay, Converter={x:Static conv:DurationConverter.Instance}}"
+									Tag="{x:Static models:SessionSortField.Duration}"/>
 				<DataGridTextColumn Header="Спосіб" Width="100"
-									Binding="{ReflectionBinding EntryMethod, Mode=OneWay, Converter={x:Static conv:EntryMethodConverter.Instance}}"/>
+									Binding="{ReflectionBinding EntryMethod, Mode=OneWay, Converter={x:Static conv:EntryMethodConverter.Instance}}"
+									CanUserSort="False"/>
 				<DataGridTextColumn Header="Нотатка" Width="*"
-									Binding="{ReflectionBinding Note}"/>
+									Binding="{ReflectionBinding Note}"
+									CanUserSort="False"/>
 				<DataGridTemplateColumn Header="" Width="100" CanUserSort="False" CanUserResize="False">
 					<DataGridTemplateColumn.CellTemplate>
 						<DataTemplate x:DataType="models:PlaySession">

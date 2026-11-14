@@ -3,9 +3,15 @@ using System.Collections.Generic;
 
 namespace Game_Catalog.Models
 {
-    /// <summary> Filter criteria for the session list. Empty lists and null bounds mean "not set". </summary>
+    /// <summary> Filter criteria and sort order for the session list. Empty lists and null bounds mean "not set". </summary>
     public sealed record SessionFilter
     {
+        /// <summary> Field the list is ordered by. Not a criterion. </summary>
+        public SessionSortField SortField { get; init; } = SessionSortField.Start;
+
+        /// <summary> True for descending order; by default the newest sessions go first. Not a criterion. </summary>
+        public bool SortDescending { get; init; } = true;
+
         public IReadOnlyList<int> GameIds { get; init; } = Array.Empty<int>();
 
         /// <summary> First day of the range. A session belongs to the day it started. </summary>
