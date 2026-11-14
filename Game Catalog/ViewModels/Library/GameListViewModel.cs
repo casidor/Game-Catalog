@@ -42,6 +42,9 @@ namespace Game_Catalog.ViewModels
         /// <summary> Text whose matches are highlighted. </summary>
         [ObservableProperty] private string _searchText = string.Empty;
 
+        /// <summary> "Found N of M" text shown next to the search box; empty when nothing is searched. </summary>
+        [ObservableProperty] private string _searchSummary = string.Empty;
+
         /// <summary> Field of the current sort order. </summary>
         [ObservableProperty] private GameSortField _sortField = GameSortField.Title;
 
@@ -83,11 +86,13 @@ namespace Game_Catalog.ViewModels
             if (SortField == field)
             {
                 SortDescending = !SortDescending;
-                return;
             }
-
-            SortField = field;
-            SortDescending = false;
+            else
+            {
+                SortField = field;
+                SortDescending = false;
+            }
+            Reload();
         }
 
         public bool HasActiveFilter => !_applied.IsEmpty;
@@ -131,8 +136,6 @@ namespace Game_Catalog.ViewModels
         }
 
         partial void OnSearchTextChanged(string value) => UpdateMatches();
-        partial void OnSortFieldChanged(GameSortField value) => Rebuild();
-        partial void OnSortDescendingChanged(bool value) => Rebuild();
 
         /// <summary> Loads the page data when the page is shown. </summary>
         public override void OnNavigatedTo() => Load();
@@ -179,12 +182,17 @@ namespace Game_Catalog.ViewModels
                 target.Add(item);
         }
 
-        /// <summary> Loads games matching the applied filter from the database. </summary>
+        /// <summary> Loads games matching the applied filter from the database, already in the chosen order. </summary>
         private void Reload()
         {
             try
             {
-                _loaded = GameRepository.GetAll(_applied with { IsArchived = _isArchive });
+                _loaded = GameRepository.GetAll(_applied with
+                {
+                    IsArchived = _isArchive,
+                    SortField = SortField,
+                    SortDescending = SortDescending
+                });
             }
             catch (DatabaseException ex)
             {
@@ -195,11 +203,11 @@ namespace Game_Catalog.ViewModels
             Rebuild();
         }
 
-        /// <summary> Sorts the loaded games in memory and rebuilds the rows. </summary>
+        /// <summary> Rebuilds the rows from the loaded games, keeping the order returned by the database. </summary>
         private void Rebuild()
         {
             Rows.Clear();
-            foreach (var game in Sort(_loaded))
+            foreach (var game in _loaded)
                 Rows.Add(new GameRow(game));
 
             UpdateMatches();
@@ -214,49 +222,33 @@ namespace Game_Catalog.ViewModels
             OnPropertyChanged(nameof(ShowAddInEmpty));
         }
 
-        /// <summary> Orders games by the chosen field. Games without a value always go last. </summary>
-        private List<Game> Sort(List<Game> source)
-        {
-            var comparer = StringComparer.CurrentCultureIgnoreCase;
-
-            if (SortField == GameSortField.Title)
-            {
-                var byTitle = SortDescending
-                    ? source.OrderByDescending(g => g.GameTitle, comparer)
-                    : source.OrderBy(g => g.GameTitle, comparer);
-                return byTitle.ThenBy(g => g.GameId).ToList();
-            }
-
-            Func<Game, double?> key = SortField switch
-            {
-                GameSortField.Year => g => g.ReleaseYear,
-                GameSortField.Rating => g => g.PersonalRating,
-                GameSortField.Size => g => g.SizeGB,
-                _ => g => g.TotalHours
-            };
-
-            var withValue = source.Where(g => key(g) != null);
-            var withoutValue = source.Where(g => key(g) == null);
-
-            var sorted = SortDescending
-                ? withValue.OrderByDescending(g => key(g))
-                : withValue.OrderBy(g => key(g));
-
-            return sorted.ThenBy(g => g.GameTitle, comparer)
-                .Concat(withoutValue.OrderBy(g => g.GameTitle, comparer))
-                .ToList();
-        }
-
-        /// <summary> Marks rows whose title or studio name contains the search text. </summary>
+        /// <summary> Marks rows found by the database search and updates the "found" counter. </summary>
         private void UpdateMatches()
         {
-            var query = SearchText.Trim();
-            foreach (var row in Rows)
+            // Nothing to search for or nothing to mark: reset without asking the database.
+            if (string.IsNullOrWhiteSpace(SearchText) || Rows.Count == 0)
             {
-                row.IsMatch = query.Length > 0 &&
-                    (row.Title.Contains(query, StringComparison.OrdinalIgnoreCase) ||
-                     row.DeveloperName.Contains(query, StringComparison.OrdinalIgnoreCase));
+                foreach (var row in Rows)
+                    row.IsMatch = false;
+                SearchSummary = string.Empty;
+                return;
             }
+
+            HashSet<int> matches;
+            try
+            {
+                matches = GameRepository.GetMatchIds(SearchText);
+            }
+            catch (DatabaseException ex)
+            {
+                matches = new HashSet<int>();
+                _ = ShowErrorAsync("Помилка пошуку ігор", ex);
+            }
+
+            foreach (var row in Rows)
+                row.IsMatch = matches.Contains(row.Game.GameId);
+
+            SearchSummary = $"Знайдено: {Rows.Count(r => r.IsMatch)} з {Rows.Count}";
         }
 
         private void SyncDraftFromApplied()
@@ -279,15 +271,27 @@ namespace Game_Catalog.ViewModels
 
         /// <summary> Selects the sort field. </summary>
         [RelayCommand]
-        private void SetSortField(GameSortField field) => SortField = field;
+        private void SetSortField(GameSortField field)
+        {
+            SortField = field;
+            Reload();
+        }
 
         /// <summary> Sets ascending order. </summary>
         [RelayCommand]
-        private void SetAscending() => SortDescending = false;
+        private void SetAscending()
+        {
+            SortDescending = false;
+            Reload();
+        }
 
         /// <summary> Sets descending order. </summary>
         [RelayCommand]
-        private void SetDescending() => SortDescending = true;
+        private void SetDescending()
+        {
+            SortDescending = true;
+            Reload();
+        }
 
         /// <summary> Opens the filter panel showing the currently applied values. </summary>
         [RelayCommand]

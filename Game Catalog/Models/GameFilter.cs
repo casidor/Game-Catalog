@@ -3,11 +3,17 @@ using System.Collections.Generic;
 
 namespace Game_Catalog.Models
 {
-    /// <summary> Filter criteria for the game list. Empty lists and null bounds mean "not set". </summary>
+    /// <summary> Filter criteria and sort order for the game list. Empty lists and null bounds mean "not set". </summary>
     public sealed record GameFilter
     {
         /// <summary> False for the library, true for the archive, null for both. </summary>
         public bool? IsArchived { get; init; }
+
+        /// <summary> Field the list is ordered by. Not a criterion. </summary>
+        public GameSortField SortField { get; init; } = GameSortField.Title;
+
+        /// <summary> True for descending order. Not a criterion. </summary>
+        public bool SortDescending { get; init; }
 
         public IReadOnlyList<int> GenreIds { get; init; } = Array.Empty<int>();
         public IReadOnlyList<int> PlatformIds { get; init; } = Array.Empty<int>();

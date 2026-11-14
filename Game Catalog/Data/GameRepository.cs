@@ -9,12 +9,39 @@ namespace Game_Catalog.Data.Repositories
     /// <summary> Data access for games (read through the v_game view) and their genre, platform and tag links. </summary>
     public static class GameRepository
     {
-        /// <summary> Returns games matching the filter, ordered by title. Filtering is done by the database. </summary>
-        public static List<Game> GetAll(GameFilter filter) =>
-            Db.Run("Не вдалося завантажити ігри", () =>
+        /// <summary>
+        /// Returns games matching the filter in the order chosen in it.
+        /// Filtering and sorting are done by the database; games without a value of the sort field go last.
+        /// </summary>
+        public static List<Game> GetAll(GameFilter filter)
+        {
+            // ORDER BY cannot be a query parameter, so the clause is chosen from fixed literals (no user text).
+            var orderBy = (filter.SortField, filter.SortDescending) switch
+            {
+                (GameSortField.Year, false) =>
+                    "x.release_year ASC NULLS LAST, x.game_title COLLATE UKR_NOCASE ASC, x.game_id ASC",
+                (GameSortField.Year, true) =>
+                    "x.release_year DESC NULLS LAST, x.game_title COLLATE UKR_NOCASE ASC, x.game_id ASC",
+                (GameSortField.Rating, false) =>
+                    "x.personal_rating ASC NULLS LAST, x.game_title COLLATE UKR_NOCASE ASC, x.game_id ASC",
+                (GameSortField.Rating, true) =>
+                    "x.personal_rating DESC NULLS LAST, x.game_title COLLATE UKR_NOCASE ASC, x.game_id ASC",
+                (GameSortField.Size, false) =>
+                    "x.size_gb ASC NULLS LAST, x.game_title COLLATE UKR_NOCASE ASC, x.game_id ASC",
+                (GameSortField.Size, true) =>
+                    "x.size_gb DESC NULLS LAST, x.game_title COLLATE UKR_NOCASE ASC, x.game_id ASC",
+                (GameSortField.Hours, false) =>
+                    "x.total_hours ASC, x.game_title COLLATE UKR_NOCASE ASC, x.game_id ASC",
+                (GameSortField.Hours, true) =>
+                    "x.total_hours DESC, x.game_title COLLATE UKR_NOCASE ASC, x.game_id ASC",
+                (_, true) => "x.game_title COLLATE UKR_NOCASE DESC, x.game_id ASC",
+                _ => "x.game_title COLLATE UKR_NOCASE ASC, x.game_id ASC"
+            };
+
+            return Db.Run("Не вдалося завантажити ігри", () =>
             {
                 using var connection = Db.Open();
-                var games = connection.Query<Game>(@"
+                var games = connection.Query<Game>($@"
                     SELECT * FROM v_game x
                     WHERE (@IsArchived IS NULL OR x.is_archived = @IsArchived)
                       AND (@GenreCount = 0 OR EXISTS (
@@ -33,7 +60,7 @@ namespace Game_Catalog.Data.Repositories
                       AND (@SizeTo     IS NULL OR x.size_gb         <= @SizeTo)
                       AND (@HoursFrom  IS NULL OR x.total_hours     >= @HoursFrom)
                       AND (@HoursTo    IS NULL OR x.total_hours     <= @HoursTo)
-                    ORDER BY lower_ua(x.game_title), x.game_id",
+                    ORDER BY {orderBy}",
                     new
                     {
                         filter.IsArchived,
@@ -60,6 +87,29 @@ namespace Game_Catalog.Data.Repositories
                 LoadLinks(connection, games);
                 return games;
             });
+        }
+
+        /// <summary>
+        /// Returns ids of the games whose title or developer name contains the search text, ignoring case.
+        /// The match is decided by the database; an empty text matches nothing.
+        /// </summary>
+        public static HashSet<int> GetMatchIds(string? search)
+        {
+            var text = search?.Trim() ?? string.Empty;
+            if (text.Length == 0) return new HashSet<int>();
+
+            return Db.Run("Не вдалося виконати пошук ігор", () =>
+            {
+                using var connection = Db.Open();
+                return connection.Query<int>(@"
+                    SELECT g.game_id
+                    FROM Game g
+                    JOIN Studio s ON s.studio_id = g.developer_id
+                    WHERE instr(lower_ua(g.game_title), lower_ua(@Search)) > 0
+                       OR instr(lower_ua(s.studio_name), lower_ua(@Search)) > 0",
+                    new { Search = text }).ToHashSet();
+            });
+        }
 
         /// <summary> Returns the game with the given id, or null if it no longer exists. </summary>
         public static Game? GetById(int gameId) =>
@@ -190,17 +240,17 @@ namespace Game_Catalog.Data.Repositories
             var genres = connection.Query<LinkRow>(@"
                 SELECT l.game_id, x.genre_id AS item_id, x.genre_name AS item_name, NULL AS item_extra
                 FROM GameGenre l JOIN Genre x ON x.genre_id = l.genre_id
-                WHERE l.game_id IN @ids ORDER BY lower_ua(x.genre_name)", new { ids }).ToLookup(r => r.GameId);
+                WHERE l.game_id IN @ids ORDER BY x.genre_name COLLATE UKR_NOCASE", new { ids }).ToLookup(r => r.GameId);
 
             var platforms = connection.Query<LinkRow>(@"
                 SELECT l.game_id, x.platform_id AS item_id, x.platform_name AS item_name, x.manufacturer AS item_extra
                 FROM GamePlatform l JOIN Platform x ON x.platform_id = l.platform_id
-                WHERE l.game_id IN @ids ORDER BY lower_ua(x.platform_name)", new { ids }).ToLookup(r => r.GameId);
+                WHERE l.game_id IN @ids ORDER BY x.platform_name COLLATE UKR_NOCASE", new { ids }).ToLookup(r => r.GameId);
 
             var tags = connection.Query<LinkRow>(@"
                 SELECT l.game_id, x.tag_id AS item_id, x.tag_name AS item_name, x.color AS item_extra
                 FROM GameTag l JOIN Tag x ON x.tag_id = l.tag_id
-                WHERE l.game_id IN @ids ORDER BY lower_ua(x.tag_name)", new { ids }).ToLookup(r => r.GameId);
+                WHERE l.game_id IN @ids ORDER BY x.tag_name COLLATE UKR_NOCASE", new { ids }).ToLookup(r => r.GameId);
 
             foreach (var game in games)
             {
