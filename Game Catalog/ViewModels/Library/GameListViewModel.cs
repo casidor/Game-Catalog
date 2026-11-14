@@ -60,6 +60,17 @@ namespace Game_Catalog.ViewModels
 
         [ObservableProperty] private bool _isFilterPanelOpen;
 
+        /// <summary> True when the preview panel is shown on the right of the list. </summary>
+        [ObservableProperty] private bool _isPreviewOpen = true;
+
+        /// <summary> Row whose game is shown in the preview panel; null when nothing is selected. </summary>
+        [ObservableProperty]
+        [NotifyPropertyChangedFor(nameof(HasSelection))]
+        private GameRow? _selectedRow;
+
+        /// <summary> True when a game is selected. </summary>
+        public bool HasSelection => SelectedRow != null;
+
         [ObservableProperty] private int? _draftYearFrom;
         [ObservableProperty] private int? _draftYearTo;
         [ObservableProperty] private int? _draftRatingFrom;
@@ -137,6 +148,13 @@ namespace Game_Catalog.ViewModels
 
         partial void OnSearchTextChanged(string value) => UpdateMatches();
 
+        /// <summary> Moves the selection mark from the previous row to the new one. </summary>
+        partial void OnSelectedRowChanged(GameRow? oldValue, GameRow? newValue)
+        {
+            if (oldValue != null) oldValue.IsSelected = false;
+            if (newValue != null) newValue.IsSelected = true;
+        }
+
         /// <summary> Loads the page data when the page is shown. </summary>
         public override void OnNavigatedTo() => Load();
 
@@ -206,9 +224,14 @@ namespace Game_Catalog.ViewModels
         /// <summary> Rebuilds the rows from the loaded games, keeping the order returned by the database. </summary>
         private void Rebuild()
         {
+            var selectedId = SelectedRow?.Game.GameId;
+
             Rows.Clear();
             foreach (var game in _loaded)
                 Rows.Add(new GameRow(game));
+
+            // Keep the preview on the same game if it is still in the list.
+            SelectedRow = selectedId is { } id ? Rows.FirstOrDefault(r => r.Game.GameId == id) : null;
 
             UpdateMatches();
 
@@ -377,6 +400,14 @@ namespace Game_Catalog.ViewModels
             if (edited == null) return;
             Load();
         }
+        /// <summary> Selects the game shown in the preview panel. </summary>
+        [RelayCommand]
+        private void SelectRow(GameRow row) => SelectedRow = row;
+
+        /// <summary> Shows or hides the preview panel. </summary>
+        [RelayCommand]
+        private void TogglePreview() => IsPreviewOpen = !IsPreviewOpen;
+
         /// <summary> Opens the game. The details page arrives in a later commit. </summary>
         [RelayCommand]
         private void OpenGame(Game game) => GameSelected?.Invoke(game);

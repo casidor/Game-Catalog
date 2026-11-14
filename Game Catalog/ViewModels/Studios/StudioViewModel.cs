@@ -126,7 +126,7 @@ namespace Game_Catalog.ViewModels
             {
                 row.IsMatch = query.Length > 0 &&
                     (row.StudioName.Contains(query, StringComparison.OrdinalIgnoreCase) ||
-                     row.Country.Contains(query, StringComparison.OrdinalIgnoreCase));
+                     row.Studio.Country.Contains(query, StringComparison.OrdinalIgnoreCase));
             }
         }
 

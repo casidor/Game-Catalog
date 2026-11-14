@@ -100,7 +100,7 @@
 							</Grid>
 							<Grid ColumnDefinitions="130,*">
 								<TextBlock Grid.Column="0" Text="Оцінка" Opacity="0.6"/>
-								<TextBlock Grid.Column="1" Text="{Binding RatingText}"/>
+								<TextBlock Grid.Column="1" Text="{Binding RatingText, TargetNullValue={StaticResource NoValue}}"/>
 							</Grid>
 							<Grid ColumnDefinitions="130,*">
 								<TextBlock Grid.Column="0" Text="Студія" Opacity="0.6"/>
@@ -108,11 +108,11 @@
 							</Grid>
 							<Grid ColumnDefinitions="130,*">
 								<TextBlock Grid.Column="0" Text="Рік випуску" Opacity="0.6"/>
-								<TextBlock Grid.Column="1" Text="{Binding YearText}"/>
+								<TextBlock Grid.Column="1" Text="{Binding YearText, TargetNullValue={StaticResource NoValue}}"/>
 							</Grid>
 							<Grid ColumnDefinitions="130,*">
 								<TextBlock Grid.Column="0" Text="Розмір на диску" Opacity="0.6"/>
-								<TextBlock Grid.Column="1" Text="{Binding SizeText}"/>
+								<TextBlock Grid.Column="1" Text="{Binding SizeText, TargetNullValue={StaticResource NoValue}}"/>
 							</Grid>
 							<Grid ColumnDefinitions="130,*">
 								<TextBlock Grid.Column="0" Text="Часу зіграно" Opacity="0.6"/>
@@ -130,7 +130,7 @@
 							</Grid>
 							<Grid ColumnDefinitions="130,*">
 								<TextBlock Grid.Column="0" Text="Жанри" Opacity="0.6"/>
-								<TextBlock Grid.Column="1" Text="{Binding GenresText}" TextWrapping="Wrap"/>
+								<TextBlock Grid.Column="1" Text="{Binding GenresText, TargetNullValue={StaticResource NoValue}}" TextWrapping="Wrap"/>
 							</Grid>
 						</StackPanel>
 

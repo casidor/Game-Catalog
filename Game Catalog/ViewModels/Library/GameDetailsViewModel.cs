@@ -15,8 +15,6 @@ namespace Game_Catalog.ViewModels
     /// <summary> ViewModel for the game details page. </summary>
     public partial class GameDetailsViewModel : ViewModelBase
     {
-        private const string NoValue = "—";
-
         /// <summary> The game being displayed. </summary>
         public Game Game { get; private set; }
 
@@ -34,16 +32,16 @@ namespace Game_Catalog.ViewModels
         public string Title => Game.GameTitle;
         public bool IsArchived => Game.IsArchived;
         public GameStatus Status => Game.GameStatus;
-        public string RatingText => Game.PersonalRating is { } r ? $"{r}/10" : NoValue;
-        public string DeveloperName => string.IsNullOrWhiteSpace(Game.DeveloperName) ? "Невідомо" : Game.DeveloperName;
-        public string YearText => Game.ReleaseYear?.ToString() ?? NoValue;
-        public string SizeText => Game.SizeGB is { } s ? $"{s:0.0} ГБ" : "Невідомо";
+        public string? RatingText => Game.PersonalRating is { } r ? $"{r}/10" : null;
+        public string DeveloperName => Game.DeveloperName;
+        public string? YearText => Game.ReleaseYear?.ToString();
+        public string? SizeText => Game.SizeGB is { } s ? $"{s:0.0} ГБ" : null;
         public double TotalHours => Game.TotalHours;
         public string DaysInLibraryText => $"{Game.DaysInLibrary} дн.";
         public DateTime AddedAt => Game.AddedAt;
 
-        public string GenresText => Game.Genres.Count == 0
-            ? NoValue
+        public string? GenresText => Game.Genres.Count == 0
+            ? null
             : string.Join(", ", Game.Genres.Select(g => g.GenreName));
 
         public System.Collections.Generic.IReadOnlyList<Tag> Tags => Game.Tags;

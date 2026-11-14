@@ -6,6 +6,17 @@
 			 x:Class="Game_Catalog.Views.GamesListView"
 			 x:DataType="vm:GamesListViewModel">
 
+	<UserControl.Styles>
+		<!-- Game card frame: visible only on the selected card -->
+		<Style Selector="Border.gameCard">
+			<Setter Property="BorderThickness" Value="2"/>
+			<Setter Property="BorderBrush" Value="Transparent"/>
+		</Style>
+		<Style Selector="Border.gameCard.selected">
+			<Setter Property="BorderBrush" Value="{DynamicResource NavForeground}"/>
+		</Style>
+	</UserControl.Styles>
+
 	<Grid RowDefinitions="Auto,*">
 
 		<!-- Toolbar -->
@@ -75,6 +86,10 @@
 							</MenuFlyout>
 						</DropDownButton.Flyout>
 					</DropDownButton>
+					<Button Content="◨ Прев'ю"
+							ToolTip.Tip="Показати або приховати панель перегляду"
+							Command="{Binding TogglePreviewCommand}"
+							VerticalAlignment="Center"/>
 					<Button Content="{Binding FiltersButtonText}"
 							Command="{Binding OpenFiltersCommand}"
 							VerticalAlignment="Center"/>
@@ -86,12 +101,12 @@
 			</Grid>
 		</Border>
 
-		<!-- Content -->
-		<Grid Grid.Row="1">
+		<!-- Content: the list on the left, the preview panel on the right -->
+		<Grid Grid.Row="1" ColumnDefinitions="*,Auto">
 
 			<!-- Grid view -->
 			<ScrollViewer IsVisible="{Binding ShowGrid}">
-				<ItemsControl ItemsSource="{Binding Rows}">
+				<ItemsControl ItemsSource="{Binding Rows}" DoubleTapped="OnCardDoubleTapped">
 					<ItemsControl.ItemsPanel>
 						<ItemsPanelTemplate>
 							<WrapPanel Orientation="Horizontal" Margin="16"/>
@@ -99,10 +114,12 @@
 					</ItemsControl.ItemsPanel>
 					<ItemsControl.ItemTemplate>
 						<DataTemplate x:DataType="vm:GameRow">
-							<Button Padding="0" Margin="0,0,12,12" Background="Transparent"
-									Command="{Binding $parent[ItemsControl].((vm:GamesListViewModel)DataContext).OpenGameCommand}"
-									CommandParameter="{Binding Game}">
-								<Border Width="160" Height="245" CornerRadius="8" ClipToBounds="True"
+							<!-- One click selects the game for the preview, a double click opens it -->
+							<Button Classes="card" Padding="0" Margin="0,0,12,12" Background="Transparent"
+									Command="{Binding $parent[ItemsControl].((vm:GamesListViewModel)DataContext).SelectRowCommand}"
+									CommandParameter="{Binding}">
+								<Border Classes="gameCard" Classes.selected="{Binding IsSelected}"
+										Width="160" Height="245" CornerRadius="8" ClipToBounds="True"
 										Background="{DynamicResource CardBackground}">
 									<Grid RowDefinitions="*,Auto">
 										<Panel Grid.Row="0">
@@ -137,6 +154,7 @@
 
 			<!-- Table view -->
 			<DataGrid ItemsSource="{Binding Rows}"
+					  SelectedItem="{Binding SelectedRow, Mode=TwoWay}"
 					  IsVisible="{Binding ShowList}"
 					  AutoGenerateColumns="False"
 					  IsReadOnly="True"
@@ -178,21 +196,21 @@
 										Tag="{x:Static models:GameSortField.Title}"/>
 					<DataGridTextColumn Header="Студія" Width="*" Binding="{ReflectionBinding DeveloperName}"
 										CanUserSort="False"/>
-					<DataGridTextColumn Header="Жанри" Width="*" Binding="{ReflectionBinding GenresText}"
+					<DataGridTextColumn Header="Жанри" Width="*" Binding="{ReflectionBinding GenresText, TargetNullValue={StaticResource NoValue}}"
 										CanUserSort="False"/>
-					<DataGridTextColumn Header="Платформи" Width="*" Binding="{ReflectionBinding PlatformsText}"
+					<DataGridTextColumn Header="Платформи" Width="*" Binding="{ReflectionBinding PlatformsText, TargetNullValue={StaticResource NoValue}}"
 										CanUserSort="False"/>
-					<DataGridTextColumn Header="Рік" Width="80" Binding="{ReflectionBinding YearText}"
+					<DataGridTextColumn Header="Рік" Width="80" Binding="{ReflectionBinding YearText, TargetNullValue={StaticResource NoValue}}"
 										Tag="{x:Static models:GameSortField.Year}"/>
 					<DataGridTextColumn Header="Статус" Width="110"
 										Binding="{ReflectionBinding Status, Mode=OneWay, Converter={x:Static conv:GameStatusConverter.Instance}}"
 										CanUserSort="False"/>
-					<DataGridTextColumn Header="Оцінка" Width="80" Binding="{ReflectionBinding RatingText}"
+					<DataGridTextColumn Header="Оцінка" Width="80" Binding="{ReflectionBinding RatingText, TargetNullValue={StaticResource NoValue}}"
 										Tag="{x:Static models:GameSortField.Rating}"/>
 					<DataGridTextColumn Header="Час гри" Width="110"
 										Binding="{ReflectionBinding TotalHours, Mode=OneWay, Converter={x:Static conv:DurationConverter.Instance}}"
 										Tag="{x:Static models:GameSortField.Hours}"/>
-					<DataGridTextColumn Header="Розмір" Width="110" Binding="{ReflectionBinding SizeText}"
+					<DataGridTextColumn Header="Розмір" Width="110" Binding="{ReflectionBinding SizeText, TargetNullValue={StaticResource NoValue}}"
 										Tag="{x:Static models:GameSortField.Size}"/>
 					<DataGridTemplateColumn Header="" Width="70" CanUserSort="False" CanUserResize="False">
 						<DataGridTemplateColumn.CellTemplate>
@@ -207,6 +225,118 @@
 					</DataGridTemplateColumn>
 				</DataGrid.Columns>
 			</DataGrid>
+
+			<!-- Preview panel: a compact version of the game page for the selected game -->
+			<Border Grid.Column="1" Width="300" IsVisible="{Binding IsPreviewOpen}"
+					Background="{DynamicResource SidebarBackground}"
+					BorderBrush="{DynamicResource SidebarBorder}" BorderThickness="1,0,0,0">
+				<Panel>
+					<TextBlock Text="Оберіть гру, щоб побачити її дані" Opacity="0.5"
+							   TextWrapping="Wrap" TextAlignment="Center" Margin="24"
+							   HorizontalAlignment="Center" VerticalAlignment="Center"
+							   IsVisible="{Binding !HasSelection}"/>
+
+					<ScrollViewer IsVisible="{Binding HasSelection}">
+						<StackPanel Margin="16" Spacing="8">
+							<Border Width="180" Height="240" CornerRadius="8" ClipToBounds="True"
+									HorizontalAlignment="Center"
+									Background="{DynamicResource CardBackground}">
+								<Panel>
+									<Image Stretch="UniformToFill"
+										   Source="{Binding SelectedRow.CoverImagePath, Converter={x:Static conv:PathToBitmapConverter.Instance}, ConverterParameter=640}"
+										   IsVisible="{Binding SelectedRow.CoverImagePath, Converter={x:Static StringConverters.IsNotNullOrEmpty}}"/>
+									<TextBlock Text="🎮" FontSize="48"
+											   HorizontalAlignment="Center" VerticalAlignment="Center"
+											   IsVisible="{Binding SelectedRow.CoverImagePath, Converter={x:Static StringConverters.IsNullOrEmpty}}"/>
+								</Panel>
+							</Border>
+
+							<TextBlock Text="{Binding SelectedRow.Title}" FontSize="16" FontWeight="SemiBold"
+									   TextWrapping="Wrap" Margin="0,4,0,0"/>
+							<Border Height="1" Background="{DynamicResource SidebarBorder}"/>
+
+							<Grid ColumnDefinitions="110,*">
+								<TextBlock Grid.Column="0" Text="Студія" Opacity="0.6"/>
+								<TextBlock Grid.Column="1" Text="{Binding SelectedRow.DeveloperName}" TextWrapping="Wrap"/>
+							</Grid>
+							<Grid ColumnDefinitions="110,*">
+								<TextBlock Grid.Column="0" Text="Жанри" Opacity="0.6"/>
+								<TextBlock Grid.Column="1" Text="{Binding SelectedRow.GenresText, TargetNullValue={StaticResource NoValue}}" TextWrapping="Wrap"/>
+							</Grid>
+							<Grid ColumnDefinitions="110,*">
+								<TextBlock Grid.Column="0" Text="Статус" Opacity="0.6"/>
+								<TextBlock Grid.Column="1" Text="{Binding SelectedRow.Status, Converter={x:Static conv:GameStatusConverter.Instance}}" TextWrapping="Wrap"/>
+							</Grid>
+							<Grid ColumnDefinitions="110,*">
+								<TextBlock Grid.Column="0" Text="Рік випуску" Opacity="0.6"/>
+								<TextBlock Grid.Column="1" Text="{Binding SelectedRow.YearText, TargetNullValue={StaticResource NoValue}}" TextWrapping="Wrap"/>
+							</Grid>
+							<Grid ColumnDefinitions="110,*">
+								<TextBlock Grid.Column="0" Text="Оцінка" Opacity="0.6"/>
+								<TextBlock Grid.Column="1" Text="{Binding SelectedRow.RatingText, TargetNullValue={StaticResource NoValue}}" TextWrapping="Wrap"/>
+							</Grid>
+							<Grid ColumnDefinitions="110,*">
+								<TextBlock Grid.Column="0" Text="Час гри" Opacity="0.6"/>
+								<TextBlock Grid.Column="1" Text="{Binding SelectedRow.TotalHours, Converter={x:Static conv:DurationConverter.Instance}}" TextWrapping="Wrap"/>
+							</Grid>
+							<Grid ColumnDefinitions="110,*">
+								<TextBlock Grid.Column="0" Text="Розмір" Opacity="0.6"/>
+								<TextBlock Grid.Column="1" Text="{Binding SelectedRow.SizeText, TargetNullValue={StaticResource NoValue}}" TextWrapping="Wrap"/>
+							</Grid>
+
+							<TextBlock Text="Платформи" FontSize="14" FontWeight="SemiBold" Margin="0,8,0,0"/>
+							<Border Height="1" Background="{DynamicResource SidebarBorder}"/>
+							<ItemsControl ItemsSource="{Binding SelectedRow.Platforms}"
+										  IsVisible="{Binding SelectedRow.HasPlatforms}">
+								<ItemsControl.ItemsPanel>
+									<ItemsPanelTemplate>
+										<WrapPanel Orientation="Horizontal"/>
+									</ItemsPanelTemplate>
+								</ItemsControl.ItemsPanel>
+								<ItemsControl.ItemTemplate>
+									<DataTemplate x:DataType="models:Platform">
+										<Border CornerRadius="12" Padding="10,3" Margin="0,0,6,6"
+												Background="#30808080">
+											<TextBlock Text="{Binding PlatformName}"
+													   FontSize="12" FontWeight="SemiBold"/>
+										</Border>
+									</DataTemplate>
+								</ItemsControl.ItemTemplate>
+							</ItemsControl>
+							<TextBlock Text="Платформ немає" Opacity="0.5"
+									   IsVisible="{Binding !SelectedRow.HasPlatforms}"/>
+
+							<TextBlock Text="Теги" FontSize="14" FontWeight="SemiBold" Margin="0,8,0,0"/>
+							<Border Height="1" Background="{DynamicResource SidebarBorder}"/>
+							<ItemsControl ItemsSource="{Binding SelectedRow.Tags}"
+										  IsVisible="{Binding SelectedRow.HasTags}">
+								<ItemsControl.ItemsPanel>
+									<ItemsPanelTemplate>
+										<WrapPanel Orientation="Horizontal"/>
+									</ItemsPanelTemplate>
+								</ItemsControl.ItemsPanel>
+								<ItemsControl.ItemTemplate>
+									<DataTemplate x:DataType="models:Tag">
+										<Border CornerRadius="12" Padding="10,3" Margin="0,0,6,6"
+												Background="{Binding Color, Converter={x:Static conv:TagBadgeBrushConverter.Instance}, ConverterParameter=Background}">
+											<TextBlock Text="{Binding TagName}"
+													   FontSize="12" FontWeight="SemiBold"
+													   Foreground="{Binding Color, Converter={x:Static conv:TagBadgeBrushConverter.Instance}, ConverterParameter=Foreground}"/>
+										</Border>
+									</DataTemplate>
+								</ItemsControl.ItemTemplate>
+							</ItemsControl>
+							<TextBlock Text="Тегів немає" Opacity="0.5"
+									   IsVisible="{Binding !SelectedRow.HasTags}"/>
+
+							<Button Content="✏ Редагувати" Margin="0,12,0,0"
+									HorizontalAlignment="Stretch" HorizontalContentAlignment="Center"
+									Command="{Binding EditCommand}"
+									CommandParameter="{Binding SelectedRow.Game}"/>
+						</StackPanel>
+					</ScrollViewer>
+				</Panel>
+			</Border>
 
 			<!-- Empty state -->
 			<StackPanel IsVisible="{Binding IsEmpty}"

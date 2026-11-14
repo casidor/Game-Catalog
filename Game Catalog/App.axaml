@@ -12,6 +12,8 @@
     <Application.Resources>
         <ResourceDictionary>
             <Thickness x:Key="ComboBoxPadding">12,6,0,6</Thickness>
+            <!-- Shown wherever a field has no value: use as TargetNullValue in bindings -->
+            <x:String x:Key="NoValue">—</x:String>
             <ResourceDictionary.ThemeDictionaries>
 
                 <ResourceDictionary x:Key="Dark">

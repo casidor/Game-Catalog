@@ -66,11 +66,11 @@
 				<DataGridTextColumn Header="Назва" Width="2*"
 									Binding="{ReflectionBinding StudioName}"/>
 				<DataGridTextColumn Header="Країна" Width="*"
-									Binding="{ReflectionBinding Country}"/>
+									Binding="{ReflectionBinding Country, TargetNullValue={StaticResource NoValue}}"/>
 				<DataGridTextColumn Header="Рік заснування" Width="150"
-									Binding="{ReflectionBinding FoundationYear, TargetNullValue='—'}"/>
+									Binding="{ReflectionBinding FoundationYear, TargetNullValue={StaticResource NoValue}}"/>
 				<DataGridTextColumn Header="Основний жанр" Width="*"
-									Binding="{ReflectionBinding MainGenreName}"/>
+									Binding="{ReflectionBinding MainGenreName, TargetNullValue={StaticResource NoValue}}"/>
 				<DataGridTemplateColumn Header="" Width="100" CanUserSort="False" CanUserResize="False">
 					<DataGridTemplateColumn.CellTemplate>
 						<DataTemplate x:DataType="vm:StudioRow">

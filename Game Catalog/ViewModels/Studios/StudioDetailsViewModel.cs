@@ -14,8 +14,6 @@ namespace Game_Catalog.ViewModels
     /// <summary> ViewModel for the studio details page. </summary>
     public partial class StudioDetailsViewModel : ViewModelBase
     {
-        private const string Unknown = "Невідомо";
-
         /// <summary> The studio being displayed. </summary>
         public Studio Studio { get; private set; }
 
@@ -25,20 +23,20 @@ namespace Game_Catalog.ViewModels
         /// <summary> Name of the studio. </summary>
         public string Name => Studio.StudioName;
 
-        /// <summary> Country name or "Невідомо" if not specified. </summary>
-        public string DisplayCountry =>
-            string.IsNullOrWhiteSpace(Studio.Country) ? Unknown : Studio.Country;
+        /// <summary> Country name or null if not specified. </summary>
+        public string? DisplayCountry =>
+            string.IsNullOrWhiteSpace(Studio.Country) ? null : Studio.Country;
 
-        /// <summary> Foundation year or "Невідомо" if not specified. </summary>
-        public string DisplayFoundationYear => Studio.FoundationYear?.ToString() ?? Unknown;
+        /// <summary> Foundation year or null if not specified. </summary>
+        public string? DisplayFoundationYear => Studio.FoundationYear?.ToString();
 
-        /// <summary> Main genre name or "Невідомо" if not specified. </summary>
-        public string DisplayMainGenre =>
-            string.IsNullOrWhiteSpace(Studio.MainGenreName) ? Unknown : Studio.MainGenreName;
+        /// <summary> Main genre name or null if not specified. </summary>
+        public string? DisplayMainGenre =>
+            string.IsNullOrWhiteSpace(Studio.MainGenreName) ? null : Studio.MainGenreName;
 
-        /// <summary> Website URL or "Невідомо" if not specified. </summary>
-        public string DisplayWebsite =>
-            string.IsNullOrWhiteSpace(Studio.Website) ? Unknown : Studio.Website;
+        /// <summary> Website URL or null if not specified. </summary>
+        public string? DisplayWebsite =>
+            string.IsNullOrWhiteSpace(Studio.Website) ? null : Studio.Website;
 
         /// <summary> Indicates whether the studio has a website specified. </summary>
         public bool HasWebsite => !string.IsNullOrWhiteSpace(Studio.Website);

@@ -12,14 +12,15 @@ namespace Game_Catalog.ViewModels
         /// <summary> Studio name, exposed for column binding and sorting. </summary>
         public string StudioName => Studio.StudioName;
 
-        /// <summary> Country, exposed for column binding and sorting. </summary>
-        public string Country => Studio.Country;
+        /// <summary> Country or null if not specified, exposed for column binding and sorting. </summary>
+        public string? Country => string.IsNullOrWhiteSpace(Studio.Country) ? null : Studio.Country;
 
         /// <summary> Foundation year, exposed for column binding and sorting. </summary>
         public int? FoundationYear => Studio.FoundationYear;
 
-        /// <summary> Main genre name, exposed for column binding and sorting. </summary>
-        public string MainGenreName => Studio.MainGenreName;
+        /// <summary> Main genre name or null if not specified, exposed for column binding and sorting. </summary>
+        public string? MainGenreName =>
+            string.IsNullOrWhiteSpace(Studio.MainGenreName) ? null : Studio.MainGenreName;
 
         /// <summary> True when the row matches the current search text. </summary>
         [ObservableProperty] private bool _isMatch;
