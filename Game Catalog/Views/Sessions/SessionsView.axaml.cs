@@ -2,7 +2,6 @@ using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Input;
 using Avalonia.Threading;
-using Avalonia.VisualTree;
 using Game_Catalog.Models;
 using Game_Catalog.ViewModels;
 using System;
@@ -47,17 +46,6 @@ public partial class SessionsView : UserControl
     {
         if (DataContext is SessionsViewModel vm)
             vm.CancelFiltersCommand.Execute(null);
-    }
-
-    /// <summary> Opens the editor for the session whose row was double-clicked. </summary>
-    private void OnRowDoubleTapped(object? sender, TappedEventArgs e)
-    {
-        if (e.Source is not Visual source) return;
-        if (source.FindAncestorOfType<Button>(includeSelf: true) != null) return;
-        if (source.FindAncestorOfType<DataGridRow>(includeSelf: true) is not { DataContext: PlaySession session }) return;
-
-        if (DataContext is SessionsViewModel vm)
-            vm.EditCommand.Execute(session);
     }
 
     /// <summary> Clears the search box of an opened dropdown and puts the focus into it. </summary>

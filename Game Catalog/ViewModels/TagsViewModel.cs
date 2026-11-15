@@ -11,6 +11,7 @@ namespace Game_Catalog.ViewModels
     {
         protected override DictionaryTexts Texts { get; } = new(
             LoadError: "Помилка завантаження тегів",
+            SearchError: "Помилка пошуку тегів",
             SaveError: "Помилка збереження тегу",
             DeleteError: "Помилка видалення тегу",
             DeleteTitle: "Видалення тегу",
@@ -18,7 +19,12 @@ namespace Game_Catalog.ViewModels
             BlockedTitle: "Неможливо видалити тег",
             BlockedMessage: name => $"Тег «{name}» неможливо видалити.");
 
-        protected override List<Tag> LoadItems(string search) => TagRepository.GetAll(search);
+        protected override List<Tag> LoadItems(DictionarySortField field, bool descending) =>
+            TagRepository.GetAll(descending);
+
+        protected override HashSet<int> LoadMatchIds(string search) => TagRepository.GetMatchIds(search);
+
+        protected override int GetId(Tag item) => item.TagId;
 
         protected override Task<Tag?> ShowEditorAsync(Tag? item) =>
             Dialogs.Current.ShowTagEditorAsync(item);

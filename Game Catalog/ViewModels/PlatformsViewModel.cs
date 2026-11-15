@@ -11,6 +11,7 @@ namespace Game_Catalog.ViewModels
     {
         protected override DictionaryTexts Texts { get; } = new(
             LoadError: "Помилка завантаження платформ",
+            SearchError: "Помилка пошуку платформ",
             SaveError: "Помилка збереження платформи",
             DeleteError: "Помилка видалення платформи",
             DeleteTitle: "Видалення платформи",
@@ -19,7 +20,14 @@ namespace Game_Catalog.ViewModels
             BlockedMessage: name => $"Платформа «{name}» використовується в іграх.\n" +
                                     "Спершу відв'яжіть її від них.");
 
-        protected override List<Platform> LoadItems(string search) => PlatformRepository.GetAll(search);
+        protected override List<Platform> LoadItems(DictionarySortField field, bool descending) =>
+            PlatformRepository.GetAll(field, descending);
+
+        protected override HashSet<int> LoadMatchIds(string search) => PlatformRepository.GetMatchIds(search);
+
+        protected override int GetId(Platform item) => item.PlatformId;
+
+        protected override DictionaryRow<Platform> CreateRow(Platform item) => new PlatformRow(item);
 
         protected override Task<Platform?> ShowEditorAsync(Platform? item) =>
             Dialogs.Current.ShowPlatformEditorAsync(item);

@@ -2,24 +2,50 @@
 using Game_Catalog.Models;
 using Microsoft.Data.Sqlite;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace Game_Catalog.Data.Repositories
 {
     /// <summary> Data access for the Tag table. </summary>
     public static class TagRepository
     {
-        /// <summary> Returns tags whose name contains the search text, ordered by name. </summary>
-        public static List<Tag> GetAll(string? search = null) =>
-            Db.Run("Не вдалося завантажити теги", () =>
+        /// <summary> Returns all tags ordered by name. The sorting is done by the database. </summary>
+        public static List<Tag> GetAll(bool descending = false)
+        {
+            // ORDER BY cannot be a query parameter, so the clause is chosen from fixed literals (no user text).
+            var orderBy = descending
+                ? "tag_name COLLATE UKR_NOCASE DESC, tag_id ASC"
+                : "tag_name COLLATE UKR_NOCASE ASC, tag_id ASC";
+
+            return Db.Run("Не вдалося завантажити теги", () =>
             {
                 using var connection = Db.Open();
-                return connection.Query<Tag>(@"
+                return connection.Query<Tag>($@"
                     SELECT tag_id, tag_name, color
                     FROM Tag
-                    WHERE instr(lower_ua(tag_name), lower_ua(@Search)) > 0
-                    ORDER BY lower_ua(tag_name)",
-                    new { Search = search?.Trim() ?? string.Empty }).AsList();
+                    ORDER BY {orderBy}").AsList();
             });
+        }
+
+        /// <summary>
+        /// Returns ids of the tags whose name contains the search text, ignoring case.
+        /// The match is decided by the database; an empty text matches nothing.
+        /// </summary>
+        public static HashSet<int> GetMatchIds(string? search)
+        {
+            var text = search?.Trim() ?? string.Empty;
+            if (text.Length == 0) return new HashSet<int>();
+
+            return Db.Run("Не вдалося виконати пошук тегів", () =>
+            {
+                using var connection = Db.Open();
+                return connection.Query<int>(@"
+                    SELECT tag_id
+                    FROM Tag
+                    WHERE instr(lower_ua(tag_name), lower_ua(@Search)) > 0",
+                    new { Search = text }).ToHashSet();
+            });
+        }
 
         /// <summary> Inserts the tag and sets its generated id. </summary>
         public static void Insert(Tag tag) =>

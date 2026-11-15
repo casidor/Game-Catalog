@@ -2,25 +2,61 @@
 using Game_Catalog.Models;
 using Microsoft.Data.Sqlite;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace Game_Catalog.Data.Repositories
 {
     /// <summary> Data access for the Platform table. </summary>
     public static class PlatformRepository
     {
-        /// <summary> Returns platforms whose name or manufacturer contains the search text, ordered by name. </summary>
-        public static List<Platform> GetAll(string? search = null) =>
-            Db.Run("Не вдалося завантажити платформи", () =>
+        /// <summary>
+        /// Returns all platforms in the chosen order. The sorting is done by the database;
+        /// platforms without a manufacturer go last when sorted by it.
+        /// </summary>
+        public static List<Platform> GetAll(
+            DictionarySortField sortField = DictionarySortField.Name, bool descending = false)
+        {
+            // ORDER BY cannot be a query parameter, so the clause is chosen from fixed literals (no user text).
+            var orderBy = (sortField, descending) switch
+            {
+                (DictionarySortField.Manufacturer, false) =>
+                    "manufacturer COLLATE UKR_NOCASE ASC NULLS LAST, platform_name COLLATE UKR_NOCASE ASC, platform_id ASC",
+                (DictionarySortField.Manufacturer, true) =>
+                    "manufacturer COLLATE UKR_NOCASE DESC NULLS LAST, platform_name COLLATE UKR_NOCASE ASC, platform_id ASC",
+                (_, true) => "platform_name COLLATE UKR_NOCASE DESC, platform_id ASC",
+                _ => "platform_name COLLATE UKR_NOCASE ASC, platform_id ASC"
+            };
+
+            return Db.Run("Не вдалося завантажити платформи", () =>
             {
                 using var connection = Db.Open();
-                return connection.Query<Platform>(@"
+                return connection.Query<Platform>($@"
                     SELECT platform_id, platform_name, manufacturer, platform_icon_path
                     FROM Platform
-                    WHERE instr(lower_ua(platform_name), lower_ua(@Search)) > 0
-                       OR instr(lower_ua(COALESCE(manufacturer, '')), lower_ua(@Search)) > 0
-                    ORDER BY lower_ua(platform_name)",
-                    new { Search = search?.Trim() ?? string.Empty }).AsList();
+                    ORDER BY {orderBy}").AsList();
             });
+        }
+
+        /// <summary>
+        /// Returns ids of the platforms whose name or manufacturer contains the search text, ignoring case.
+        /// The match is decided by the database; an empty text matches nothing.
+        /// </summary>
+        public static HashSet<int> GetMatchIds(string? search)
+        {
+            var text = search?.Trim() ?? string.Empty;
+            if (text.Length == 0) return new HashSet<int>();
+
+            return Db.Run("Не вдалося виконати пошук платформ", () =>
+            {
+                using var connection = Db.Open();
+                return connection.Query<int>(@"
+                    SELECT platform_id
+                    FROM Platform
+                    WHERE instr(lower_ua(platform_name), lower_ua(@Search)) > 0
+                       OR instr(lower_ua(manufacturer), lower_ua(@Search)) > 0",
+                    new { Search = text }).ToHashSet();
+            });
+        }
 
         /// <summary> Inserts the platform and sets its generated id. </summary>
         public static void Insert(Platform platform) =>

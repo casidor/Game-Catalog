@@ -2,24 +2,50 @@
 using Game_Catalog.Models;
 using Microsoft.Data.Sqlite;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace Game_Catalog.Data.Repositories
 {
     /// <summary> Data access for the Genre table. </summary>
     public static class GenreRepository
     {
-        /// <summary> Returns genres whose name contains the search text, ordered by name. </summary>
-        public static List<Genre> GetAll(string? search = null) =>
-            Db.Run("Не вдалося завантажити жанри", () =>
+        /// <summary> Returns all genres ordered by name. The sorting is done by the database. </summary>
+        public static List<Genre> GetAll(bool descending = false)
+        {
+            // ORDER BY cannot be a query parameter, so the clause is chosen from fixed literals (no user text).
+            var orderBy = descending
+                ? "genre_name COLLATE UKR_NOCASE DESC, genre_id ASC"
+                : "genre_name COLLATE UKR_NOCASE ASC, genre_id ASC";
+
+            return Db.Run("Не вдалося завантажити жанри", () =>
             {
                 using var connection = Db.Open();
-                return connection.Query<Genre>(@"
+                return connection.Query<Genre>($@"
                     SELECT genre_id, genre_name, genre_description
                     FROM Genre
-                    WHERE instr(lower_ua(genre_name), lower_ua(@Search)) > 0
-                    ORDER BY lower_ua(genre_name)",
-                    new { Search = search?.Trim() ?? string.Empty }).AsList();
+                    ORDER BY {orderBy}").AsList();
             });
+        }
+
+        /// <summary>
+        /// Returns ids of the genres whose name contains the search text, ignoring case.
+        /// The match is decided by the database; an empty text matches nothing.
+        /// </summary>
+        public static HashSet<int> GetMatchIds(string? search)
+        {
+            var text = search?.Trim() ?? string.Empty;
+            if (text.Length == 0) return new HashSet<int>();
+
+            return Db.Run("Не вдалося виконати пошук жанрів", () =>
+            {
+                using var connection = Db.Open();
+                return connection.Query<int>(@"
+                    SELECT genre_id
+                    FROM Genre
+                    WHERE instr(lower_ua(genre_name), lower_ua(@Search)) > 0",
+                    new { Search = text }).ToHashSet();
+            });
+        }
 
         /// <summary> Inserts the genre and sets its generated id. </summary>
         public static void Insert(Genre genre) =>

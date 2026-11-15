@@ -11,6 +11,7 @@ namespace Game_Catalog.ViewModels
     {
         protected override DictionaryTexts Texts { get; } = new(
             LoadError: "Помилка завантаження жанрів",
+            SearchError: "Помилка пошуку жанрів",
             SaveError: "Помилка збереження жанру",
             DeleteError: "Помилка видалення жанру",
             DeleteTitle: "Видалення жанру",
@@ -19,7 +20,14 @@ namespace Game_Catalog.ViewModels
             BlockedMessage: name => $"Жанр «{name}» використовується в іграх або студіях.\n" +
                                     "Спершу відв'яжіть його від них.");
 
-        protected override List<Genre> LoadItems(string search) => GenreRepository.GetAll(search);
+        protected override List<Genre> LoadItems(DictionarySortField field, bool descending) =>
+            GenreRepository.GetAll(descending);
+
+        protected override HashSet<int> LoadMatchIds(string search) => GenreRepository.GetMatchIds(search);
+
+        protected override int GetId(Genre item) => item.GenreId;
+
+        protected override DictionaryRow<Genre> CreateRow(Genre item) => new GenreRow(item);
 
         protected override Task<Genre?> ShowEditorAsync(Genre? item) =>
             Dialogs.Current.ShowGenreEditorAsync(item);

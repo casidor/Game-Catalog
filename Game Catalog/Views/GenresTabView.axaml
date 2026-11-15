@@ -2,74 +2,100 @@
 			 xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
 			 xmlns:vm="using:Game_Catalog.ViewModels"
 			 xmlns:models="using:Game_Catalog.Models"
+			 xmlns:conv="using:Game_Catalog.Converters"
 			 x:Class="Game_Catalog.Views.GenresTabView"
 			 x:DataType="vm:GenresViewModel">
 
-	<Grid RowDefinitions="Auto,Auto,*">
+	<Grid RowDefinitions="Auto,*">
 
 		<!-- Toolbar -->
 		<Border Grid.Row="0" Padding="16,12">
 			<Grid ColumnDefinitions="Auto,*">
 				<Button Grid.Column="0" Content="+ Додати жанр"
-						Command="{Binding AddCommand}"/>
-				<TextBox Grid.Column="1" Text="{Binding SearchText}"
-						 PlaceholderText="🔍 Пошук жанру..."
-						 Width="200" HorizontalAlignment="Right"/>
+						Command="{Binding AddCommand}"
+						VerticalAlignment="Center"/>
+				<StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="8"
+							HorizontalAlignment="Right" VerticalAlignment="Center">
+					<TextBlock Text="{Binding SearchSummary}"
+							   IsVisible="{Binding SearchSummary, Converter={x:Static StringConverters.IsNotNullOrEmpty}}"
+							   FontSize="12" Opacity="0.6" VerticalAlignment="Center"/>
+					<TextBox Text="{Binding SearchText}"
+							 PlaceholderText="🔍 Пошук жанру..."
+							 Width="220" VerticalAlignment="Center"/>
+				</StackPanel>
 			</Grid>
 		</Border>
 
-		<!-- Table header -->
-		<Border Grid.Row="1" Padding="16,8"
-				BorderBrush="{DynamicResource SidebarBorder}" BorderThickness="0,0,0,1">
-			<Grid ColumnDefinitions="220,*,80">
-				<TextBlock Grid.Column="0" Text="Назва" FontSize="12" Opacity="0.5"/>
-				<TextBlock Grid.Column="1" Text="Опис" FontSize="12" Opacity="0.5"/>
-			</Grid>
-		</Border>
+		<!-- Table: sorted by the database, search matches are highlighted -->
+		<DataGrid Grid.Row="1"
+				  ItemsSource="{Binding Rows}"
+				  IsVisible="{Binding !IsEmpty}"
+				  AutoGenerateColumns="False"
+				  IsReadOnly="True"
+				  CanUserSortColumns="True"
+				  CanUserResizeColumns="True"
+				  CanUserReorderColumns="False"
+				  GridLinesVisibility="None"
+				  HeadersVisibility="Column"
+				  BorderThickness="0"
+				  Background="Transparent"
+				  RowHeight="44"
+				  Margin="8,0"
+				  Classes="dbSort"
+				  x:Name="GenresGrid">
 
-		<!-- Genres list -->
-		<ScrollViewer Grid.Row="2">
-			<ItemsControl ItemsSource="{Binding Items}">
-				<ItemsControl.ItemTemplate>
-					<DataTemplate x:DataType="models:Genre">
-						<Border Padding="16,8"
-								BorderBrush="{DynamicResource SidebarBorder}" BorderThickness="0,0,0,1">
-							<Grid ColumnDefinitions="220,*,80">
-								<TextBlock Grid.Column="0" Text="{Binding GenreName}"
-										   FontWeight="SemiBold" VerticalAlignment="Center"/>
-								<TextBlock Grid.Column="1" Text="{Binding GenreDescription}"
-										   Opacity="0.7" VerticalAlignment="Center"
+			<DataGrid.Styles>
+				<Style Selector="DataGridColumnHeader">
+					<Setter Property="Background" Value="Transparent"/>
+					<Setter Property="FontSize" Value="12"/>
+				</Style>
+				<Style Selector="DataGridRow">
+					<Setter Property="Background"
+							Value="{ReflectionBinding IsMatch, Converter={x:Static conv:SearchMatchBrushConverter.Instance}}"/>
+				</Style>
+			</DataGrid.Styles>
+
+			<DataGrid.Columns>
+				<DataGridTextColumn Header="Назва" Width="220"
+									Binding="{ReflectionBinding Item.GenreName}"
+									Tag="{x:Static models:DictionarySortField.Name}"/>
+				<DataGridTemplateColumn Header="Опис" Width="*" CanUserSort="False">
+					<DataGridTemplateColumn.CellTemplate>
+						<DataTemplate>
+							<Border Background="Transparent"
+									ToolTip.Tip="{ReflectionBinding Description}">
+								<TextBlock Text="{ReflectionBinding Description, TargetNullValue={StaticResource NoValue}}"
 										   TextTrimming="CharacterEllipsis"
-										   ToolTip.Tip="{Binding GenreDescription}"/>
-								<StackPanel Grid.Column="2" Orientation="Horizontal" Spacing="4">
-									<Button Content="✏" ToolTip.Tip="Редагувати"
-											Command="{Binding $parent[ItemsControl].((vm:GenresViewModel)DataContext).EditCommand}"
-											CommandParameter="{Binding}"/>
-									<Button Content="🗑" ToolTip.Tip="Видалити"
-											Command="{Binding $parent[ItemsControl].((vm:GenresViewModel)DataContext).DeleteCommand}"
-											CommandParameter="{Binding}"/>
-								</StackPanel>
-							</Grid>
-						</Border>
-					</DataTemplate>
-				</ItemsControl.ItemTemplate>
-			</ItemsControl>
-		</ScrollViewer>
+										   MaxLines="1"
+										   VerticalAlignment="Center"
+										   Margin="12,0"/>
+							</Border>
+						</DataTemplate>
+					</DataGridTemplateColumn.CellTemplate>
+				</DataGridTemplateColumn>
+				<DataGridTemplateColumn Header="" Width="100" CanUserSort="False" CanUserResize="False">
+					<DataGridTemplateColumn.CellTemplate>
+						<DataTemplate>
+							<StackPanel Orientation="Horizontal" Spacing="4" HorizontalAlignment="Center">
+								<Button Content="✏" ToolTip.Tip="Редагувати"
+										Command="{ReflectionBinding $parent[DataGrid].DataContext.EditCommand}"
+										CommandParameter="{ReflectionBinding Item}"/>
+								<Button Content="🗑" ToolTip.Tip="Видалити"
+										Command="{ReflectionBinding $parent[DataGrid].DataContext.DeleteCommand}"
+										CommandParameter="{ReflectionBinding Item}"/>
+							</StackPanel>
+						</DataTemplate>
+					</DataGridTemplateColumn.CellTemplate>
+				</DataGridTemplateColumn>
+			</DataGrid.Columns>
+		</DataGrid>
 
 		<!-- Empty state -->
-		<StackPanel Grid.Row="2" IsVisible="{Binding IsEmpty}"
+		<StackPanel Grid.Row="1" IsVisible="{Binding IsEmpty}"
 					HorizontalAlignment="Center" VerticalAlignment="Center" Spacing="16">
 			<TextBlock Text="🏷" FontSize="48" HorizontalAlignment="Center"/>
 			<TextBlock Text="Жанрів немає" FontSize="18" FontWeight="SemiBold" HorizontalAlignment="Center"/>
 			<TextBlock Text="Додайте перший жанр" Opacity="0.6" HorizontalAlignment="Center"/>
-		</StackPanel>
-
-		<!-- Filtered empty state -->
-		<StackPanel Grid.Row="2" IsVisible="{Binding IsFilteredEmpty}"
-					HorizontalAlignment="Center" VerticalAlignment="Center" Spacing="12">
-			<TextBlock Text="🔍" FontSize="48" HorizontalAlignment="Center"/>
-			<TextBlock Text="Жанрів не знайдено" FontSize="18" FontWeight="SemiBold" HorizontalAlignment="Center"/>
-			<TextBlock Text="Спробуйте змінити критерії пошуку" Opacity="0.6" HorizontalAlignment="Center"/>
 		</StackPanel>
 
 	</Grid>

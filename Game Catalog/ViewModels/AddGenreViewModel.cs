@@ -20,7 +20,7 @@ namespace Game_Catalog.ViewModels
         private string _genreName = string.Empty;
 
         /// <summary> Optional description of the genre. </summary>
-        [MaxLength(500, ErrorMessage = "Опис не може перевищувати 500 символів")]
+        [MaxLength(200, ErrorMessage = "Опис не може перевищувати 200 символів")]
         [NotifyDataErrorInfo]
         [ObservableProperty]
         private string _genreDescription = string.Empty;

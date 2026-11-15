@@ -1,9 +1,11 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using Game_Catalog.Models;
 using Game_Catalog.Services;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Linq;
 using System.Threading.Tasks;
 using DatabaseException = Game_Catalog.Data.DatabaseException;
 
@@ -12,6 +14,7 @@ namespace Game_Catalog.ViewModels
     /// <summary> User-facing messages of a dictionary tab. </summary>
     public sealed record DictionaryTexts(
         string LoadError,
+        string SearchError,
         string SaveError,
         string DeleteError,
         string DeleteTitle,
@@ -20,29 +23,43 @@ namespace Game_Catalog.ViewModels
         Func<string, string> BlockedMessage);
 
     /// <summary>
-    /// Base ViewModel of a dictionary tab: search, list, add, edit and delete flow.
-    /// Derived classes provide repository calls, the editor dialog and the texts.
+    /// Base ViewModel of a dictionary tab: list, sorting, search highlight, add, edit and delete flow.
+    /// Sorting and search matching are done by the database through the repository calls of derived classes.
     /// </summary>
     public abstract partial class DictionaryTabViewModel<T> : ViewModelBase where T : class
     {
-        /// <summary> Items matching the current search. </summary>
-        public ObservableCollection<T> Items { get; } = new();
+        /// <summary> Rows of the table, in the order returned by the database. </summary>
+        public ObservableCollection<DictionaryRow<T>> Rows { get; } = new();
 
-        /// <summary> Text used to search items. </summary>
-        [ObservableProperty]
-        private string _searchText = string.Empty;
+        /// <summary> Text whose matches are highlighted in the table. </summary>
+        [ObservableProperty] private string _searchText = string.Empty;
 
-        /// <summary> True when there are no items at all. </summary>
-        public bool IsEmpty => Items.Count == 0 && string.IsNullOrWhiteSpace(SearchText);
+        /// <summary> "Found N of M" text shown next to the search box; empty when nothing is searched. </summary>
+        [ObservableProperty] private string _searchSummary = string.Empty;
 
-        /// <summary> True when the search found nothing. </summary>
-        public bool IsFilteredEmpty => Items.Count == 0 && !string.IsNullOrWhiteSpace(SearchText);
+        /// <summary> Field of the current sort order; the sorting itself is done by the database. </summary>
+        [ObservableProperty] private DictionarySortField _sortField = DictionarySortField.Name;
+
+        /// <summary> True for descending order. </summary>
+        [ObservableProperty] private bool _sortDescending;
+
+        /// <summary> True when the dictionary has no items. </summary>
+        public bool IsEmpty => Rows.Count == 0;
 
         /// <summary> Messages shown by this tab. </summary>
         protected abstract DictionaryTexts Texts { get; }
 
-        /// <summary> Loads items matching the search text from the repository. </summary>
-        protected abstract List<T> LoadItems(string search);
+        /// <summary> Loads all items from the repository in the given order. </summary>
+        protected abstract List<T> LoadItems(DictionarySortField field, bool descending);
+
+        /// <summary> Returns ids of the items matching the search text; the match is decided by the database. </summary>
+        protected abstract HashSet<int> LoadMatchIds(string search);
+
+        /// <summary> Identifier of the item, used to mark rows found by the search. </summary>
+        protected abstract int GetId(T item);
+
+        /// <summary> Creates the table row for the item. </summary>
+        protected virtual DictionaryRow<T> CreateRow(T item) => new(item);
 
         /// <summary> Opens the editor dialog and returns the edited item, or null if cancelled. </summary>
         protected abstract Task<T?> ShowEditorAsync(T? item);
@@ -59,25 +76,69 @@ namespace Game_Catalog.ViewModels
         /// <summary> Display name of the item used in confirmation messages. </summary>
         protected abstract string GetName(T item);
 
-        partial void OnSearchTextChanged(string value) => Reload();
+        partial void OnSearchTextChanged(string value) => UpdateMatches();
 
-        /// <summary> Reloads the list from the database using the current search. </summary>
+        /// <summary> Sorts by the clicked table column: same column flips the direction. </summary>
+        public void SortByColumn(DictionarySortField field)
+        {
+            if (SortField == field)
+            {
+                SortDescending = !SortDescending;
+            }
+            else
+            {
+                SortField = field;
+                SortDescending = false;
+            }
+            Reload();
+        }
+
+        /// <summary> Reloads the table from the database, already in the chosen order. </summary>
         public void Reload()
         {
             try
             {
-                var items = LoadItems(SearchText);
-                Items.Clear();
+                var items = LoadItems(SortField, SortDescending);
+                Rows.Clear();
                 foreach (var item in items)
-                    Items.Add(item);
+                    Rows.Add(CreateRow(item));
             }
             catch (DatabaseException ex)
             {
                 _ = ShowErrorAsync(Texts.LoadError, ex);
             }
 
+            UpdateMatches();
             OnPropertyChanged(nameof(IsEmpty));
-            OnPropertyChanged(nameof(IsFilteredEmpty));
+        }
+
+        /// <summary> Marks rows found by the database search and updates the "found" counter. </summary>
+        private void UpdateMatches()
+        {
+            // Nothing to search for or nothing to mark: reset without asking the database.
+            if (string.IsNullOrWhiteSpace(SearchText) || Rows.Count == 0)
+            {
+                foreach (var row in Rows)
+                    row.IsMatch = false;
+                SearchSummary = string.Empty;
+                return;
+            }
+
+            HashSet<int> matches;
+            try
+            {
+                matches = LoadMatchIds(SearchText);
+            }
+            catch (DatabaseException ex)
+            {
+                matches = new HashSet<int>();
+                _ = ShowErrorAsync(Texts.SearchError, ex);
+            }
+
+            foreach (var row in Rows)
+                row.IsMatch = matches.Contains(GetId(row.Item));
+
+            SearchSummary = $"Знайдено: {Rows.Count(r => r.IsMatch)} з {Rows.Count}";
         }
 
         /// <summary> Opens the editor and saves a new item. </summary>

@@ -69,7 +69,6 @@
 				  Background="Transparent"
 				  RowHeight="44"
 				  Margin="8,0"
-				  DoubleTapped="OnRowDoubleTapped"
 				  Classes="dbSort"
 				  x:Name="SessionsGrid">
 

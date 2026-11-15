@@ -16,7 +16,7 @@
 
 		<TextBlock Text="Опис"/>
 		<TextBox Text="{Binding GenreDescription}"
-				 PlaceholderText="Необов'язково (до 500 символів)..."
+				 PlaceholderText="Необов'язково (до 200 символів)..."
 				 TextWrapping="Wrap"
 				 AcceptsReturn="True"
 				 Height="100"/>
