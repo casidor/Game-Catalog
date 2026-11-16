@@ -7,7 +7,7 @@
 	<Grid RowDefinitions="Auto,*">
 
 		<!-- Page header -->
-		<Grid Grid.Row="0" ColumnDefinitions="Auto,*,Auto" Margin="16,16,16,0">
+		<Grid Grid.Row="0" ColumnDefinitions="Auto,*,Auto" Margin="16,16,156,0">
 			<Button Grid.Column="0"
 					Content="← Назад"
 					Command="{Binding GoBackCommand}"

@@ -7,6 +7,8 @@
         x:Class="Game_Catalog.Views.MainWindow"
         x:DataType="vm:MainWindowViewModel"
         Title="Game Catalog"
+        ExtendClientAreaToDecorationsHint="True"
+        ExtendClientAreaTitleBarHeightHint="56"
         MinWidth="900"
         MinHeight="600"
         Background="{DynamicResource AppBackground}">
@@ -16,49 +18,61 @@
     </Design.DataContext>
 
     <Window.Resources>
-    <DataTemplate x:Key="NavButton" x:DataType="vm:NavItem">
-        <Panel>
-            <Button Classes="nav"
-                    Classes.active="{Binding IsActive}"
-                    Content="{Binding Icon}"
-                    Command="{Binding $parent[Window].((vm:MainWindowViewModel)DataContext).NavigateToCommand}"
-                    CommandParameter="{Binding Page}"
-                    ToolTip.Tip="{Binding Title}"/>
-            <TextBlock Text="{Binding Title}"
-                       IsVisible="{Binding $parent[Window].((vm:MainWindowViewModel)DataContext).IsSidebarExpanded}"
-                       IsHitTestVisible="False"
-                       VerticalAlignment="Center"
-                       TextTrimming="CharacterEllipsis"
-                       Margin="52,0,12,0"
-                       FontSize="14"
-                       Foreground="{DynamicResource NavForeground}"/>
-        </Panel>
-    </DataTemplate>
-</Window.Resources>
+        <DataTemplate x:Key="NavButton" x:DataType="vm:NavItem">
+            <Panel>
+                <Button Classes="nav"
+                        Classes.active="{Binding IsActive}"
+                        Content="{Binding Icon}"
+                        Command="{Binding $parent[Window].((vm:MainWindowViewModel)DataContext).NavigateToCommand}"
+                        CommandParameter="{Binding Page}"
+                        ToolTip.Tip="{Binding Title}"/>
+                <TextBlock Text="{Binding Title}"
+                           IsVisible="{Binding $parent[Window].((vm:MainWindowViewModel)DataContext).IsSidebarExpanded}"
+                           IsHitTestVisible="False"
+                           VerticalAlignment="Center"
+                           TextTrimming="CharacterEllipsis"
+                           Margin="52,0,12,0"
+                           FontSize="14"
+                           Foreground="{DynamicResource NavForeground}"/>
+            </Panel>
+        </DataTemplate>
+    </Window.Resources>
 
-<Window.Styles>
-    <Style Selector="Border.sidebar">
-        <Setter Property="Width" Value="64"/>
-    </Style>
-    <Style Selector="Border.sidebar.expanded">
-        <Setter Property="Width" Value="220"/>
-    </Style>
+    <Window.Styles>
+        <Style Selector="Border.sidebar">
+            <Setter Property="Width" Value="64"/>
+        </Style>
+        <Style Selector="Border.sidebar.expanded">
+            <Setter Property="Width" Value="220"/>
+        </Style>
 
-    <Style Selector="Button.nav">
-        <Setter Property="HorizontalAlignment" Value="Stretch"/>
-        <Setter Property="HorizontalContentAlignment" Value="Left"/>
-        <Setter Property="Padding" Value="11,8"/>
-        <Setter Property="FontSize" Value="20"/>
-        <Setter Property="FontFamily" Value="Segoe UI Emoji, Noto Color Emoji, Apple Color Emoji"/>
-        <Setter Property="CornerRadius" Value="8"/>
-        <Setter Property="Background" Value="Transparent"/>
-        <Setter Property="Foreground" Value="{DynamicResource NavForeground}"/>
-    </Style>
+        <Style Selector="Button.nav">
+            <Setter Property="HorizontalAlignment" Value="Stretch"/>
+            <Setter Property="HorizontalContentAlignment" Value="Left"/>
+            <Setter Property="Padding" Value="11,8"/>
+            <Setter Property="FontSize" Value="20"/>
+            <Setter Property="FontFamily" Value="Segoe UI Emoji, Noto Color Emoji, Apple Color Emoji"/>
+            <Setter Property="CornerRadius" Value="8"/>
+            <Setter Property="Background" Value="Transparent"/>
+            <Setter Property="Foreground" Value="{DynamicResource NavForeground}"/>
+        </Style>
 
-    <Style Selector="Button.nav.active">
-        <Setter Property="Background" Value="{DynamicResource ButtonBackground}"/>
-    </Style>
-</Window.Styles>
+        <Style Selector="Button.nav.active">
+            <Setter Property="Background" Value="{DynamicResource ButtonBackground}"/>
+        </Style>
+
+        <Style Selector="WindowDrawnDecorations /template/ Button#PART_FullScreenButton">
+            <Setter Property="IsVisible" Value="False"/>
+            <Setter Property="Width" Value="0"/>
+            <Setter Property="MinWidth" Value="0"/>
+            <Setter Property="Margin" Value="0"/>
+        </Style>
+
+        <Style Selector="WindowDrawnDecorations /template/ Panel#PART_TitleTextPanel > TextBlock">
+            <Setter Property="IsVisible" Value="False"/>
+        </Style>
+
+    </Window.Styles>
 
 
 
@@ -107,11 +121,15 @@
             </Grid>
         </Border>
 
-        <!-- Main content -->
-        <Border Grid.Column="1"
-                Background="{DynamicResource AppBackground}">
+        <!-- Main content. The strip under the page is the window title bar: pages have no background
+        of their own, so a click on an empty part of a page top bar reaches it and drags the window -->
+        <Panel Grid.Column="1"
+               Background="{DynamicResource AppBackground}">
+            <Border Height="56" VerticalAlignment="Top"
+                    Background="Transparent"
+                    WindowDecorationProperties.ElementRole="TitleBar"/>
             <ContentControl Content="{Binding CurrentPage}"/>
-        </Border>
+        </Panel>
 
     </Grid>
 

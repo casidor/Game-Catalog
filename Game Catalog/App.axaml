@@ -14,6 +14,11 @@
             <Thickness x:Key="ComboBoxPadding">12,6,0,6</Thickness>
             <!-- Shown wherever a field has no value: use as TargetNullValue in bindings -->
             <x:String x:Key="NoValue">—</x:String>
+            <!-- Custom title bar: the page content starts at the top edge of the window.
+                 CaptionButtonsInset keeps page top bars clear of the system window buttons,
+                 TitleBarInset pushes overlays below the title bar strip -->
+            <Thickness x:Key="CaptionButtonsInset">0,0,140,0</Thickness>
+            <Thickness x:Key="TitleBarInset">0,56,0,0</Thickness>
             <ResourceDictionary.ThemeDictionaries>
 
                 <ResourceDictionary x:Key="Dark">
