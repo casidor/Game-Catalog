@@ -15,84 +15,94 @@
         <vm:MainWindowViewModel/>
     </Design.DataContext>
 
-    <Grid ColumnDefinitions="220,*">
+    <Window.Resources>
+    <DataTemplate x:Key="NavButton" x:DataType="vm:NavItem">
+        <Panel>
+            <Button Classes="nav"
+                    Classes.active="{Binding IsActive}"
+                    Content="{Binding Icon}"
+                    Command="{Binding $parent[Window].((vm:MainWindowViewModel)DataContext).NavigateToCommand}"
+                    CommandParameter="{Binding Page}"
+                    ToolTip.Tip="{Binding Title}"/>
+            <TextBlock Text="{Binding Title}"
+                       IsVisible="{Binding $parent[Window].((vm:MainWindowViewModel)DataContext).IsSidebarExpanded}"
+                       IsHitTestVisible="False"
+                       VerticalAlignment="Center"
+                       TextTrimming="CharacterEllipsis"
+                       Margin="52,0,12,0"
+                       FontSize="14"
+                       Foreground="{DynamicResource NavForeground}"/>
+        </Panel>
+    </DataTemplate>
+</Window.Resources>
+
+<Window.Styles>
+    <Style Selector="Border.sidebar">
+        <Setter Property="Width" Value="64"/>
+    </Style>
+    <Style Selector="Border.sidebar.expanded">
+        <Setter Property="Width" Value="220"/>
+    </Style>
+
+    <Style Selector="Button.nav">
+        <Setter Property="HorizontalAlignment" Value="Stretch"/>
+        <Setter Property="HorizontalContentAlignment" Value="Left"/>
+        <Setter Property="Padding" Value="11,8"/>
+        <Setter Property="FontSize" Value="20"/>
+        <Setter Property="FontFamily" Value="Segoe UI Emoji, Noto Color Emoji, Apple Color Emoji"/>
+        <Setter Property="CornerRadius" Value="8"/>
+        <Setter Property="Background" Value="Transparent"/>
+        <Setter Property="Foreground" Value="{DynamicResource NavForeground}"/>
+    </Style>
+
+    <Style Selector="Button.nav.active">
+        <Setter Property="Background" Value="{DynamicResource ButtonBackground}"/>
+    </Style>
+</Window.Styles>
+
+
+
+    <Grid ColumnDefinitions="Auto,*">
 
         <!-- Sidebar -->
         <Border Grid.Column="0"
+                Classes="sidebar"
+                Classes.expanded="{Binding IsSidebarExpanded}"
                 Background="{DynamicResource SidebarBackground}"
                 BorderBrush="{DynamicResource SidebarBorder}"
                 BorderThickness="0,0,1,0">
-            <Grid RowDefinitions="Auto,*,Auto">
+            <Grid RowDefinitions="56,*,Auto">
 
-                <!-- Logo -->
-                <Border Grid.Row="0" Padding="24,32,24,24">
-                    <StackPanel Spacing="4">
-                        <TextBlock Text="🎮" FontSize="28"/>
-                        <TextBlock Text="Game Catalog"
-                                   FontSize="16"
-                                   FontWeight="Bold"
-                                   Foreground="{DynamicResource LogoForeground}"/>
-                        <TextBlock Text="My Library"
-                                   FontSize="11"
-                                   Foreground="{DynamicResource SubtitleForeground}"/>
-                    </StackPanel>
-                </Border>
+                <!-- Mode toggle -->
+                <Button Grid.Row="0" Classes="nav"
+                        Content="☰"
+                        Command="{Binding ToggleSidebarCommand}"
+                        ToolTip.Tip="Меню"
+                        Width="48"
+                        HorizontalAlignment="Left"
+                        HorizontalContentAlignment="Center"
+                        VerticalAlignment="Center"
+                        Padding="0,8"
+                        FontSize="18"
+                        Margin="8,0"/>
 
                 <!-- Navigation buttons -->
-                <StackPanel Grid.Row="1" Spacing="4" Margin="12,0">
-                    <Button Content="🎮  Бібліотека"
-                            Command="{Binding NavigateToCommand}"
-                            CommandParameter="{Binding LibraryPage}"
-                            HorizontalAlignment="Stretch"
-                            HorizontalContentAlignment="Left"
-                            Padding="16,12" FontSize="14"
-                            Background="Transparent"
-                            Foreground="{DynamicResource NavForeground}" CornerRadius="8"/>
-                    <Button Content="🏢  Студії"
-                            Command="{Binding NavigateToCommand}"
-                            CommandParameter="{Binding StudioPage}"
-                            HorizontalAlignment="Stretch"
-                            HorizontalContentAlignment="Left"
-                            Padding="16,12" FontSize="14"
-                            Background="Transparent"
-                            Foreground="{DynamicResource NavForeground}" CornerRadius="8"/>
-                    <Button Content="⏱  Сесії"
-                            Command="{Binding NavigateToCommand}"
-                            CommandParameter="{Binding SessionsPage}"
-                            HorizontalAlignment="Stretch"
-                            HorizontalContentAlignment="Left"
-                            Padding="16,12" FontSize="14"
-                            Background="Transparent"
-                            Foreground="{DynamicResource NavForeground}" CornerRadius="8"/>
-                    <Button Content="📦  Архів"
-                            Command="{Binding NavigateToCommand}"
-                            CommandParameter="{Binding ArchivePage}"
-                            HorizontalAlignment="Stretch"
-                            HorizontalContentAlignment="Left"
-                            Padding="16,12" FontSize="14"
-                            Background="Transparent"
-                            Foreground="{DynamicResource NavForeground}" CornerRadius="8"/>
-                    <Button Content="🏷  Довідники"
-                            Command="{Binding NavigateToCommand}"
-                            CommandParameter="{Binding DictionariesPage}"
-                            HorizontalAlignment="Stretch"
-                            HorizontalContentAlignment="Left"
-                            Padding="16,12" FontSize="14"
-                            Background="Transparent"
-                            Foreground="{DynamicResource NavForeground}" CornerRadius="8"/>
-                </StackPanel>
+                <ItemsControl Grid.Row="1" ItemsSource="{Binding NavItems}"
+                              ItemTemplate="{StaticResource NavButton}"
+                              Margin="8,0">
+                    <ItemsControl.ItemsPanel>
+                        <ItemsPanelTemplate>
+                            <StackPanel Spacing="4"/>
+                        </ItemsPanelTemplate>
+                    </ItemsControl.ItemsPanel>
+                </ItemsControl>
 
                 <!-- Settings pinned to bottom -->
-                <Border Grid.Row="2" Padding="12,12">
-                    <Button Content="⚙  Налаштування"
-                            Command="{Binding NavigateToCommand}"
-                            CommandParameter="{Binding SettingsPage}"
-                            HorizontalAlignment="Stretch"
-                            HorizontalContentAlignment="Left"
-                            Padding="16,12" FontSize="14"
-                            Background="Transparent"
-                            Foreground="{DynamicResource NavForeground}" CornerRadius="8"/>
-                </Border>
+                <ContentControl Grid.Row="2"
+                                Content="{Binding SettingsItem}"
+                                ContentTemplate="{StaticResource NavButton}"
+                                HorizontalContentAlignment="Stretch"
+                                Margin="8,12"/>
 
             </Grid>
         </Border>

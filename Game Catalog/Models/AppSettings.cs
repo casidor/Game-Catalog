@@ -7,5 +7,8 @@
     {
         /// <summary>The selected UI theme: "Dark" or "Light".</summary>
         public string Theme { get; set; } = "Dark";
+
+        /// <summary>True when the navigation sidebar shows captions next to the icons.</summary>
+        public bool SidebarExpanded { get; set; }
     }
 }

@@ -4,6 +4,7 @@ using Game_Catalog.Data;
 using Game_Catalog.Models;
 using Game_Catalog.Services;
 using System;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 
 namespace Game_Catalog.ViewModels
@@ -34,9 +35,32 @@ namespace Game_Catalog.ViewModels
 
         /// <summary> The settings page. </summary>
         public SettingsViewModel SettingsPage { get; } = new();
+
+        /// <summary> Sidebar buttons of the main sections, top to bottom. </summary>
+        public IReadOnlyList<NavItem> NavItems { get; }
+
+        /// <summary> Sidebar button of the settings, pinned to the bottom. </summary>
+        public NavItem SettingsItem { get; }
+
+        /// <summary> True when the sidebar shows captions next to the icons. </summary>
+        [ObservableProperty]
+        private bool _isSidebarExpanded;
+
         public MainWindowViewModel()
         {
             _currentPage = LibraryPage;
+            _isSidebarExpanded = SettingsService.Current.SidebarExpanded;
+
+            NavItems = new[]
+            {
+                new NavItem("🎮", "Бібліотека", LibraryPage) { IsActive = true },
+                new NavItem("🏢", "Студії", StudioPage),
+                new NavItem("⏱", "Сесії", SessionsPage),
+                new NavItem("📦", "Архів", ArchivePage),
+                new NavItem("🏷", "Довідники", DictionariesPage)
+            };
+            SettingsItem = new NavItem("⚙", "Налаштування", SettingsPage);
+
             StudioPage.StudioSelected += studio => NavigateToStudio(studio);
             LibraryPage.GameSelected += game => NavigateToGame(game, LibraryPage);
             ArchivePage.GameSelected += game => NavigateToGame(game, ArchivePage);
@@ -75,14 +99,30 @@ namespace Game_Catalog.ViewModels
         /// <summary> Lets the page that was just shown load its data. </summary>
         partial void OnCurrentPageChanged(ViewModelBase value) => value.OnNavigatedTo();
 
+        /// <summary> Remembers the chosen sidebar mode between application runs. </summary>
+        partial void OnIsSidebarExpandedChanged(bool value)
+        {
+            SettingsService.Current.SidebarExpanded = value;
+            SettingsService.Save();
+        }
+
+        /// <summary> Switches the sidebar between the narrow (icons only) and the wide mode. </summary>
+        [RelayCommand]
+        private void ToggleSidebar() => IsSidebarExpanded = !IsSidebarExpanded;
+
         /// <summary>
-        /// Navigates to the specified page.
+        /// Navigates to the page of a sidebar section and marks that section as active.
+        /// Details pages are opened from a section, so they keep its button highlighted.
         /// </summary>
         /// <param name="page">Target page ViewModel.</param>
         [RelayCommand]
         private void NavigateTo(ViewModelBase page)
         {
             CurrentPage = page;
+
+            foreach (var item in NavItems)
+                item.IsActive = ReferenceEquals(item.Page, page);
+            SettingsItem.IsActive = ReferenceEquals(SettingsItem.Page, page);
         }
 
         /// <summary> Navigates to the game details page. "Back" returns to the page the user came from. </summary>
