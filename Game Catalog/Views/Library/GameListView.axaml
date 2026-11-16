@@ -25,7 +25,8 @@
 				<StackPanel Grid.Column="0" Orientation="Horizontal" Spacing="8" VerticalAlignment="Center">
 					<TextBlock Text="{Binding PageTitle}"
 							   FontSize="20" FontWeight="Bold" VerticalAlignment="Center"/>
-					<Button Content="+ Додати гру"
+					<Button Content="+" ToolTip.Tip="Додати гру"
+							Width="32" Padding="0" FontSize="18"
 							Command="{Binding AddCommand}"
 							IsVisible="{Binding CanAdd}"
 							VerticalAlignment="Center"/>
@@ -74,7 +75,8 @@
 						</DropDownButton.Flyout>
 					</DropDownButton>
 
-					<DropDownButton Content="{Binding ViewModeText}" VerticalAlignment="Center">
+					<DropDownButton Content="{Binding ViewModeIcon}" ToolTip.Tip="Вигляд: сітка або список"
+									VerticalAlignment="Center">
 						<DropDownButton.Flyout>
 							<MenuFlyout Placement="BottomEdgeAlignedRight">
 								<MenuItem Header="Сітка" ToggleType="Radio" GroupName="ViewMode"
@@ -86,7 +88,7 @@
 							</MenuFlyout>
 						</DropDownButton.Flyout>
 					</DropDownButton>
-					<Button Content="◨ Прев'ю"
+					<Button Content="◨"
 							ToolTip.Tip="Показати або приховати панель перегляду"
 							Command="{Binding TogglePreviewCommand}"
 							VerticalAlignment="Center"/>

@@ -37,7 +37,8 @@
 					<TextBlock Text="Сесії"
 							   FontSize="20" FontWeight="Bold"
 							   VerticalAlignment="Center"/>
-					<Button Content="+ Додати сесію"
+					<Button Content="+" ToolTip.Tip="Додати сесію"
+							Width="32" Padding="0" FontSize="18"
 							Command="{Binding AddCommand}"
 							VerticalAlignment="Center"/>
 				</StackPanel>

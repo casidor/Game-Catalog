@@ -53,7 +53,7 @@ namespace Game_Catalog.ViewModels
 
         /// <summary> True for the cover grid, false for the table. </summary>
         [ObservableProperty]
-        [NotifyPropertyChangedFor(nameof(ViewModeText))]
+        [NotifyPropertyChangedFor(nameof(ViewModeIcon))]
         [NotifyPropertyChangedFor(nameof(ShowGrid))]
         [NotifyPropertyChangedFor(nameof(ShowList))]
         private bool _isGridView = true;
@@ -80,8 +80,8 @@ namespace Game_Catalog.ViewModels
         [ObservableProperty] private double? _draftHoursFrom;
         [ObservableProperty] private double? _draftHoursTo;
 
-        /// <summary> Caption of the view mode button: the mode shown right now. </summary>
-        public string ViewModeText => IsGridView ? "▦ Сітка" : "☰ Список";
+        /// <summary> Icon of the view mode button: the mode shown right now. </summary>
+        public string ViewModeIcon => IsGridView ? "▦" : "☰";
 
         /// <summary> Shows games as a cover grid. </summary>
         [RelayCommand]

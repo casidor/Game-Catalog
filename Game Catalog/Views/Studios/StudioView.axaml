@@ -15,7 +15,8 @@
 					<TextBlock Text="Студії"
 							   FontSize="20" FontWeight="Bold"
 							   VerticalAlignment="Center"/>
-					<Button Content="+ Додати студію"
+					<Button Content="+" ToolTip.Tip="Додати студію"
+							Width="32" Padding="0" FontSize="18"
 							Command="{Binding AddCommand}"
 							VerticalAlignment="Center"/>
 				</StackPanel>
