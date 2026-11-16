@@ -100,6 +100,20 @@
                         FontSize="18"
                         Margin="8,0"/>
 
+                <!-- Theme toggle: only in the wide mode -->
+                <Button Grid.Row="0" Classes="nav"
+                        Content="{Binding ThemeToggleIcon}"
+                        Command="{Binding ToggleThemeCommand}"
+                        ToolTip.Tip="Змінити тему"
+                        IsVisible="{Binding IsSidebarExpanded}"
+                        Width="48"
+                        HorizontalAlignment="Right"
+                        HorizontalContentAlignment="Center"
+                        VerticalAlignment="Center"
+                        Padding="0,8"
+                        FontSize="18"
+                        Margin="8,0"/>
+
                 <!-- Navigation buttons -->
                 <ItemsControl Grid.Row="1" ItemsSource="{Binding NavItems}"
                               ItemTemplate="{StaticResource NavButton}"

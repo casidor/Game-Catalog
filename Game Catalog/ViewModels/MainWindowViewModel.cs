@@ -46,6 +46,9 @@ namespace Game_Catalog.ViewModels
         [ObservableProperty]
         private bool _isSidebarExpanded;
 
+        /// <summary> Icon of the theme toggle: the theme a click switches to. </summary>
+        public string ThemeToggleIcon => SettingsPage.SelectedTheme == "Light" ? "🌙" : "☀";
+
         public MainWindowViewModel()
         {
             _currentPage = LibraryPage;
@@ -60,6 +63,13 @@ namespace Game_Catalog.ViewModels
                 new NavItem("🏷", "Довідники", DictionariesPage)
             };
             SettingsItem = new NavItem("⚙", "Налаштування", SettingsPage);
+
+            // The theme can also be changed on the settings page: keep the toggle icon in step with it.
+            SettingsPage.PropertyChanged += (_, e) =>
+            {
+                if (e.PropertyName == nameof(SettingsViewModel.SelectedTheme))
+                    OnPropertyChanged(nameof(ThemeToggleIcon));
+            };
 
             StudioPage.StudioSelected += studio => NavigateToStudio(studio);
             LibraryPage.GameSelected += game => NavigateToGame(game, LibraryPage);
@@ -109,6 +119,11 @@ namespace Game_Catalog.ViewModels
         /// <summary> Switches the sidebar between the narrow (icons only) and the wide mode. </summary>
         [RelayCommand]
         private void ToggleSidebar() => IsSidebarExpanded = !IsSidebarExpanded;
+
+        /// <summary> Switches between the dark and the light theme. The settings page applies and saves it. </summary>
+        [RelayCommand]
+        private void ToggleTheme() =>
+            SettingsPage.SelectedTheme = SettingsPage.SelectedTheme == "Light" ? "Dark" : "Light";
 
         /// <summary>
         /// Navigates to the page of a sidebar section and marks that section as active.
