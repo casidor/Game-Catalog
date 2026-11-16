@@ -17,13 +17,15 @@
 		</Panel>
 
 		<!-- Layer 2: page content -->
-		<Grid RowDefinitions="Auto,*">
+		<Grid RowDefinitions="56,*">
 
-			<!-- Top bar -->
-			<Grid Grid.Row="0" ColumnDefinitions="Auto,Auto,*,Auto" Margin="16,16,16,12">
+			<!-- Top bar: stays in place on every tab -->
+			<Grid Grid.Row="0" ColumnDefinitions="Auto,Auto,*,Auto" Margin="16,0">
 				<Button Grid.Column="0" Content="← Назад"
-						Command="{Binding GoBackCommand}" Padding="8,4"/>
+						Command="{Binding GoBackCommand}" Padding="8,4"
+						VerticalAlignment="Center"/>
 				<Border Grid.Column="1" Width="32" Height="32" Margin="16,0,0,0"
+						VerticalAlignment="Center"
 						IsVisible="{Binding HasIcon}">
 					<Image Source="{Binding IconImage}" Stretch="Uniform"
 						   RenderOptions.BitmapInterpolationMode="HighQuality"/>
@@ -33,109 +35,123 @@
 						   VerticalAlignment="Center"
 						   TextTrimming="CharacterEllipsis"
 						   Margin="12,0,16,0"/>
-				<StackPanel Grid.Column="3" Orientation="Horizontal" Spacing="8">
-					<Button Content="✏ Редагувати" Command="{Binding EditCommand}"/>
-					<Button Content="📦 В архів" Command="{Binding ArchiveCommand}"
-							IsVisible="{Binding !IsArchived}"/>
-					<Button Content="♻ Відновити" Command="{Binding RestoreCommand}"
-							IsVisible="{Binding IsArchived}"/>
-					<Button Content="🗑 Видалити" Command="{Binding DeleteCommand}"/>
-				</StackPanel>
+
+				<!-- Tabs: only details for now -->
+				<TabStrip Grid.Column="3" VerticalAlignment="Center"
+						  SelectedIndex="{Binding SelectedTabIndex}">
+					<TabStrip.Styles>
+						<Style Selector="TabStripItem">
+							<Setter Property="FontSize" Value="16"/>
+							<Setter Property="MinHeight" Value="40"/>
+						</Style>
+					</TabStrip.Styles>
+					<TabStripItem Content="Деталі"/>
+				</TabStrip>
 			</Grid>
 
-			<ScrollViewer Grid.Row="1">
-				<StackPanel>
+			<!-- Details tab: two columns, each with its own scrolling -->
+			<Grid Grid.Row="1" ColumnDefinitions="280,*"
+				  IsVisible="{Binding IsDetailsTab}">
 
-					<!-- Background banner -->
-					<Panel Height="550">
-						<Image Source="{Binding BackgroundImage}"
-							   Stretch="UniformToFill"
-							   VerticalAlignment="Center"
-							   IsVisible="{Binding HasBackground}">
-							<Image.OpacityMask>
+				<!-- Left: cover, actions and fields -->
+				<ScrollViewer Grid.Column="0">
+					<StackPanel Spacing="8" Margin="16,0,16,16">
+						<Border Width="248" Height="330" CornerRadius="8" ClipToBounds="True"
+								HorizontalAlignment="Left"
+								Background="{DynamicResource CardBackground}">
+							<Panel>
+								<Image Source="{Binding CoverImage}" Stretch="UniformToFill"
+									   IsVisible="{Binding HasCover}"/>
+								<TextBlock Text="🎮" FontSize="48"
+										   HorizontalAlignment="Center" VerticalAlignment="Center"
+										   IsVisible="{Binding !HasCover}"/>
+							</Panel>
+						</Border>
+
+						<!-- Actions: edit plus a menu with the rest. The main action row will go above this one -->
+						<Grid ColumnDefinitions="2*,8,*" Margin="0,0,0,8">
+							<Button Grid.Column="0" Content="✏ Редагувати"
+									Command="{Binding EditCommand}"
+									HorizontalAlignment="Stretch"/>
+							<Button Grid.Column="2" Content="⋯" ToolTip.Tip="Інші дії"
+									HorizontalAlignment="Stretch">
+								<Button.Flyout>
+									<MenuFlyout>
+										<MenuItem Header="📦 В архів" Command="{Binding ArchiveCommand}"
+												  IsVisible="{Binding !IsArchived}"/>
+										<MenuItem Header="♻ Відновити" Command="{Binding RestoreCommand}"
+												  IsVisible="{Binding IsArchived}"/>
+										<MenuItem Header="🗑 Видалити" Command="{Binding DeleteCommand}"/>
+									</MenuFlyout>
+								</Button.Flyout>
+							</Button>
+						</Grid>
+
+						<TextBlock Text="Деталі" FontSize="14" FontWeight="SemiBold"/>
+						<Border Height="1" Background="{DynamicResource SidebarBorder}"/>
+
+						<Grid ColumnDefinitions="130,*">
+							<TextBlock Grid.Column="0" Text="Статус" Opacity="0.6"/>
+							<TextBlock Grid.Column="1"
+									   Text="{Binding Status, Converter={x:Static conv:GameStatusConverter.Instance}}"/>
+						</Grid>
+						<Grid ColumnDefinitions="130,*">
+							<TextBlock Grid.Column="0" Text="Оцінка" Opacity="0.6"/>
+							<TextBlock Grid.Column="1" Text="{Binding RatingText, TargetNullValue={StaticResource NoValue}}"/>
+						</Grid>
+						<Grid ColumnDefinitions="130,*">
+							<TextBlock Grid.Column="0" Text="Студія" Opacity="0.6"/>
+							<TextBlock Grid.Column="1" Text="{Binding DeveloperName}" TextWrapping="Wrap"/>
+						</Grid>
+						<Grid ColumnDefinitions="130,*">
+							<TextBlock Grid.Column="0" Text="Рік випуску" Opacity="0.6"/>
+							<TextBlock Grid.Column="1" Text="{Binding YearText, TargetNullValue={StaticResource NoValue}}"/>
+						</Grid>
+						<Grid ColumnDefinitions="130,*">
+							<TextBlock Grid.Column="0" Text="Розмір на диску" Opacity="0.6"/>
+							<TextBlock Grid.Column="1" Text="{Binding SizeText, TargetNullValue={StaticResource NoValue}}"/>
+						</Grid>
+						<Grid ColumnDefinitions="130,*">
+							<TextBlock Grid.Column="0" Text="Часу зіграно" Opacity="0.6"/>
+							<TextBlock Grid.Column="1"
+									   Text="{Binding TotalHours, Converter={x:Static conv:DurationConverter.Instance}}"/>
+						</Grid>
+						<Grid ColumnDefinitions="130,*">
+							<TextBlock Grid.Column="0" Text="У бібліотеці" Opacity="0.6"/>
+							<TextBlock Grid.Column="1" Text="{Binding DaysInLibraryText}"/>
+						</Grid>
+						<Grid ColumnDefinitions="130,*">
+							<TextBlock Grid.Column="0" Text="Додано" Opacity="0.6"/>
+							<TextBlock Grid.Column="1"
+									   Text="{Binding AddedAt, StringFormat='{}{0:dd.MM.yyyy}'}"/>
+						</Grid>
+						<Grid ColumnDefinitions="130,*">
+							<TextBlock Grid.Column="0" Text="Жанри" Opacity="0.6"/>
+							<TextBlock Grid.Column="1" Text="{Binding GenresText, TargetNullValue={StaticResource NoValue}}" TextWrapping="Wrap"/>
+						</Grid>
+					</StackPanel>
+				</ScrollViewer>
+
+				<!-- Right: banner, then tags, platforms and description -->
+				<ScrollViewer Grid.Column="1">
+					<StackPanel>
+
+						<!-- Banner: full column width, fades into the page background at the bottom -->
+						<Border MaxHeight="590" ClipToBounds="True"
+								IsVisible="{Binding HasBackground}">
+							<Border.OpacityMask>
 								<LinearGradientBrush StartPoint="0%,0%" EndPoint="0%,100%">
 									<GradientStop Offset="0.0" Color="#FFFFFFFF"/>
 									<GradientStop Offset="0.8" Color="#FFFFFFFF"/>
 									<GradientStop Offset="1.0" Color="#00FFFFFF"/>
 								</LinearGradientBrush>
-							</Image.OpacityMask>
-						</Image>
-						<Border Background="{DynamicResource CardBackground}"
-								IsVisible="{Binding !HasBackground}">
-							<TextBlock Text="🎮" FontSize="64"
-									   HorizontalAlignment="Center" VerticalAlignment="Center"/>
+							</Border.OpacityMask>
+							<StackPanel>
+								<Image Source="{Binding BackgroundImage}" Stretch="Uniform"/>
+							</StackPanel>
 						</Border>
-					</Panel>
 
-					<!-- Tabs: only details for now -->
-					<TabStrip Margin="16,8,16,0" SelectedIndex="{Binding SelectedTabIndex}">
-						<TabStripItem Content="Деталі"/>
-					</TabStrip>
-
-					<!-- Details tab -->
-					<Grid ColumnDefinitions="280,16,*"
-						  Margin="16" IsVisible="{Binding IsDetailsTab}">
-
-						<!-- Left: cover and fields -->
-						<StackPanel Grid.Row="0" Grid.Column="0" Spacing="8">
-							<Border Width="240" Height="320" CornerRadius="8" ClipToBounds="True"
-									HorizontalAlignment="Left"
-									Background="{DynamicResource CardBackground}">
-								<Panel>
-									<Image Source="{Binding CoverImage}" Stretch="UniformToFill"
-										   IsVisible="{Binding HasCover}"/>
-									<TextBlock Text="🎮" FontSize="48"
-											   HorizontalAlignment="Center" VerticalAlignment="Center"
-											   IsVisible="{Binding !HasCover}"/>
-								</Panel>
-							</Border>
-
-							<TextBlock Text="Деталі" FontSize="14" FontWeight="SemiBold"/>
-							<Border Height="1" Background="{DynamicResource SidebarBorder}"/>
-
-							<Grid ColumnDefinitions="130,*">
-								<TextBlock Grid.Column="0" Text="Статус" Opacity="0.6"/>
-								<TextBlock Grid.Column="1"
-										   Text="{Binding Status, Converter={x:Static conv:GameStatusConverter.Instance}}"/>
-							</Grid>
-							<Grid ColumnDefinitions="130,*">
-								<TextBlock Grid.Column="0" Text="Оцінка" Opacity="0.6"/>
-								<TextBlock Grid.Column="1" Text="{Binding RatingText, TargetNullValue={StaticResource NoValue}}"/>
-							</Grid>
-							<Grid ColumnDefinitions="130,*">
-								<TextBlock Grid.Column="0" Text="Студія" Opacity="0.6"/>
-								<TextBlock Grid.Column="1" Text="{Binding DeveloperName}" TextWrapping="Wrap"/>
-							</Grid>
-							<Grid ColumnDefinitions="130,*">
-								<TextBlock Grid.Column="0" Text="Рік випуску" Opacity="0.6"/>
-								<TextBlock Grid.Column="1" Text="{Binding YearText, TargetNullValue={StaticResource NoValue}}"/>
-							</Grid>
-							<Grid ColumnDefinitions="130,*">
-								<TextBlock Grid.Column="0" Text="Розмір на диску" Opacity="0.6"/>
-								<TextBlock Grid.Column="1" Text="{Binding SizeText, TargetNullValue={StaticResource NoValue}}"/>
-							</Grid>
-							<Grid ColumnDefinitions="130,*">
-								<TextBlock Grid.Column="0" Text="Часу зіграно" Opacity="0.6"/>
-								<TextBlock Grid.Column="1"
-										   Text="{Binding TotalHours, Converter={x:Static conv:DurationConverter.Instance}}"/>
-							</Grid>
-							<Grid ColumnDefinitions="130,*">
-								<TextBlock Grid.Column="0" Text="У бібліотеці" Opacity="0.6"/>
-								<TextBlock Grid.Column="1" Text="{Binding DaysInLibraryText}"/>
-							</Grid>
-							<Grid ColumnDefinitions="130,*">
-								<TextBlock Grid.Column="0" Text="Додано" Opacity="0.6"/>
-								<TextBlock Grid.Column="1"
-										   Text="{Binding AddedAt, StringFormat='{}{0:dd.MM.yyyy}'}"/>
-							</Grid>
-							<Grid ColumnDefinitions="130,*">
-								<TextBlock Grid.Column="0" Text="Жанри" Opacity="0.6"/>
-								<TextBlock Grid.Column="1" Text="{Binding GenresText, TargetNullValue={StaticResource NoValue}}" TextWrapping="Wrap"/>
-							</Grid>
-						</StackPanel>
-
-						<!-- Right: tags and platforms as badges -->
-						<StackPanel Grid.Row="0" Grid.Column="2" Spacing="8">
+						<StackPanel Spacing="8" Margin="16,0,16,16">
 
 							<TextBlock Text="Теги" FontSize="14" FontWeight="SemiBold"/>
 							<Border Height="1" Background="{DynamicResource SidebarBorder}"/>
@@ -197,10 +213,10 @@
 							<TextBlock Text="Опис відсутній"
 									   IsVisible="{Binding !HasDescription}" Opacity="0.5"/>
 						</StackPanel>
-					</Grid>
 
-				</StackPanel>
-			</ScrollViewer>
+					</StackPanel>
+				</ScrollViewer>
+			</Grid>
 
 		</Grid>
 	</Grid>
