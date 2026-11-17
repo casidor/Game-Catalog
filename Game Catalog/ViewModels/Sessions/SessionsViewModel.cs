@@ -4,21 +4,20 @@ using Game_Catalog.Data.Repositories;
 using Game_Catalog.Models;
 using Game_Catalog.Services;
 using System;
-using System.Collections.ObjectModel;
 using System.Linq;
 using System.Threading.Tasks;
 using DatabaseException = Game_Catalog.Data.DatabaseException;
 
 namespace Game_Catalog.ViewModels
 {
-    /// <summary> ViewModel for the sessions page: filtering and sorting done by the database, editing and deletion of play sessions. </summary>
+    /// <summary> ViewModel for the sessions page: the sessions table plus the filter panel, all applied by the database. </summary>
     public partial class SessionsViewModel : ViewModelBase
     {
         /// <summary> Filter currently applied to the list. </summary>
         private SessionFilter _applied = new();
 
-        /// <summary> Rows of the sessions table. </summary>
-        public ObservableCollection<PlaySession> Rows { get; } = new();
+        /// <summary> Sessions table: rows, sorting, selection, editing and deleting. </summary>
+        public SessionTableViewModel Table { get; }
 
         /// <summary> Game dropdown of the filter panel. </summary>
         public MultiSelectField Games { get; } = new("Усі ігри");
@@ -49,12 +48,6 @@ namespace Game_Catalog.ViewModels
         /// <summary> Indicates whether the filter panel is open. </summary>
         [ObservableProperty] private bool _isFilterPanelOpen;
 
-        /// <summary> Field of the current sort order; the sorting itself is done by the database. </summary>
-        [ObservableProperty] private SessionSortField _sortField = SessionSortField.Start;
-
-        /// <summary> True for descending order. The page opens with the newest sessions first. </summary>
-        [ObservableProperty] private bool _sortDescending = true;
-
         /// <summary> True when a filter is applied to the list. </summary>
         public bool HasActiveFilter => !_applied.IsEmpty;
 
@@ -70,26 +63,20 @@ namespace Game_Catalog.ViewModels
             ActiveFilterCount > 0 ? $"⚙ Фільтри · {ActiveFilterCount}" : "⚙ Фільтри";
 
         /// <summary> True when there are no sessions and no filter is applied. </summary>
-        public bool IsEmpty => Rows.Count == 0 && !HasActiveFilter;
+        public bool IsEmpty => Table.Rows.Count == 0 && !HasActiveFilter;
 
         /// <summary> True when the applied filter leaves no sessions. </summary>
-        public bool IsFilteredEmpty => Rows.Count == 0 && HasActiveFilter;
+        public bool IsFilteredEmpty => Table.Rows.Count == 0 && HasActiveFilter;
 
-        public SessionsViewModel() => _draftMethod = MethodOptions[0];
-
-        /// <summary> Sorts by the clicked table column: same column flips the direction. </summary>
-        public void SortByColumn(SessionSortField field)
+        public SessionsViewModel()
         {
-            if (SortField == field)
-            {
-                SortDescending = !SortDescending;
-            }
-            else
-            {
-                SortField = field;
-                SortDescending = false;
-            }
-            Reload();
+            _draftMethod = MethodOptions[0];
+
+            Table = new SessionTableViewModel((sortField, descending) =>
+                SessionRepository.GetAll(_applied with { SortField = sortField, SortDescending = descending }));
+
+            // A session changed in the table may affect the filter (e.g. a game added from the editor).
+            Table.DataChanged += Load;
         }
 
         /// <summary> Loads the page data when the page is shown. </summary>
@@ -119,24 +106,10 @@ namespace Game_Catalog.ViewModels
             Reload();
         }
 
-        /// <summary> Loads sessions matching the applied filter from the database, already in the chosen order. </summary>
+        /// <summary> Reloads the table with the applied filter and refreshes the filter and empty state indicators. </summary>
         private void Reload()
         {
-            try
-            {
-                var sessions = SessionRepository.GetAll(_applied with
-                {
-                    SortField = SortField,
-                    SortDescending = SortDescending
-                });
-                Rows.Clear();
-                foreach (var session in sessions)
-                    Rows.Add(session);
-            }
-            catch (DatabaseException ex)
-            {
-                _ = ShowErrorAsync("Помилка завантаження сесій", ex);
-            }
+            Table.Reload();
 
             OnPropertyChanged(nameof(HasActiveFilter));
             OnPropertyChanged(nameof(IsEmpty));
@@ -214,39 +187,6 @@ namespace Game_Catalog.ViewModels
             var saved = await Dialogs.Current.ShowSessionEditorAsync();
             if (saved != null)
                 Load();
-        }
-
-        /// <summary> Opens the editor for the given session. The editor saves the changes itself. </summary>
-        [RelayCommand]
-        private async Task EditAsync(PlaySession session)
-        {
-            var saved = await Dialogs.Current.ShowSessionEditorAsync(session);
-            if (saved != null)
-                Load();
-        }
-
-        /// <summary> Deletes the session after confirmation. </summary>
-        [RelayCommand]
-        private async Task DeleteAsync(PlaySession session)
-        {
-            var confirmed = await Dialogs.Current.ConfirmAsync(
-                "Видалення сесії",
-                $"Видалити сесію гри «{session.GameTitle}» від {session.StartTime:dd.MM.yyyy HH:mm}? " +
-                "Цю дію не можна скасувати.",
-                "Видалити");
-            if (!confirmed) return;
-
-            try
-            {
-                SessionRepository.Delete(new[] { session.PlaySessionId });
-            }
-            catch (DatabaseException ex)
-            {
-                await ShowErrorAsync("Помилка видалення сесії", ex);
-                return;
-            }
-
-            Load();
         }
 
         /// <summary> Shows a plain alert for our own errors and a detailed one for database failures. </summary>

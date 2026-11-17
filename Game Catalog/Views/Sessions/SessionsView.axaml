@@ -3,6 +3,7 @@
 			 xmlns:vm="using:Game_Catalog.ViewModels"
 			 xmlns:models="using:Game_Catalog.Models"
 			 xmlns:conv="using:Game_Catalog.Converters"
+			 xmlns:sessions="using:Game_Catalog.Views"
 			 x:Class="Game_Catalog.Views.SessionsView"
 			 x:DataType="vm:SessionsViewModel">
 
@@ -55,66 +56,10 @@
 			</Grid>
 		</Border>
 
-		<!-- Sessions table -->
-		<DataGrid Grid.Row="1"
-				  ItemsSource="{Binding Rows}"
-				  IsVisible="{Binding !IsEmpty}"
-				  AutoGenerateColumns="False"
-				  IsReadOnly="True"
-				  CanUserSortColumns="True"
-				  CanUserResizeColumns="True"
-				  CanUserReorderColumns="False"
-				  GridLinesVisibility="None"
-				  HeadersVisibility="Column"
-				  BorderThickness="0"
-				  Background="Transparent"
-				  RowHeight="44"
-				  Margin="8,0"
-				  Classes="dbSort"
-				  x:Name="SessionsGrid">
-
-			<DataGrid.Styles>
-				<Style Selector="DataGridColumnHeader">
-					<Setter Property="Background" Value="Transparent"/>
-					<Setter Property="FontSize" Value="12"/>
-				</Style>
-			</DataGrid.Styles>
-
-			<DataGrid.Columns>
-				<DataGridTextColumn Header="Гра" Width="2*"
-									Binding="{ReflectionBinding GameTitle}"
-									Tag="{x:Static models:SessionSortField.Game}"/>
-				<DataGridTextColumn Header="Початок" Width="160"
-									Binding="{ReflectionBinding StartTime, StringFormat='dd.MM.yyyy HH:mm'}"
-									Tag="{x:Static models:SessionSortField.Start}"/>
-				<DataGridTextColumn Header="Завершення" Width="160"
-									Binding="{ReflectionBinding EndTime, StringFormat='dd.MM.yyyy HH:mm', TargetNullValue='триває'}"
-									CanUserSort="False"/>
-				<DataGridTextColumn Header="Тривалість" Width="120"
-									Binding="{ReflectionBinding DurationSeconds, Mode=OneWay, Converter={x:Static conv:DurationConverter.Instance}}"
-									Tag="{x:Static models:SessionSortField.Duration}"/>
-				<DataGridTextColumn Header="Спосіб" Width="100"
-									Binding="{ReflectionBinding EntryMethod, Mode=OneWay, Converter={x:Static conv:EntryMethodConverter.Instance}}"
-									CanUserSort="False"/>
-				<DataGridTextColumn Header="Нотатка" Width="*"
-									Binding="{ReflectionBinding Note}"
-									CanUserSort="False"/>
-				<DataGridTemplateColumn Header="" Width="100" CanUserSort="False" CanUserResize="False">
-					<DataGridTemplateColumn.CellTemplate>
-						<DataTemplate x:DataType="models:PlaySession">
-							<StackPanel Orientation="Horizontal" Spacing="4" HorizontalAlignment="Center">
-								<Button Content="✏" ToolTip.Tip="Редагувати"
-										Command="{Binding $parent[DataGrid].((vm:SessionsViewModel)DataContext).EditCommand}"
-										CommandParameter="{Binding}"/>
-								<Button Content="🗑" ToolTip.Tip="Видалити"
-										Command="{Binding $parent[DataGrid].((vm:SessionsViewModel)DataContext).DeleteCommand}"
-										CommandParameter="{Binding}"/>
-							</StackPanel>
-						</DataTemplate>
-					</DataGridTemplateColumn.CellTemplate>
-				</DataGridTemplateColumn>
-			</DataGrid.Columns>
-		</DataGrid>
+		<!-- Sessions table; hidden while there are no sessions at all -->
+		<Panel Grid.Row="1" IsVisible="{Binding !IsEmpty}">
+			<sessions:SessionTable DataContext="{Binding Table}"/>
+		</Panel>
 
 		<!-- Empty state -->
 		<StackPanel Grid.Row="1"

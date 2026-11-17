@@ -1,0 +1,71 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+			 xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+			 xmlns:vm="using:Game_Catalog.ViewModels"
+			 xmlns:models="using:Game_Catalog.Models"
+			 xmlns:conv="using:Game_Catalog.Converters"
+			 xmlns:views="using:Game_Catalog.Views"
+			 x:Class="Game_Catalog.Views.SessionTable"
+			 x:DataType="vm:SessionTableViewModel">
+
+	<!-- Sessions table shared by the sessions page and the sessions tab of the game details -->
+	<DataGrid ItemsSource="{Binding Rows}"
+			  AutoGenerateColumns="False"
+			  IsReadOnly="True"
+			  CanUserSortColumns="True"
+			  CanUserResizeColumns="True"
+			  CanUserReorderColumns="False"
+			  GridLinesVisibility="None"
+			  HeadersVisibility="Column"
+			  BorderThickness="0"
+			  Background="Transparent"
+			  RowHeight="44"
+			  Margin="8,0"
+			  Classes="dbSort"
+			  SelectionMode="Extended"
+			  SelectedItem="{Binding SelectedRow, Mode=TwoWay}"
+			  views:DataGridBehavior.SelectedItems="{Binding SelectedRows}"
+			  views:DataGridBehavior.RowDoubleTapCommand="{Binding EditCommand}"
+			  views:DataGridBehavior.DeleteCommand="{Binding DeleteSelectedCommand}"
+			  x:Name="SessionsGrid">
+
+		<DataGrid.ContextMenu>
+			<ContextMenu>
+				<MenuItem Header="Редагувати"
+						  Command="{Binding EditSelectedCommand}"/>
+				<Separator/>
+				<MenuItem Header="{Binding DeleteSelectedHeader}"
+						  Command="{Binding DeleteSelectedCommand}"
+						  InputGesture="Delete"/>
+			</ContextMenu>
+		</DataGrid.ContextMenu>
+
+		<DataGrid.Styles>
+			<Style Selector="DataGridColumnHeader">
+				<Setter Property="Background" Value="Transparent"/>
+				<Setter Property="FontSize" Value="12"/>
+			</Style>
+		</DataGrid.Styles>
+
+		<DataGrid.Columns>
+			<DataGridTextColumn Header="Гра" Width="2*"
+								Binding="{ReflectionBinding GameTitle}"
+								Tag="{x:Static models:SessionSortField.Game}"/>
+			<DataGridTextColumn Header="Початок" Width="160"
+								Binding="{ReflectionBinding StartTime, StringFormat='dd.MM.yyyy HH:mm'}"
+								Tag="{x:Static models:SessionSortField.Start}"/>
+			<DataGridTextColumn Header="Завершення" Width="160"
+								Binding="{ReflectionBinding EndTime, StringFormat='dd.MM.yyyy HH:mm', TargetNullValue='триває'}"
+								CanUserSort="False"/>
+			<DataGridTextColumn Header="Тривалість" Width="120"
+								Binding="{ReflectionBinding DurationSeconds, Mode=OneWay, Converter={x:Static conv:DurationConverter.Instance}}"
+								Tag="{x:Static models:SessionSortField.Duration}"/>
+			<DataGridTextColumn Header="Спосіб" Width="100"
+								Binding="{ReflectionBinding EntryMethod, Mode=OneWay, Converter={x:Static conv:EntryMethodConverter.Instance}}"
+								CanUserSort="False"/>
+			<DataGridTextColumn Header="Нотатка" Width="*"
+								Binding="{ReflectionBinding Note}"
+								CanUserSort="False"/>
+		</DataGrid.Columns>
+	</DataGrid>
+
+</UserControl>
