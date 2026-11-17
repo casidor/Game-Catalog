@@ -119,7 +119,7 @@ CREATE TABLE Goal (
     game_id          INTEGER NOT NULL,
     goal_name        TEXT NOT NULL,
     goal_description TEXT,
-    goal_status      TEXT NOT NULL,
+    goal_status      TEXT NOT NULL DEFAULT 'Active',
     priority         INTEGER NOT NULL,
     created_at       TEXT NOT NULL DEFAULT (strftime('%Y-%m-%d %H:%M:%S', 'now', 'localtime')),
     due_date         TEXT,
@@ -127,7 +127,12 @@ CREATE TABLE Goal (
     CHECK (length(trim(goal_name)) > 0),
     CHECK (goal_status IN ('Active', 'Completed', 'Cancelled')),
     CHECK (priority BETWEEN 1 AND 5),
-    CHECK (completed_at IS NULL OR goal_status = 'Completed'),
+    CHECK (datetime(created_at) IS created_at),
+    CHECK (due_date IS NULL OR date(due_date, '+0 days') IS due_date),
+    CHECK (due_date IS NULL OR due_date >= date(created_at)),
+    CHECK (completed_at IS NULL OR datetime(completed_at) IS completed_at),
+    CHECK ((goal_status = 'Completed' AND completed_at IS NOT NULL)
+        OR (goal_status <> 'Completed' AND completed_at IS NULL)),
     CHECK (completed_at IS NULL OR completed_at >= created_at),
     FOREIGN KEY (game_id) REFERENCES Game(game_id) ON DELETE CASCADE ON UPDATE CASCADE
 ) STRICT;
@@ -249,3 +254,22 @@ SELECT ps.play_session_id, ps.game_id, g.game_title, ps.start_time, ps.end_time,
        ps.duration_seconds, ps.entry_method, ps.note
 FROM PlaySession ps
 JOIN Game g ON g.game_id = ps.game_id;
+
+CREATE VIEW v_goal AS
+SELECT gl.goal_id, gl.game_id, g.game_title, g.is_archived,
+       gl.goal_name, gl.goal_description, gl.goal_status,
+       CASE
+           WHEN gl.goal_status = 'Active' AND gl.due_date < date('now', 'localtime') THEN 'Overdue'
+           ELSE gl.goal_status
+       END AS display_status,
+       gl.priority, gl.created_at, gl.due_date, gl.completed_at,
+       CASE
+           WHEN gl.goal_status = 'Active' AND gl.due_date IS NOT NULL
+           THEN MAX(0, CAST(julianday(gl.due_date) - julianday(date('now', 'localtime')) AS INTEGER))
+       END AS days_left,
+       CASE
+           WHEN gl.goal_status = 'Completed'
+           THEN CAST(julianday(gl.completed_at) - julianday(gl.created_at) AS INTEGER)
+       END AS completion_days
+FROM Goal gl
+JOIN Game g ON g.game_id = gl.game_id;
