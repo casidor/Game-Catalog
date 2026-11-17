@@ -256,6 +256,54 @@ namespace Game_Catalog.ViewModels
                 Load();
         }
 
+        /// <summary> Marks the goal as completed now. Works for active and overdue goals. </summary>
+        [RelayCommand]
+        private async Task CompleteAsync(Goal goal)
+        {
+            try
+            {
+                GoalRepository.Complete(new[] { goal.GoalId });
+            }
+            catch (DatabaseException ex)
+            {
+                await ShowErrorAsync("Помилка зміни статусу цілі", ex);
+                return;
+            }
+            Load();
+        }
+
+        /// <summary> Cancels the goal. Works for active and overdue goals. </summary>
+        [RelayCommand]
+        private async Task CancelGoalAsync(Goal goal)
+        {
+            try
+            {
+                GoalRepository.Cancel(new[] { goal.GoalId });
+            }
+            catch (DatabaseException ex)
+            {
+                await ShowErrorAsync("Помилка зміни статусу цілі", ex);
+                return;
+            }
+            Load();
+        }
+
+        /// <summary> Returns a completed or cancelled goal to active. </summary>
+        [RelayCommand]
+        private async Task ReopenAsync(Goal goal)
+        {
+            try
+            {
+                GoalRepository.Reopen(new[] { goal.GoalId });
+            }
+            catch (DatabaseException ex)
+            {
+                await ShowErrorAsync("Помилка зміни статусу цілі", ex);
+                return;
+            }
+            Load();
+        }
+
         /// <summary> Shows a plain alert for our own errors and a detailed one for database failures. </summary>
         private static Task ShowErrorAsync(string title, DatabaseException ex) =>
             ex.InnerException == null

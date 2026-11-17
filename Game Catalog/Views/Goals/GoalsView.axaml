@@ -206,6 +206,26 @@
 						</DataTemplate>
 					</DataGridTemplateColumn.CellTemplate>
 				</DataGridTemplateColumn>
+				<DataGridTemplateColumn Header="" Width="100" CanUserSort="False" CanUserResize="False">
+					<DataGridTemplateColumn.CellTemplate>
+						<DataTemplate x:DataType="vm:GoalRow">
+							<Panel HorizontalAlignment="Center">
+								<StackPanel Orientation="Horizontal" Spacing="4" IsVisible="{Binding IsOpen}">
+									<Button Content="✓" ToolTip.Tip="Позначити виконаною"
+											Command="{Binding $parent[DataGrid].((vm:GoalsViewModel)DataContext).CompleteCommand}"
+											CommandParameter="{Binding Goal}"/>
+									<Button Content="✕" ToolTip.Tip="Скасувати ціль"
+											Command="{Binding $parent[DataGrid].((vm:GoalsViewModel)DataContext).CancelGoalCommand}"
+											CommandParameter="{Binding Goal}"/>
+								</StackPanel>
+								<Button Content="↺" ToolTip.Tip="Повернути в активні"
+										IsVisible="{Binding IsClosed}"
+										Command="{Binding $parent[DataGrid].((vm:GoalsViewModel)DataContext).ReopenCommand}"
+										CommandParameter="{Binding Goal}"/>
+							</Panel>
+						</DataTemplate>
+					</DataGridTemplateColumn.CellTemplate>
+				</DataGridTemplateColumn>
 			</DataGrid.Columns>
 		</DataGrid>
 

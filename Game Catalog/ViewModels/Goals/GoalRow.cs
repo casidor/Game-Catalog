@@ -67,8 +67,11 @@ namespace Game_Catalog.ViewModels
         public string? CompletedTip =>
             Goal.CompletedAt is { } done ? $"{done:dd.MM.yyyy HH:mm}" : null;
 
-        /// <summary> True for completed and cancelled goals: their row is dimmed so open ones stand out. </summary>
-        private bool IsClosed => Goal.Status is GoalStatus.Completed or GoalStatus.Cancelled;
+        /// <summary> True for completed and cancelled goals: their row is dimmed and they can be reopened. </summary>
+        public bool IsClosed => Goal.Status is GoalStatus.Completed or GoalStatus.Cancelled;
+
+        /// <summary> True for active and overdue goals: they can be completed. </summary>
+        public bool IsOpen => !IsClosed;
 
         /// <summary> Opacity of the main cells of the row. </summary>
         public double TextOpacity => IsClosed ? 0.5 : 1;
