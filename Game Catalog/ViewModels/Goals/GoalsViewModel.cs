@@ -21,6 +21,12 @@ namespace Game_Catalog.ViewModels
         /// <summary> Rows of the goals table. </summary>
         public ObservableCollection<GoalRow> Rows { get; } = new();
 
+        /// <summary> Rows selected in the table, mirrored from the grid by DataGridBehavior. </summary>
+        public ObservableCollection<GoalRow> SelectedRows { get; } = new();
+
+        /// <summary> Single selected row of the grid; set here to select a goal again after it was edited. </summary>
+        [ObservableProperty] private GoalRow? _selectedRow;
+
         /// <summary> Game dropdown of the filter panel. </summary>
         public MultiSelectField Games { get; } = new("Усі ігри");
 
@@ -84,7 +90,49 @@ namespace Game_Catalog.ViewModels
         /// <summary> True when the applied filter leaves no goals. </summary>
         public bool IsFilteredEmpty => Rows.Count == 0 && HasActiveFilter;
 
+        /// <summary> Number of selected goals that can be completed or cancelled (active and overdue ones). </summary>
+        public int OpenSelectedCount => SelectedRows.Count(r => r.IsOpen);
+
+        /// <summary> Number of selected goals that can be returned to active (completed and cancelled ones). </summary>
+        public int ClosedSelectedCount => SelectedRows.Count(r => r.IsClosed);
+
+        /// <summary> True when "Completed" and "Cancel" apply to at least one selected goal. </summary>
+        public bool HasOpenSelected => OpenSelectedCount > 0;
+
+        /// <summary> True when "Return to active" applies to at least one selected goal. </summary>
+        public bool HasClosedSelected => ClosedSelectedCount > 0;
+
+        /// <summary> True when the context menu has at least one status action. </summary>
+        public bool HasStatusActions => HasOpenSelected || HasClosedSelected;
+
+        /// <summary> Context menu captions with the number of goals the action applies to. </summary>
+        public string CompleteSelectedHeader => $"Виконано ({OpenSelectedCount})";
+        public string CancelSelectedHeader => $"Скасувати ({OpenSelectedCount})";
+        public string ReopenSelectedHeader => $"Повернути в активні ({ClosedSelectedCount})";
+        public string DeleteSelectedHeader => $"Видалити ({SelectedRows.Count})";
+
+        public GoalsViewModel()
+        {
+            SelectedRows.CollectionChanged += (_, _) => OnSelectionChanged();
+        }
+
         partial void OnSearchTextChanged(string value) => UpdateMatches();
+
+        /// <summary> Refreshes the menu captions and the commands that depend on the selection. </summary>
+        private void OnSelectionChanged()
+        {
+            OnPropertyChanged(nameof(OpenSelectedCount));
+            OnPropertyChanged(nameof(ClosedSelectedCount));
+            OnPropertyChanged(nameof(HasOpenSelected));
+            OnPropertyChanged(nameof(HasClosedSelected));
+            OnPropertyChanged(nameof(HasStatusActions));
+            OnPropertyChanged(nameof(CompleteSelectedHeader));
+            OnPropertyChanged(nameof(CancelSelectedHeader));
+            OnPropertyChanged(nameof(ReopenSelectedHeader));
+            OnPropertyChanged(nameof(DeleteSelectedHeader));
+            EditSelectedCommand.NotifyCanExecuteChanged();
+            DeleteSelectedCommand.NotifyCanExecuteChanged();
+        }
 
         /// <summary> Sorts by the clicked table column: same column flips the direction. </summary>
         public void SortByColumn(GoalSortField field)
@@ -256,13 +304,90 @@ namespace Game_Catalog.ViewModels
                 Load();
         }
 
-        /// <summary> Marks the goal as completed now. Works for active and overdue goals. </summary>
+        /// <summary> Opens the editor for the goal of a double-clicked row and selects that goal again after saving. </summary>
         [RelayCommand]
-        private async Task CompleteAsync(Goal goal)
+        private async Task EditAsync(GoalRow row)
         {
+            var saved = await Dialogs.Current.ShowGoalEditorAsync(row.Goal);
+            if (saved == null)
+                return;
+
+            Load();
+            SelectedRow = Rows.FirstOrDefault(r => r.Goal.GoalId == row.Goal.GoalId);
+        }
+
+        /// <summary> Opens the editor for the only selected goal. </summary>
+        [RelayCommand(CanExecute = nameof(CanEditSelected))]
+        private Task EditSelectedAsync() => EditAsync(SelectedRows[0]);
+
+        private bool CanEditSelected() => SelectedRows.Count == 1;
+
+        /// <summary> Marks the goal of the row as completed now. Works for active and overdue goals. </summary>
+        [RelayCommand]
+        private Task CompleteAsync(Goal goal) => ChangeStatusAsync(GoalRepository.Complete, new[] { goal.GoalId });
+
+        /// <summary> Cancels the goal of the row. Works for active and overdue goals. </summary>
+        [RelayCommand]
+        private Task CancelGoalAsync(Goal goal) => ChangeStatusAsync(GoalRepository.Cancel, new[] { goal.GoalId });
+
+        /// <summary> Returns the completed or cancelled goal of the row to active. </summary>
+        [RelayCommand]
+        private Task ReopenAsync(Goal goal) => ChangeStatusAsync(GoalRepository.Reopen, new[] { goal.GoalId });
+
+        /// <summary> Completes the selected active and overdue goals; the others are skipped. </summary>
+        [RelayCommand]
+        private Task CompleteSelectedAsync() => ChangeStatusAsync(GoalRepository.Complete, SelectedIds(r => r.IsOpen));
+
+        /// <summary> Cancels the selected active and overdue goals; the others are skipped. </summary>
+        [RelayCommand]
+        private Task CancelSelectedAsync() => ChangeStatusAsync(GoalRepository.Cancel, SelectedIds(r => r.IsOpen));
+
+        /// <summary> Returns the selected completed and cancelled goals to active; the others are skipped. </summary>
+        [RelayCommand]
+        private Task ReopenSelectedAsync() => ChangeStatusAsync(GoalRepository.Reopen, SelectedIds(r => r.IsClosed));
+
+        /// <summary> Deletes the selected goals in one transaction after confirmation. </summary>
+        [RelayCommand(CanExecute = nameof(HasSelection))]
+        private async Task DeleteSelectedAsync()
+        {
+            var rows = SelectedRows.ToList();
+            var confirmed = rows.Count == 1
+                ? await Dialogs.Current.ConfirmAsync(
+                    "Видалення цілі",
+                    $"Видалити ціль «{rows[0].GoalName}»?\nЦю дію неможливо скасувати.",
+                    "Видалити")
+                : await Dialogs.Current.ConfirmAsync(
+                    "Видалення цілей",
+                    $"Видалити {GoalsCount(rows.Count)}?\nЦю дію неможливо скасувати.",
+                    "Видалити");
+            if (!confirmed) return;
+
             try
             {
-                GoalRepository.Complete(new[] { goal.GoalId });
+                GoalRepository.Delete(rows.Select(r => r.Goal.GoalId).ToList());
+            }
+            catch (DatabaseException ex)
+            {
+                await ShowErrorAsync("Помилка видалення цілей", ex);
+                return;
+            }
+            Load();
+        }
+
+        private bool HasSelection() => SelectedRows.Count > 0;
+
+        /// <summary> Ids of the selected goals the action applies to. </summary>
+        private List<int> SelectedIds(Func<GoalRow, bool> applies) =>
+            SelectedRows.Where(applies).Select(r => r.Goal.GoalId).ToList();
+
+        /// <summary> Changes the status of the goals in one transaction and reloads the page. </summary>
+        private async Task ChangeStatusAsync(Action<IReadOnlyCollection<int>> change, IReadOnlyCollection<int> goalIds)
+        {
+            if (goalIds.Count == 0) return;
+
+            try
+            {
+                change(goalIds);
             }
             catch (DatabaseException ex)
             {
@@ -272,36 +397,16 @@ namespace Game_Catalog.ViewModels
             Load();
         }
 
-        /// <summary> Cancels the goal. Works for active and overdue goals. </summary>
-        [RelayCommand]
-        private async Task CancelGoalAsync(Goal goal)
+        /// <summary> Number of goals with the matching Ukrainian word form: "1 ціль", "3 цілі", "5 цілей". </summary>
+        private static string GoalsCount(int count)
         {
-            try
+            var word = (count % 10, count % 100) switch
             {
-                GoalRepository.Cancel(new[] { goal.GoalId });
-            }
-            catch (DatabaseException ex)
-            {
-                await ShowErrorAsync("Помилка зміни статусу цілі", ex);
-                return;
-            }
-            Load();
-        }
-
-        /// <summary> Returns a completed or cancelled goal to active. </summary>
-        [RelayCommand]
-        private async Task ReopenAsync(Goal goal)
-        {
-            try
-            {
-                GoalRepository.Reopen(new[] { goal.GoalId });
-            }
-            catch (DatabaseException ex)
-            {
-                await ShowErrorAsync("Помилка зміни статусу цілі", ex);
-                return;
-            }
-            Load();
+                (1, not 11) => "ціль",
+                (>= 2 and <= 4, not (>= 12 and <= 14)) => "цілі",
+                _ => "цілей"
+            };
+            return $"{count} {word}";
         }
 
         /// <summary> Shows a plain alert for our own errors and a detailed one for database failures. </summary>

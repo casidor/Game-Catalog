@@ -3,6 +3,7 @@
 			 xmlns:vm="using:Game_Catalog.ViewModels"
 			 xmlns:models="using:Game_Catalog.Models"
 			 xmlns:conv="using:Game_Catalog.Converters"
+			 xmlns:views="using:Game_Catalog.Views"
 			 x:Class="Game_Catalog.Views.GoalsView"
 			 x:DataType="vm:GoalsViewModel">
 
@@ -77,7 +78,34 @@
 				  RowHeight="44"
 				  Margin="8,0"
 				  Classes="dbSort"
+				  SelectionMode="Extended"
+				  SelectedItem="{Binding SelectedRow, Mode=TwoWay}"
+				  views:DataGridBehavior.SelectedItems="{Binding SelectedRows}"
+				  views:DataGridBehavior.RowDoubleTapCommand="{Binding EditCommand}"
+				  views:DataGridBehavior.DeleteCommand="{Binding DeleteSelectedCommand}"
 				  x:Name="GoalsGrid">
+
+			<!-- Status actions apply only to the goals they fit, so each one hides when it fits none -->
+			<DataGrid.ContextMenu>
+				<ContextMenu>
+					<MenuItem Header="{Binding CompleteSelectedHeader}"
+							  Command="{Binding CompleteSelectedCommand}"
+							  IsVisible="{Binding HasOpenSelected}"/>
+					<MenuItem Header="{Binding CancelSelectedHeader}"
+							  Command="{Binding CancelSelectedCommand}"
+							  IsVisible="{Binding HasOpenSelected}"/>
+					<MenuItem Header="{Binding ReopenSelectedHeader}"
+							  Command="{Binding ReopenSelectedCommand}"
+							  IsVisible="{Binding HasClosedSelected}"/>
+					<Separator IsVisible="{Binding HasStatusActions}"/>
+					<MenuItem Header="Редагувати"
+							  Command="{Binding EditSelectedCommand}"/>
+					<Separator/>
+					<MenuItem Header="{Binding DeleteSelectedHeader}"
+							  Command="{Binding DeleteSelectedCommand}"
+							  InputGesture="Delete"/>
+				</ContextMenu>
+			</DataGrid.ContextMenu>
 
 			<DataGrid.Styles>
 				<Style Selector="DataGridColumnHeader">
