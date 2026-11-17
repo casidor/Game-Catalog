@@ -2,7 +2,6 @@ using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Input;
 using Avalonia.Threading;
-using Game_Catalog.Models;
 using Game_Catalog.ViewModels;
 using System;
 using System.Linq;
@@ -11,34 +10,9 @@ namespace Game_Catalog.Views;
 
 public partial class GoalsView : UserControl
 {
-    /// <summary> Header clicks and sort arrows of the goals table. </summary>
-    private readonly DataGridSortHeaders _sortHeaders;
-
     public GoalsView()
     {
         InitializeComponent();
-
-        _sortHeaders = new DataGridSortHeaders(GoalsGrid,
-            () => DataContext is GoalsViewModel vm
-                ? ((object?)vm.SortField, vm.SortDescending)
-                : ((object?)null, false),
-            field =>
-            {
-                if (DataContext is GoalsViewModel vm && field is GoalSortField sortField)
-                    vm.SortByColumn(sortField);
-            });
-    }
-
-    protected override void OnAttachedToVisualTree(VisualTreeAttachmentEventArgs e)
-    {
-        base.OnAttachedToVisualTree(e);
-        _sortHeaders.Attach(DataContext);
-    }
-
-    protected override void OnDetachedFromVisualTree(VisualTreeAttachmentEventArgs e)
-    {
-        _sortHeaders.Detach();
-        base.OnDetachedFromVisualTree(e);
     }
 
     /// <summary> Closes the filter panel without applying when the dimmed backdrop is clicked. </summary>

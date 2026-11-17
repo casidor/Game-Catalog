@@ -3,7 +3,7 @@
 			 xmlns:vm="using:Game_Catalog.ViewModels"
 			 xmlns:models="using:Game_Catalog.Models"
 			 xmlns:conv="using:Game_Catalog.Converters"
-			 xmlns:views="using:Game_Catalog.Views"
+			 xmlns:goals="using:Game_Catalog.Views"
 			 x:Class="Game_Catalog.Views.GoalsView"
 			 x:DataType="vm:GoalsViewModel">
 
@@ -45,10 +45,10 @@
 				</StackPanel>
 				<StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="8"
 							HorizontalAlignment="Right" VerticalAlignment="Center">
-					<TextBlock Text="{Binding SearchSummary}"
-							   IsVisible="{Binding SearchSummary, Converter={x:Static StringConverters.IsNotNullOrEmpty}}"
+					<TextBlock Text="{Binding Table.SearchSummary}"
+							   IsVisible="{Binding Table.SearchSummary, Converter={x:Static StringConverters.IsNotNullOrEmpty}}"
 							   FontSize="12" Opacity="0.6" VerticalAlignment="Center"/>
-					<TextBox Text="{Binding SearchText}"
+					<TextBox Text="{Binding Table.SearchText}"
 							 PlaceholderText="🔍 Пошук цілі..."
 							 Width="220" VerticalAlignment="Center"/>
 					<Button Content="{Binding FiltersButtonText}"
@@ -62,200 +62,10 @@
 			</Grid>
 		</Border>
 
-		<!-- Goals table -->
-		<DataGrid Grid.Row="1"
-				  ItemsSource="{Binding Rows}"
-				  IsVisible="{Binding !IsEmpty}"
-				  AutoGenerateColumns="False"
-				  IsReadOnly="True"
-				  CanUserSortColumns="True"
-				  CanUserResizeColumns="True"
-				  CanUserReorderColumns="False"
-				  GridLinesVisibility="None"
-				  HeadersVisibility="Column"
-				  BorderThickness="0"
-				  Background="Transparent"
-				  RowHeight="44"
-				  Margin="8,0"
-				  Classes="dbSort"
-				  SelectionMode="Extended"
-				  SelectedItem="{Binding SelectedRow, Mode=TwoWay}"
-				  views:DataGridBehavior.SelectedItems="{Binding SelectedRows}"
-				  views:DataGridBehavior.RowDoubleTapCommand="{Binding EditCommand}"
-				  views:DataGridBehavior.DeleteCommand="{Binding DeleteSelectedCommand}"
-				  x:Name="GoalsGrid">
-
-			<!-- Status actions apply only to the goals they fit, so each one hides when it fits none -->
-			<DataGrid.ContextMenu>
-				<ContextMenu>
-					<MenuItem Header="{Binding CompleteSelectedHeader}"
-							  Command="{Binding CompleteSelectedCommand}"
-							  IsVisible="{Binding HasOpenSelected}"/>
-					<MenuItem Header="{Binding CancelSelectedHeader}"
-							  Command="{Binding CancelSelectedCommand}"
-							  IsVisible="{Binding HasOpenSelected}"/>
-					<MenuItem Header="{Binding ReopenSelectedHeader}"
-							  Command="{Binding ReopenSelectedCommand}"
-							  IsVisible="{Binding HasClosedSelected}"/>
-					<Separator IsVisible="{Binding HasStatusActions}"/>
-					<MenuItem Header="Редагувати"
-							  Command="{Binding EditSelectedCommand}"/>
-					<Separator/>
-					<MenuItem Header="{Binding DeleteSelectedHeader}"
-							  Command="{Binding DeleteSelectedCommand}"
-							  InputGesture="Delete"/>
-				</ContextMenu>
-			</DataGrid.ContextMenu>
-
-			<DataGrid.Styles>
-				<Style Selector="DataGridColumnHeader">
-					<Setter Property="Background" Value="Transparent"/>
-					<Setter Property="FontSize" Value="12"/>
-				</Style>
-				<Style Selector="DataGridRow">
-					<Setter Property="Background"
-							Value="{ReflectionBinding IsMatch, Converter={x:Static conv:SearchMatchBrushConverter.Instance}}"/>
-				</Style>
-				<Style Selector="TextBlock.overdue">
-					<Setter Property="Foreground" Value="{DynamicResource GoalBadgeOverdueForeground}"/>
-				</Style>
-				<Style Selector="Border.badge.active">
-					<Setter Property="Background" Value="{DynamicResource GoalBadgeActiveBackground}"/>
-				</Style>
-				<Style Selector="Border.badge.active > TextBlock">
-					<Setter Property="Foreground" Value="{DynamicResource GoalBadgeActiveForeground}"/>
-				</Style>
-				<Style Selector="Border.badge.overdue">
-					<Setter Property="Background" Value="{DynamicResource GoalBadgeOverdueBackground}"/>
-				</Style>
-				<Style Selector="Border.badge.overdue > TextBlock">
-					<Setter Property="Foreground" Value="{DynamicResource GoalBadgeOverdueForeground}"/>
-				</Style>
-				<Style Selector="Border.badge.completed">
-					<Setter Property="Background" Value="{DynamicResource GoalBadgeCompletedBackground}"/>
-				</Style>
-				<Style Selector="Border.badge.completed > TextBlock">
-					<Setter Property="Foreground" Value="{DynamicResource GoalBadgeCompletedForeground}"/>
-				</Style>
-				<Style Selector="Border.badge.cancelled">
-					<Setter Property="Background" Value="{DynamicResource GoalBadgeCancelledBackground}"/>
-				</Style>
-				<Style Selector="Border.badge.cancelled > TextBlock">
-					<Setter Property="Foreground" Value="{DynamicResource GoalBadgeCancelledForeground}"/>
-				</Style>
-			</DataGrid.Styles>
-
-			<DataGrid.Columns>
-				<DataGridTemplateColumn Header="Гра" Width="*" CanUserSort="False">
-					<DataGridTemplateColumn.CellTemplate>
-						<DataTemplate x:DataType="vm:GoalRow">
-							<TextBlock Text="{Binding GameTitle}" Opacity="{Binding TextOpacity}"
-									   TextTrimming="CharacterEllipsis" MaxLines="1"
-									   VerticalAlignment="Center" Margin="12,0"/>
-						</DataTemplate>
-					</DataGridTemplateColumn.CellTemplate>
-				</DataGridTemplateColumn>
-				<DataGridTemplateColumn Header="Ціль" Width="2*" CanUserSort="False">
-					<DataGridTemplateColumn.CellTemplate>
-						<DataTemplate x:DataType="vm:GoalRow">
-							<Border Background="Transparent" ToolTip.Tip="{Binding Description}">
-								<StackPanel VerticalAlignment="Center" Margin="12,0" Opacity="{Binding TextOpacity}">
-									<TextBlock Text="{Binding GoalName}"
-											   TextTrimming="CharacterEllipsis" MaxLines="1"/>
-									<TextBlock Text="{Binding Description}"
-											   IsVisible="{Binding Description, Converter={x:Static ObjectConverters.IsNotNull}}"
-											   FontSize="11" Opacity="0.6"
-											   TextTrimming="CharacterEllipsis" MaxLines="1"/>
-								</StackPanel>
-							</Border>
-						</DataTemplate>
-					</DataGridTemplateColumn.CellTemplate>
-				</DataGridTemplateColumn>
-				<DataGridTemplateColumn Header="Пріоритет" Width="165"
-										SortMemberPath="Priority" CanUserSort="True"
-										Tag="{x:Static models:GoalSortField.Priority}">
-					<DataGridTemplateColumn.CellTemplate>
-						<DataTemplate x:DataType="vm:GoalRow">
-							<TextBlock Text="{Binding Priority, Converter={x:Static conv:GoalPriorityConverter.Instance}}"
-									   Opacity="{Binding TextOpacity}"
-									   VerticalAlignment="Center" Margin="12,0"/>
-						</DataTemplate>
-					</DataGridTemplateColumn.CellTemplate>
-				</DataGridTemplateColumn>
-				<DataGridTemplateColumn Header="Статус" Width="130" CanUserSort="False">
-					<DataGridTemplateColumn.CellTemplate>
-						<DataTemplate x:DataType="vm:GoalRow">
-							<Border Classes="badge"
-									Classes.active="{Binding IsActive}"
-									Classes.overdue="{Binding IsOverdue}"
-									Classes.completed="{Binding IsCompleted}"
-									Classes.cancelled="{Binding IsCancelled}"
-									CornerRadius="10" Padding="10,3" Margin="12,0"
-									HorizontalAlignment="Left" VerticalAlignment="Center"
-									Opacity="{Binding TextOpacity}">
-								<TextBlock Text="{Binding Status, Converter={x:Static conv:GoalStatusConverter.Instance}}"
-										   FontSize="12" FontWeight="SemiBold"/>
-							</Border>
-						</DataTemplate>
-					</DataGridTemplateColumn.CellTemplate>
-				</DataGridTemplateColumn>
-				<DataGridTemplateColumn Header="Термін" Width="170"
-										SortMemberPath="DueText" CanUserSort="True"
-										Tag="{x:Static models:GoalSortField.DueDate}">
-					<DataGridTemplateColumn.CellTemplate>
-						<DataTemplate x:DataType="vm:GoalRow">
-							<TextBlock Text="{Binding DueText, TargetNullValue={StaticResource NoValue}}"
-									   Classes.overdue="{Binding IsOverdue}"
-									   Opacity="{Binding TextOpacity}"
-									   VerticalAlignment="Center" Margin="12,0"/>
-						</DataTemplate>
-					</DataGridTemplateColumn.CellTemplate>
-				</DataGridTemplateColumn>
-				<DataGridTemplateColumn Header="Створено" Width="130"
-										SortMemberPath="CreatedAt" CanUserSort="True"
-										Tag="{x:Static models:GoalSortField.CreatedAt}">
-					<DataGridTemplateColumn.CellTemplate>
-						<DataTemplate x:DataType="vm:GoalRow">
-							<Border Background="Transparent" ToolTip.Tip="{Binding CreatedTip}">
-								<TextBlock Text="{Binding CreatedText}" Opacity="{Binding ServiceOpacity}"
-										   VerticalAlignment="Center" Margin="12,0"/>
-							</Border>
-						</DataTemplate>
-					</DataGridTemplateColumn.CellTemplate>
-				</DataGridTemplateColumn>
-				<DataGridTemplateColumn Header="Виконано" Width="170" CanUserSort="False">
-					<DataGridTemplateColumn.CellTemplate>
-						<DataTemplate x:DataType="vm:GoalRow">
-							<Border Background="Transparent" ToolTip.Tip="{Binding CompletedTip}">
-								<TextBlock Text="{Binding CompletedText, TargetNullValue={StaticResource NoValue}}"
-										   Opacity="{Binding ServiceOpacity}"
-										   VerticalAlignment="Center" Margin="12,0"/>
-							</Border>
-						</DataTemplate>
-					</DataGridTemplateColumn.CellTemplate>
-				</DataGridTemplateColumn>
-				<DataGridTemplateColumn Header="" Width="100" CanUserSort="False" CanUserResize="False">
-					<DataGridTemplateColumn.CellTemplate>
-						<DataTemplate x:DataType="vm:GoalRow">
-							<Panel HorizontalAlignment="Center">
-								<StackPanel Orientation="Horizontal" Spacing="4" IsVisible="{Binding IsOpen}">
-									<Button Content="✓" ToolTip.Tip="Позначити виконаною"
-											Command="{Binding $parent[DataGrid].((vm:GoalsViewModel)DataContext).CompleteCommand}"
-											CommandParameter="{Binding Goal}"/>
-									<Button Content="✕" ToolTip.Tip="Скасувати ціль"
-											Command="{Binding $parent[DataGrid].((vm:GoalsViewModel)DataContext).CancelGoalCommand}"
-											CommandParameter="{Binding Goal}"/>
-								</StackPanel>
-								<Button Content="↺" ToolTip.Tip="Повернути в активні"
-										IsVisible="{Binding IsClosed}"
-										Command="{Binding $parent[DataGrid].((vm:GoalsViewModel)DataContext).ReopenCommand}"
-										CommandParameter="{Binding Goal}"/>
-							</Panel>
-						</DataTemplate>
-					</DataGridTemplateColumn.CellTemplate>
-				</DataGridTemplateColumn>
-			</DataGrid.Columns>
-		</DataGrid>
+		<!-- Goals table; hidden while there are no goals at all -->
+		<Panel Grid.Row="1" IsVisible="{Binding !IsEmpty}">
+			<goals:GoalTable DataContext="{Binding Table}"/>
+		</Panel>
 
 		<!-- Empty state -->
 		<StackPanel Grid.Row="1"
