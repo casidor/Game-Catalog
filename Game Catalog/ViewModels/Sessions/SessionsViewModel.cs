@@ -238,7 +238,7 @@ namespace Game_Catalog.ViewModels
 
             try
             {
-                SessionRepository.Delete(session.PlaySessionId);
+                SessionRepository.Delete(new[] { session.PlaySessionId });
             }
             catch (DatabaseException ex)
             {

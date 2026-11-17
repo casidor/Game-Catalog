@@ -49,6 +49,37 @@ namespace Game_Catalog.Data.Repositories
         }
 
         /// <summary>
+        /// Returns all goals of one game in the chosen order, for the goals tab of the game details.
+        /// Archived games are included: their details can still be opened.
+        /// </summary>
+        public static List<Goal> GetByGame(int gameId, GoalSortField sortField, bool sortDescending)
+        {
+            // ORDER BY cannot be a query parameter, so the clause is chosen from fixed literals (no user text).
+            var orderBy = (sortField, sortDescending) switch
+            {
+                (GoalSortField.DueDate, false) => "due_date ASC NULLS LAST, goal_id ASC",
+                (GoalSortField.DueDate, true) => "due_date DESC NULLS LAST, goal_id ASC",
+                (GoalSortField.CreatedAt, false) => "created_at ASC, goal_id ASC",
+                (GoalSortField.CreatedAt, true) => "created_at DESC, goal_id ASC",
+                (_, true) => "priority DESC, goal_id ASC",
+                _ => "priority ASC, goal_id ASC"
+            };
+
+            return Db.Run("Не вдалося завантажити цілі гри", () =>
+            {
+                using var connection = Db.Open();
+                return connection.Query<Goal>($@"
+                    SELECT goal_id, game_id, game_title, goal_name, goal_description,
+                           display_status AS status, priority, created_at, due_date, completed_at,
+                           days_left, completion_days
+                    FROM v_goal
+                    WHERE game_id = @gameId
+                    ORDER BY {orderBy}",
+                    new { gameId }).AsList();
+            });
+        }
+
+        /// <summary>
         /// Returns ids of the goals whose name or description contains the search text, ignoring case.
         /// The match is decided by the database; an empty text matches nothing.
         /// </summary>

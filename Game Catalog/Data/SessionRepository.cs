@@ -51,6 +51,36 @@ namespace Game_Catalog.Data.Repositories
             });
         }
 
+        /// <summary>
+        /// Returns all sessions of one game in the chosen order (newest first by default), for the sessions tab
+        /// of the game details. Sessions still in progress have no duration and go last when sorted by it.
+        /// </summary>
+        public static List<PlaySession> GetByGame(int gameId, SessionSortField sortField, bool sortDescending)
+        {
+            // ORDER BY cannot be a query parameter, so the clause is chosen from fixed literals (no user text).
+            var orderBy = (sortField, sortDescending) switch
+            {
+                (SessionSortField.Duration, false) =>
+                    "duration_seconds ASC NULLS LAST, start_time DESC, play_session_id DESC",
+                (SessionSortField.Duration, true) =>
+                    "duration_seconds DESC NULLS LAST, start_time DESC, play_session_id DESC",
+                (_, false) => "start_time ASC, play_session_id ASC",
+                _ => "start_time DESC, play_session_id DESC"
+            };
+
+            return Db.Run("Не вдалося завантажити сесії гри", () =>
+            {
+                using var connection = Db.Open();
+                return connection.Query<PlaySession>($@"
+                    SELECT play_session_id, game_id, game_title, start_time, end_time,
+                           duration_seconds, entry_method, note
+                    FROM v_play_session
+                    WHERE game_id = @gameId
+                    ORDER BY {orderBy}",
+                    new { gameId }).AsList();
+            });
+        }
+
         /// <summary> Returns the open session of the game, or null if the game is not being played. </summary>
         public static PlaySession? GetActive(int gameId) =>
             Db.Run("Не вдалося завантажити поточну сесію", () =>
@@ -90,13 +120,13 @@ namespace Game_Catalog.Data.Repositories
                     WHERE play_session_id = @PlaySessionId", ToParams(session));
             });
 
-        /// <summary> Deletes the session. </summary>
-        public static void Delete(int playSessionId) =>
-            Db.Run("Не вдалося видалити сесію", () =>
+        /// <summary> Deletes the sessions, all or none. </summary>
+        public static void Delete(IReadOnlyCollection<int> playSessionIds) =>
+            Db.InTransaction("Не вдалося видалити сесії", (connection, tx) =>
             {
-                using var connection = Db.Open();
-                connection.Execute("DELETE FROM PlaySession WHERE play_session_id = @playSessionId",
-                    new { playSessionId });
+                foreach (var playSessionId in playSessionIds)
+                    connection.Execute("DELETE FROM PlaySession WHERE play_session_id = @playSessionId",
+                        new { playSessionId }, tx);
             });
 
         /// <summary> Starts a session for the game now and returns its id. The time is taken by the database. </summary>
