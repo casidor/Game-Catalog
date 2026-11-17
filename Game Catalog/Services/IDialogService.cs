@@ -42,4 +42,9 @@ public interface IDialogService
     /// <param name="session"> Session to edit, or null to add a new one. </param>
     /// <param name="presetGameId"> Game preselected for a new session, or null. </param>
     Task<PlaySession?> ShowSessionEditorAsync(PlaySession? session = null, int? presetGameId = null);
+
+    /// <summary> Shows the goal editor. The editor saves the goal itself; returns the saved goal, or null if cancelled. </summary>
+    /// <param name="goal"> Goal to edit, or null to add a new one. </param>
+    /// <param name="presetGameId"> Game preselected for a new goal, or null. </param>
+    Task<Goal?> ShowGoalEditorAsync(Goal? goal = null, int? presetGameId = null);
 }

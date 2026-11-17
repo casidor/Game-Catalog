@@ -247,6 +247,15 @@ namespace Game_Catalog.ViewModels
             Reload();
         }
 
+        /// <summary> Opens the editor for a new goal. The editor saves the goal itself. </summary>
+        [RelayCommand]
+        private async Task AddAsync()
+        {
+            var saved = await Dialogs.Current.ShowGoalEditorAsync();
+            if (saved != null)
+                Load();
+        }
+
         /// <summary> Shows a plain alert for our own errors and a detailed one for database failures. </summary>
         private static Task ShowErrorAsync(string title, DatabaseException ex) =>
             ex.InnerException == null

@@ -173,4 +173,14 @@ public sealed class DialogService : IDialogService
         await new SessionEditorWindow { DataContext = vm }.ShowDialog(owner);
         return vm.SavedSession;
     }
+
+    /// <inheritdoc/>
+    public async Task<Goal?> ShowGoalEditorAsync(Goal? goal = null, int? presetGameId = null)
+    {
+        if (Owner is not { } owner) return null;
+
+        var vm = new GoalEditorViewModel(goal, presetGameId);
+        await new GoalEditorWindow { DataContext = vm }.ShowDialog(owner);
+        return vm.SavedGoal;
+    }
 }
