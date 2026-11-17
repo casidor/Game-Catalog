@@ -21,13 +21,19 @@ namespace Game_Catalog.ViewModels
         /// <summary> Raised when the user leaves the page: back, or after archiving, restoring or deleting. </summary>
         public event Action? BackRequested;
 
-        /// <summary> Index of the selected page tab. Only the details tab exists for now. </summary>
+        /// <summary> Index of the selected page tab: 0 details, 1 goals. </summary>
         [ObservableProperty]
-        [NotifyPropertyChangedFor(nameof(IsDetailsTab))]
+        [NotifyPropertyChangedFor(nameof(IsDetailsTab), nameof(IsGoalsTab))]
         private int _selectedTabIndex;
 
         /// <summary> True when the details tab is selected. </summary>
         public bool IsDetailsTab => SelectedTabIndex == 0;
+
+        /// <summary> True when the goals tab is selected. </summary>
+        public bool IsGoalsTab => SelectedTabIndex == 1;
+
+        /// <summary> Goals tab of the game. Loaded every time the tab is opened. </summary>
+        public GameGoalsTabViewModel Goals { get; }
 
         public string Title => Game.GameTitle;
         public bool IsArchived => Game.IsArchived;
@@ -67,6 +73,13 @@ namespace Game_Catalog.ViewModels
         public GameDetailsViewModel(Game game)
         {
             Game = game;
+            Goals = new GameGoalsTabViewModel(game);
+        }
+
+        partial void OnSelectedTabIndexChanged(int value)
+        {
+            if (value == 1)
+                Goals.Reload();
         }
 
         /// <summary> Raises change notifications for everything shown on the page. </summary>

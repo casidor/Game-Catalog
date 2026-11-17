@@ -4,6 +4,7 @@
 			 xmlns:models="using:Game_Catalog.Models"
 			 xmlns:conv="using:Game_Catalog.Converters"
 			 x:Class="Game_Catalog.Views.GameDetailsView"
+			 xmlns:views="using:Game_Catalog.Views"
 			 x:DataType="vm:GameDetailsViewModel">
 	<Grid>
 
@@ -20,7 +21,7 @@
 		<Grid RowDefinitions="56,*">
 
 			<!-- Top bar: stays in place on every tab -->
-			<Grid Grid.Row="0" ColumnDefinitions="Auto,Auto,*,Auto" Margin="16,0,156,0">
+			<Grid Grid.Row="0" ColumnDefinitions="Auto,Auto,*,Auto,Auto" Margin="16,0,156,0">
 				<Button Grid.Column="0" Content="← Назад"
 						Command="{Binding GoBackCommand}" Padding="8,4"
 						VerticalAlignment="Center"/>
@@ -36,8 +37,20 @@
 						   TextTrimming="CharacterEllipsis"
 						   Margin="12,0,16,0"/>
 
-				<!-- Tabs: only details for now -->
-				<TabStrip Grid.Column="3" VerticalAlignment="Center"
+				<!-- Search of the goals tab, shown only there -->
+				<StackPanel Grid.Column="3" Orientation="Horizontal" Spacing="8" Margin="0,0,16,0"
+							VerticalAlignment="Center"
+							IsVisible="{Binding IsGoalsTab}">
+					<TextBlock Text="{Binding Goals.Table.SearchSummary}"
+							   IsVisible="{Binding Goals.Table.SearchSummary, Converter={x:Static StringConverters.IsNotNullOrEmpty}}"
+							   FontSize="12" Opacity="0.6" VerticalAlignment="Center"/>
+					<TextBox Text="{Binding Goals.Table.SearchText}"
+							 PlaceholderText="🔍 Пошук цілі..."
+							 Width="220" VerticalAlignment="Center"/>
+				</StackPanel>
+
+				<!-- Tabs -->
+				<TabStrip Grid.Column="4" VerticalAlignment="Center"
 						  SelectedIndex="{Binding SelectedTabIndex}">
 					<TabStrip.Styles>
 						<Style Selector="TabStripItem">
@@ -46,6 +59,7 @@
 						</Style>
 					</TabStrip.Styles>
 					<TabStripItem Content="Деталі"/>
+					<TabStripItem Content="Цілі"/>
 				</TabStrip>
 			</Grid>
 
@@ -217,6 +231,11 @@
 					</StackPanel>
 				</ScrollViewer>
 			</Grid>
+
+			<!-- Goals tab -->
+			<Panel Grid.Row="1" IsVisible="{Binding IsGoalsTab}">
+				<views:GameGoalsTabView DataContext="{Binding Goals}"/>
+			</Panel>
 
 		</Grid>
 	</Grid>

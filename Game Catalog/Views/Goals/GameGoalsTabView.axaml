@@ -1,0 +1,41 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+			 xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+			 xmlns:vm="using:Game_Catalog.ViewModels"
+			 xmlns:goals="using:Game_Catalog.Views"
+			 x:Class="Game_Catalog.Views.GameGoalsTabView"
+			 x:DataType="vm:GameGoalsTabViewModel">
+
+	<Grid RowDefinitions="40,*" Margin="8,0,8,8">
+
+		<!-- Summary row: live counts on the left, adding on the right -->
+		<Grid Grid.Row="0" ColumnDefinitions="*,Auto" Margin="8,0"
+			  IsVisible="{Binding !IsEmpty}">
+			<TextBlock Grid.Column="0" Text="{Binding SummaryText}"
+					   Opacity="0.7" VerticalAlignment="Center"/>
+			<Button Grid.Column="1" Content="+ Додати ціль"
+					Command="{Binding AddCommand}"
+					IsVisible="{Binding CanAdd}"
+					VerticalAlignment="Center"/>
+		</Grid>
+
+		<!-- Goals of the game -->
+		<Panel Grid.Row="1" IsVisible="{Binding !IsEmpty}">
+			<goals:GoalTable DataContext="{Binding Table}"
+							 ShowGameColumn="False"
+							 AllowChanges="{Binding !IsReadOnly}"/>
+		</Panel>
+
+		<!-- Empty state -->
+		<StackPanel Grid.Row="0" Grid.RowSpan="2"
+					IsVisible="{Binding IsEmpty}"
+					HorizontalAlignment="Center" VerticalAlignment="Center" Spacing="16">
+			<TextBlock Text="Цілей для цієї гри ще немає"
+					   Opacity="0.6" HorizontalAlignment="Center"/>
+			<Button Content="+ Створити першу ціль"
+					Command="{Binding AddCommand}"
+					IsVisible="{Binding CanAdd}"
+					HorizontalAlignment="Center"/>
+		</StackPanel>
+	</Grid>
+
+</UserControl>
