@@ -1,0 +1,316 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+			 xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+			 xmlns:vm="using:Game_Catalog.ViewModels"
+			 xmlns:models="using:Game_Catalog.Models"
+			 xmlns:conv="using:Game_Catalog.Converters"
+			 x:Class="Game_Catalog.Views.GoalsView"
+			 x:DataType="vm:GoalsViewModel">
+
+	<UserControl.Styles>
+		<Style Selector="DropDownButton.field">
+			<Setter Property="Background" Value="{DynamicResource ComboBoxBackground}"/>
+			<Setter Property="BorderBrush" Value="{DynamicResource ComboBoxBorderBrush}"/>
+			<Setter Property="BorderThickness" Value="{DynamicResource ComboBoxBorderThemeThickness}"/>
+			<Setter Property="Padding" Value="{DynamicResource ComboBoxPadding}"/>
+			<Setter Property="Foreground" Value="{DynamicResource ComboBoxForeground}"/>
+			<Setter Property="CornerRadius" Value="{DynamicResource ControlCornerRadius}"/>
+		</Style>
+		<Style Selector="DropDownButton.field:pointerover /template/ Border#RootBorder">
+			<Setter Property="Background" Value="{DynamicResource ComboBoxBackgroundPointerOver}"/>
+			<Setter Property="BorderBrush" Value="{DynamicResource ComboBoxBorderBrushPointerOver}"/>
+		</Style>
+		<Style Selector="DropDownButton.field:pressed">
+			<Setter Property="RenderTransform" Value="none"/>
+		</Style>
+		<Style Selector="DropDownButton.field:pressed /template/ Border#RootBorder">
+			<Setter Property="Background" Value="{DynamicResource ComboBoxBackgroundPressed}"/>
+			<Setter Property="BorderBrush" Value="{DynamicResource ComboBoxBorderBrushPressed}"/>
+		</Style>
+	</UserControl.Styles>
+
+	<Grid RowDefinitions="Auto,*">
+
+		<!-- Toolbar -->
+		<Border Grid.Row="0" Padding="16,12" Margin="{StaticResource CaptionButtonsInset}">
+			<Grid ColumnDefinitions="Auto,*">
+				<TextBlock Grid.Column="0" Text="Цілі"
+						   FontSize="20" FontWeight="Bold"
+						   VerticalAlignment="Center"/>
+				<StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="8"
+							HorizontalAlignment="Right" VerticalAlignment="Center">
+					<TextBlock Text="{Binding SearchSummary}"
+							   IsVisible="{Binding SearchSummary, Converter={x:Static StringConverters.IsNotNullOrEmpty}}"
+							   FontSize="12" Opacity="0.6" VerticalAlignment="Center"/>
+					<TextBox Text="{Binding SearchText}"
+							 PlaceholderText="🔍 Пошук цілі..."
+							 Width="220" VerticalAlignment="Center"/>
+					<Button Content="{Binding FiltersButtonText}"
+							Command="{Binding OpenFiltersCommand}"
+							VerticalAlignment="Center"/>
+					<Button Content="✕ Скинути"
+							Command="{Binding ResetFiltersCommand}"
+							IsVisible="{Binding HasActiveFilter}"
+							VerticalAlignment="Center"/>
+				</StackPanel>
+			</Grid>
+		</Border>
+
+		<!-- Goals table -->
+		<DataGrid Grid.Row="1"
+				  ItemsSource="{Binding Rows}"
+				  IsVisible="{Binding !IsEmpty}"
+				  AutoGenerateColumns="False"
+				  IsReadOnly="True"
+				  CanUserSortColumns="True"
+				  CanUserResizeColumns="True"
+				  CanUserReorderColumns="False"
+				  GridLinesVisibility="None"
+				  HeadersVisibility="Column"
+				  BorderThickness="0"
+				  Background="Transparent"
+				  RowHeight="44"
+				  Margin="8,0"
+				  Classes="dbSort"
+				  x:Name="GoalsGrid">
+
+			<DataGrid.Styles>
+				<Style Selector="DataGridColumnHeader">
+					<Setter Property="Background" Value="Transparent"/>
+					<Setter Property="FontSize" Value="12"/>
+				</Style>
+				<Style Selector="DataGridRow">
+					<Setter Property="Background"
+							Value="{ReflectionBinding IsMatch, Converter={x:Static conv:SearchMatchBrushConverter.Instance}}"/>
+				</Style>
+				<Style Selector="TextBlock.overdue">
+					<Setter Property="Foreground" Value="#EF5350"/>
+				</Style>
+			</DataGrid.Styles>
+
+			<DataGrid.Columns>
+				<DataGridTemplateColumn Header="Гра" Width="*" CanUserSort="False">
+					<DataGridTemplateColumn.CellTemplate>
+						<DataTemplate x:DataType="vm:GoalRow">
+							<TextBlock Text="{Binding GameTitle}" Opacity="{Binding TextOpacity}"
+									   TextTrimming="CharacterEllipsis" MaxLines="1"
+									   VerticalAlignment="Center" Margin="12,0"/>
+						</DataTemplate>
+					</DataGridTemplateColumn.CellTemplate>
+				</DataGridTemplateColumn>
+				<DataGridTemplateColumn Header="Ціль" Width="2*" CanUserSort="False">
+					<DataGridTemplateColumn.CellTemplate>
+						<DataTemplate x:DataType="vm:GoalRow">
+							<Border Background="Transparent" ToolTip.Tip="{Binding Description}">
+								<StackPanel VerticalAlignment="Center" Margin="12,0" Opacity="{Binding TextOpacity}">
+									<TextBlock Text="{Binding GoalName}"
+											   TextTrimming="CharacterEllipsis" MaxLines="1"/>
+									<TextBlock Text="{Binding Description}"
+											   IsVisible="{Binding Description, Converter={x:Static ObjectConverters.IsNotNull}}"
+											   FontSize="11" Opacity="0.6"
+											   TextTrimming="CharacterEllipsis" MaxLines="1"/>
+								</StackPanel>
+							</Border>
+						</DataTemplate>
+					</DataGridTemplateColumn.CellTemplate>
+				</DataGridTemplateColumn>
+				<DataGridTemplateColumn Header="Пріоритет" Width="165"
+										SortMemberPath="Priority" CanUserSort="True"
+										Tag="{x:Static models:GoalSortField.Priority}">
+					<DataGridTemplateColumn.CellTemplate>
+						<DataTemplate x:DataType="vm:GoalRow">
+							<TextBlock Text="{Binding Priority, Converter={x:Static conv:GoalPriorityConverter.Instance}}"
+									   Opacity="{Binding TextOpacity}"
+									   VerticalAlignment="Center" Margin="12,0"/>
+						</DataTemplate>
+					</DataGridTemplateColumn.CellTemplate>
+				</DataGridTemplateColumn>
+				<DataGridTemplateColumn Header="Статус" Width="130" CanUserSort="False">
+					<DataGridTemplateColumn.CellTemplate>
+						<DataTemplate x:DataType="vm:GoalRow">
+							<Border CornerRadius="10" Padding="10,3" Margin="12,0"
+									HorizontalAlignment="Left" VerticalAlignment="Center"
+									Opacity="{Binding TextOpacity}"
+									Background="{Binding Status, Converter={x:Static conv:GoalStatusBrushConverter.Background}}">
+								<TextBlock Text="{Binding Status, Converter={x:Static conv:GoalStatusConverter.Instance}}"
+										   Foreground="{Binding Status, Converter={x:Static conv:GoalStatusBrushConverter.Foreground}}"
+										   FontSize="12" FontWeight="SemiBold"/>
+							</Border>
+						</DataTemplate>
+					</DataGridTemplateColumn.CellTemplate>
+				</DataGridTemplateColumn>
+				<DataGridTemplateColumn Header="Термін" Width="170"
+										SortMemberPath="DueText" CanUserSort="True"
+										Tag="{x:Static models:GoalSortField.DueDate}">
+					<DataGridTemplateColumn.CellTemplate>
+						<DataTemplate x:DataType="vm:GoalRow">
+							<TextBlock Text="{Binding DueText, TargetNullValue={StaticResource NoValue}}"
+									   Classes.overdue="{Binding IsOverdue}"
+									   Opacity="{Binding TextOpacity}"
+									   VerticalAlignment="Center" Margin="12,0"/>
+						</DataTemplate>
+					</DataGridTemplateColumn.CellTemplate>
+				</DataGridTemplateColumn>
+				<DataGridTemplateColumn Header="Створено" Width="130"
+										SortMemberPath="CreatedAt" CanUserSort="True"
+										Tag="{x:Static models:GoalSortField.CreatedAt}">
+					<DataGridTemplateColumn.CellTemplate>
+						<DataTemplate x:DataType="vm:GoalRow">
+							<Border Background="Transparent" ToolTip.Tip="{Binding CreatedTip}">
+								<TextBlock Text="{Binding CreatedText}" Opacity="{Binding ServiceOpacity}"
+										   VerticalAlignment="Center" Margin="12,0"/>
+							</Border>
+						</DataTemplate>
+					</DataGridTemplateColumn.CellTemplate>
+				</DataGridTemplateColumn>
+				<DataGridTemplateColumn Header="Виконано" Width="170" CanUserSort="False">
+					<DataGridTemplateColumn.CellTemplate>
+						<DataTemplate x:DataType="vm:GoalRow">
+							<Border Background="Transparent" ToolTip.Tip="{Binding CompletedTip}">
+								<TextBlock Text="{Binding CompletedText, TargetNullValue={StaticResource NoValue}}"
+										   Opacity="{Binding ServiceOpacity}"
+										   VerticalAlignment="Center" Margin="12,0"/>
+							</Border>
+						</DataTemplate>
+					</DataGridTemplateColumn.CellTemplate>
+				</DataGridTemplateColumn>
+			</DataGrid.Columns>
+		</DataGrid>
+
+		<!-- Empty state -->
+		<StackPanel Grid.Row="1"
+					IsVisible="{Binding IsEmpty}"
+					HorizontalAlignment="Center" VerticalAlignment="Center" Spacing="16">
+			<TextBlock Text="🎯" FontSize="48" HorizontalAlignment="Center"/>
+			<TextBlock Text="Цілей немає" FontSize="18" FontWeight="SemiBold" HorizontalAlignment="Center"/>
+		</StackPanel>
+
+		<!-- Filtered empty state -->
+		<StackPanel Grid.Row="1"
+					IsVisible="{Binding IsFilteredEmpty}"
+					HorizontalAlignment="Center" VerticalAlignment="Center" Spacing="12">
+			<TextBlock Text="🔍" FontSize="48" HorizontalAlignment="Center"/>
+			<TextBlock Text="Цілей не знайдено" FontSize="18" FontWeight="SemiBold" HorizontalAlignment="Center"/>
+			<TextBlock Text="Спробуйте змінити фільтр" Opacity="0.6" HorizontalAlignment="Center"/>
+		</StackPanel>
+
+		<!-- Filter side panel with a dimmed, click-blocking backdrop -->
+		<Grid Grid.Row="0" Grid.RowSpan="2" IsVisible="{Binding IsFilterPanelOpen}">
+			<Border Background="{DynamicResource OverlayScrim}" PointerPressed="OnOverlayPressed"/>
+			<Border HorizontalAlignment="Right" Width="340"
+					Padding="{StaticResource TitleBarInset}"
+					Background="{DynamicResource SidebarBackground}"
+					BorderBrush="{DynamicResource SidebarBorder}"
+					BorderThickness="1,0,0,0"
+					BoxShadow="-6 0 20 0 #40000000">
+				<Grid RowDefinitions="Auto,*,Auto">
+
+					<!-- Header -->
+					<Border Grid.Row="0" Padding="12,12"
+							BorderBrush="{DynamicResource SidebarBorder}" BorderThickness="0,0,0,1">
+						<Grid ColumnDefinitions="Auto,*,Auto">
+							<Button Grid.Column="0" Content="✕"
+									Command="{Binding CancelFiltersCommand}"
+									Background="Transparent" Padding="10,4"/>
+							<TextBlock Grid.Column="1" Text="Фільтри"
+									   FontSize="18" FontWeight="Bold"
+									   Margin="12,0" VerticalAlignment="Center"/>
+							<Button Grid.Column="2" Content="Скинути"
+									Command="{Binding ClearDraftCommand}"
+									Background="Transparent" Padding="10,4"/>
+						</Grid>
+					</Border>
+
+					<!-- Filter groups -->
+					<ScrollViewer Grid.Row="1">
+						<StackPanel>
+
+							<StackPanel Spacing="8" Margin="20,16">
+								<TextBlock Text="Гра" FontSize="15" FontWeight="SemiBold"/>
+								<DropDownButton Classes="field"
+												HorizontalAlignment="Stretch"
+												HorizontalContentAlignment="Left">
+									<TextBlock Text="{Binding Games.Summary}" TextTrimming="CharacterEllipsis"/>
+									<DropDownButton.Flyout>
+										<Flyout Placement="Bottom" Opened="OnFlyoutOpened">
+											<StackPanel Width="280" Spacing="8">
+												<TextBox Text="{Binding Games.SearchText}"
+														 PlaceholderText="🔍 Пошук гри..."/>
+												<ScrollViewer MaxHeight="220">
+													<ItemsControl ItemsSource="{Binding Games.FilteredOptions}">
+														<ItemsControl.ItemTemplate>
+															<DataTemplate x:DataType="vm:FilterOption">
+																<CheckBox Content="{Binding Name}" IsChecked="{Binding IsChecked}"/>
+															</DataTemplate>
+														</ItemsControl.ItemTemplate>
+													</ItemsControl>
+												</ScrollViewer>
+											</StackPanel>
+										</Flyout>
+									</DropDownButton.Flyout>
+								</DropDownButton>
+							</StackPanel>
+
+							<Border Height="1" Background="{DynamicResource SidebarBorder}"/>
+
+							<StackPanel Spacing="8" Margin="20,16">
+								<TextBlock Text="Пріоритет" FontSize="15" FontWeight="SemiBold"/>
+								<ItemsControl ItemsSource="{Binding PriorityOptions}">
+									<ItemsControl.ItemTemplate>
+										<DataTemplate x:DataType="vm:FilterOption">
+											<CheckBox Content="{Binding Name}" IsChecked="{Binding IsChecked}"/>
+										</DataTemplate>
+									</ItemsControl.ItemTemplate>
+								</ItemsControl>
+							</StackPanel>
+
+							<Border Height="1" Background="{DynamicResource SidebarBorder}"/>
+
+							<StackPanel Spacing="8" Margin="20,16">
+								<TextBlock Text="Статус" FontSize="15" FontWeight="SemiBold"/>
+								<ItemsControl ItemsSource="{Binding StatusOptions}">
+									<ItemsControl.ItemTemplate>
+										<DataTemplate x:DataType="vm:FilterOption">
+											<CheckBox Content="{Binding Name}" IsChecked="{Binding IsChecked}"/>
+										</DataTemplate>
+									</ItemsControl.ItemTemplate>
+								</ItemsControl>
+							</StackPanel>
+
+							<Border Height="1" Background="{DynamicResource SidebarBorder}"/>
+
+							<StackPanel Spacing="8" Margin="20,16">
+								<TextBlock Text="Термін виконання" FontSize="15" FontWeight="SemiBold"/>
+								<Grid ColumnDefinitions="Auto,8,*" RowDefinitions="Auto,8,Auto">
+									<TextBlock Grid.Row="0" Grid.Column="0" Text="від" VerticalAlignment="Center"/>
+									<CalendarDatePicker Grid.Row="0" Grid.Column="2"
+														SelectedDate="{Binding DraftDueFrom}"
+														SelectedDateFormat="Custom"
+														CustomDateFormatString="dd.MM.yyyy"
+														HorizontalAlignment="Stretch"/>
+									<TextBlock Grid.Row="2" Grid.Column="0" Text="до" VerticalAlignment="Center"/>
+									<CalendarDatePicker Grid.Row="2" Grid.Column="2"
+														SelectedDate="{Binding DraftDueTo}"
+														SelectedDateFormat="Custom"
+														CustomDateFormatString="dd.MM.yyyy"
+														HorizontalAlignment="Stretch"/>
+								</Grid>
+							</StackPanel>
+
+						</StackPanel>
+					</ScrollViewer>
+
+					<!-- Apply -->
+					<Border Grid.Row="2" Padding="20,12"
+							BorderBrush="{DynamicResource SidebarBorder}" BorderThickness="0,1,0,0">
+						<Button Content="Застосувати"
+								Command="{Binding ApplyFiltersCommand}"
+								HorizontalAlignment="Stretch"
+								Padding="0,10"/>
+					</Border>
+
+				</Grid>
+			</Border>
+		</Grid>
+
+	</Grid>
+</UserControl>
