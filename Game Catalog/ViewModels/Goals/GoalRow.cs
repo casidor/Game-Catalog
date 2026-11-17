@@ -37,6 +37,15 @@ namespace Game_Catalog.ViewModels
         /// <summary> True when the due date has passed and the goal is still open; the date is shown in red. </summary>
         public bool IsOverdue => Goal.Status == GoalStatus.Overdue;
 
+        /// <summary> True for an active goal; picks the badge color. </summary>
+        public bool IsActive => Goal.Status == GoalStatus.Active;
+
+        /// <summary> True for a completed goal; picks the badge color. </summary>
+        public bool IsCompleted => Goal.Status == GoalStatus.Completed;
+
+        /// <summary> True for a cancelled goal; picks the badge color. </summary>
+        public bool IsCancelled => Goal.Status == GoalStatus.Cancelled;
+
         /// <summary> Creation date and time, used as the sort path of the column. </summary>
         public System.DateTime CreatedAt => Goal.CreatedAt;
 
@@ -62,10 +71,10 @@ namespace Game_Catalog.ViewModels
         private bool IsClosed => Goal.Status is GoalStatus.Completed or GoalStatus.Cancelled;
 
         /// <summary> Opacity of the main cells of the row. </summary>
-        public double TextOpacity => IsClosed ? 0.55 : 1;
+        public double TextOpacity => IsClosed ? 0.5 : 1;
 
         /// <summary> Opacity of the service dates (created, completed): muted in an open row, level with the rest in a closed one. </summary>
-        public double ServiceOpacity => IsClosed ? 0.55 : 0.6;
+        public double ServiceOpacity => IsClosed ? 0.5 : 0.6;
 
         /// <summary> True when the row matches the current search text. </summary>
         [ObservableProperty] private bool _isMatch;

@@ -124,12 +124,7 @@
 		<!-- Filter side panel with a dimmed, click-blocking backdrop -->
 		<Grid Grid.Row="0" Grid.RowSpan="2" IsVisible="{Binding IsFilterPanelOpen}">
 			<Border Background="{DynamicResource OverlayScrim}" PointerPressed="OnOverlayPressed"/>
-			<Border HorizontalAlignment="Right" Width="340"
-					Padding="{StaticResource TitleBarInset}"
-					Background="{DynamicResource SidebarBackground}"
-					BorderBrush="{DynamicResource SidebarBorder}"
-					BorderThickness="1,0,0,0"
-					BoxShadow="-6 0 20 0 #40000000">
+			<Border Classes="filterPanel">
 				<Grid RowDefinitions="Auto,*,Auto">
 
 					<!-- Header -->

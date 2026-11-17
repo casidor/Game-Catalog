@@ -14,11 +14,15 @@
             <Thickness x:Key="ComboBoxPadding">12,6,0,6</Thickness>
             <!-- Shown wherever a field has no value: use as TargetNullValue in bindings -->
             <x:String x:Key="NoValue">—</x:String>
+            <!-- Tables work with whole rows: the focus frame of a single cell is hidden -->
+            <SolidColorBrush x:Key="DataGridCurrencyVisualPrimaryBrush" Color="Transparent"/>
+            <SolidColorBrush x:Key="DataGridCellFocusVisualPrimaryBrush" Color="Transparent"/>
+            <SolidColorBrush x:Key="DataGridCellFocusVisualSecondaryBrush" Color="Transparent"/>
             <!-- Custom title bar: the page content starts at the top edge of the window.
                  CaptionButtonsInset keeps page top bars clear of the system window buttons,
-                 TitleBarInset pushes overlays below the title bar strip -->
+                 FilterPanelMargin puts the filter card below the title bar strip, off the window edges -->
             <Thickness x:Key="CaptionButtonsInset">0,0,140,0</Thickness>
-            <Thickness x:Key="TitleBarInset">0,56,0,0</Thickness>
+            <Thickness x:Key="FilterPanelMargin">0,56,8,8</Thickness>
             <ResourceDictionary.ThemeDictionaries>
 
                 <ResourceDictionary x:Key="Dark">
@@ -33,6 +37,25 @@
                     <SolidColorBrush x:Key="ButtonBackgroundPointerOver" Color="#363650"/>
                     <SolidColorBrush x:Key="ButtonBackgroundPressed" Color="#4a4a70"/>
                     <SolidColorBrush x:Key="OverlayScrim" Color="#80000000"/>
+                    <!-- Goal status badges: translucent fill and text of the same hue -->
+                    <SolidColorBrush x:Key="GoalBadgeActiveBackground" Color="#38818CF8"/>
+                    <SolidColorBrush x:Key="GoalBadgeActiveForeground" Color="#818CF8"/>
+                    <SolidColorBrush x:Key="GoalBadgeOverdueBackground" Color="#38EF5350"/>
+                    <SolidColorBrush x:Key="GoalBadgeOverdueForeground" Color="#EF5350"/>
+                    <SolidColorBrush x:Key="GoalBadgeCompletedBackground" Color="#383FB96B"/>
+                    <SolidColorBrush x:Key="GoalBadgeCompletedForeground" Color="#3FB96B"/>
+                    <SolidColorBrush x:Key="GoalBadgeCancelledBackground" Color="#389A9AA8"/>
+                    <SolidColorBrush x:Key="GoalBadgeCancelledForeground" Color="#9A9AA8"/>
+                    <!-- Table rows: neutral hover and selection instead of the accent color -->
+                    <Color x:Key="DataGridRowHoveredBackgroundColor">#0AFFFFFF</Color>
+                    <SolidColorBrush x:Key="DataGridRowSelectedBackgroundBrush" Color="#FFFFFF"/>
+                    <SolidColorBrush x:Key="DataGridRowSelectedHoveredBackgroundBrush" Color="#FFFFFF"/>
+                    <SolidColorBrush x:Key="DataGridRowSelectedUnfocusedBackgroundBrush" Color="#FFFFFF"/>
+                    <SolidColorBrush x:Key="DataGridRowSelectedHoveredUnfocusedBackgroundBrush" Color="#FFFFFF"/>
+                    <x:Double x:Key="DataGridRowSelectedBackgroundOpacity">0.09</x:Double>
+                    <x:Double x:Key="DataGridRowSelectedHoveredBackgroundOpacity">0.12</x:Double>
+                    <x:Double x:Key="DataGridRowSelectedUnfocusedBackgroundOpacity">0.09</x:Double>
+                    <x:Double x:Key="DataGridRowSelectedHoveredUnfocusedBackgroundOpacity">0.12</x:Double>
                 </ResourceDictionary>
 
                 <ResourceDictionary x:Key="Light">
@@ -47,6 +70,25 @@
                     <SolidColorBrush x:Key="ButtonBackgroundPointerOver" Color="#c0c0d6"/>
                     <SolidColorBrush x:Key="ButtonBackgroundPressed" Color="#adadc8"/>
                     <SolidColorBrush x:Key="OverlayScrim" Color="#26000000"/>
+                    <!-- Goal status badges: translucent fill and text of the same hue -->
+                    <SolidColorBrush x:Key="GoalBadgeActiveBackground" Color="#244F46E5"/>
+                    <SolidColorBrush x:Key="GoalBadgeActiveForeground" Color="#3730A3"/>
+                    <SolidColorBrush x:Key="GoalBadgeOverdueBackground" Color="#24E53935"/>
+                    <SolidColorBrush x:Key="GoalBadgeOverdueForeground" Color="#B71C1C"/>
+                    <SolidColorBrush x:Key="GoalBadgeCompletedBackground" Color="#242E9E4F"/>
+                    <SolidColorBrush x:Key="GoalBadgeCompletedForeground" Color="#1B6E36"/>
+                    <SolidColorBrush x:Key="GoalBadgeCancelledBackground" Color="#246B6B78"/>
+                    <SolidColorBrush x:Key="GoalBadgeCancelledForeground" Color="#4A4A55"/>
+                    <!-- Table rows: neutral hover and selection instead of the accent color -->
+                    <Color x:Key="DataGridRowHoveredBackgroundColor">#0D000000</Color>
+                    <SolidColorBrush x:Key="DataGridRowSelectedBackgroundBrush" Color="#000000"/>
+                    <SolidColorBrush x:Key="DataGridRowSelectedHoveredBackgroundBrush" Color="#000000"/>
+                    <SolidColorBrush x:Key="DataGridRowSelectedUnfocusedBackgroundBrush" Color="#000000"/>
+                    <SolidColorBrush x:Key="DataGridRowSelectedHoveredUnfocusedBackgroundBrush" Color="#000000"/>
+                    <x:Double x:Key="DataGridRowSelectedBackgroundOpacity">0.12</x:Double>
+                    <x:Double x:Key="DataGridRowSelectedHoveredBackgroundOpacity">0.16</x:Double>
+                    <x:Double x:Key="DataGridRowSelectedUnfocusedBackgroundOpacity">0.12</x:Double>
+                    <x:Double x:Key="DataGridRowSelectedHoveredUnfocusedBackgroundOpacity">0.16</x:Double>
                 </ResourceDictionary>
 
             </ResourceDictionary.ThemeDictionaries>
@@ -61,6 +103,18 @@
             <Setter Property="VerticalContentAlignment"   Value="Center"/>
             <Setter Property="MinHeight"                  Value="32"/>
             <Setter Property="CornerRadius" Value="6"/>
+        </Style>
+
+        <!-- Filter side panel of a page: a floating card on the right, over the dimmed page -->
+        <Style Selector="Border.filterPanel">
+            <Setter Property="HorizontalAlignment" Value="Right"/>
+            <Setter Property="Width" Value="340"/>
+            <Setter Property="Margin" Value="{StaticResource FilterPanelMargin}"/>
+            <Setter Property="CornerRadius" Value="12"/>
+            <Setter Property="Background" Value="{DynamicResource SidebarBackground}"/>
+            <Setter Property="BorderBrush" Value="{DynamicResource SidebarBorder}"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="BoxShadow" Value="0 6 24 0 #40000000"/>
         </Style>
 
         <!-- Tables sorted by the database (class "dbSort"): the built-in sort glyph is hidden,
