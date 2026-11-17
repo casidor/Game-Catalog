@@ -1,0 +1,46 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+			 xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+			 xmlns:vm="using:Game_Catalog.ViewModels"
+			 xmlns:conv="using:Game_Catalog.Converters"
+			 xmlns:sessions="using:Game_Catalog.Views"
+			 x:Class="Game_Catalog.Views.GameSessionsTabView"
+			 x:DataType="vm:GameSessionsTabViewModel">
+
+	<Grid RowDefinitions="40,*" Margin="8,0,8,8">
+
+		<!-- Summary row: live counts on the left, adding on the right -->
+		<Grid Grid.Row="0" ColumnDefinitions="*,Auto" Margin="8,0"
+			  IsVisible="{Binding !IsEmpty}">
+			<StackPanel Grid.Column="0" Orientation="Horizontal" Opacity="0.7" VerticalAlignment="Center">
+				<TextBlock Text="Усього сесій: "/>
+				<TextBlock Text="{Binding SessionCount}"/>
+				<TextBlock Text=" • Загальний час: "/>
+				<TextBlock Text="{Binding TotalHours, Converter={x:Static conv:DurationConverter.Instance}}"/>
+			</StackPanel>
+			<Button Grid.Column="1" Content="+ Записати сесію"
+					Command="{Binding AddCommand}"
+					IsVisible="{Binding CanAdd}"
+					VerticalAlignment="Center"/>
+		</Grid>
+
+		<!-- Sessions of the game -->
+		<Panel Grid.Row="1" IsVisible="{Binding !IsEmpty}">
+			<sessions:SessionTable DataContext="{Binding Table}"
+								   ShowGameColumn="False"
+								   AllowChanges="{Binding !IsReadOnly}"/>
+		</Panel>
+
+		<!-- Empty state -->
+		<StackPanel Grid.Row="0" Grid.RowSpan="2"
+					IsVisible="{Binding IsEmpty}"
+					HorizontalAlignment="Center" VerticalAlignment="Center" Spacing="16">
+			<TextBlock Text="Сесій для цієї гри ще немає"
+					   Opacity="0.6" HorizontalAlignment="Center"/>
+			<Button Content="+ Записати першу сесію"
+					Command="{Binding AddCommand}"
+					IsVisible="{Binding CanAdd}"
+					HorizontalAlignment="Center"/>
+		</StackPanel>
+	</Grid>
+
+</UserControl>

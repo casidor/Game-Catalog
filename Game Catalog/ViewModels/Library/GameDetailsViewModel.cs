@@ -21,16 +21,22 @@ namespace Game_Catalog.ViewModels
         /// <summary> Raised when the user leaves the page: back, or after archiving, restoring or deleting. </summary>
         public event Action? BackRequested;
 
-        /// <summary> Index of the selected page tab: 0 details, 1 goals. </summary>
+        /// <summary> Index of the selected page tab: 0 details, 1 sessions, 2 goals. </summary>
         [ObservableProperty]
-        [NotifyPropertyChangedFor(nameof(IsDetailsTab), nameof(IsGoalsTab))]
+        [NotifyPropertyChangedFor(nameof(IsDetailsTab), nameof(IsSessionsTab), nameof(IsGoalsTab))]
         private int _selectedTabIndex;
 
         /// <summary> True when the details tab is selected. </summary>
         public bool IsDetailsTab => SelectedTabIndex == 0;
 
+        /// <summary> True when the sessions tab is selected. </summary>
+        public bool IsSessionsTab => SelectedTabIndex == 1;
+
         /// <summary> True when the goals tab is selected. </summary>
-        public bool IsGoalsTab => SelectedTabIndex == 1;
+        public bool IsGoalsTab => SelectedTabIndex == 2;
+
+        /// <summary> Sessions tab of the game. Loaded every time the tab is opened. </summary>
+        public GameSessionsTabViewModel Sessions { get; }
 
         /// <summary> Goals tab of the game. Loaded every time the tab is opened. </summary>
         public GameGoalsTabViewModel Goals { get; }
@@ -74,11 +80,17 @@ namespace Game_Catalog.ViewModels
         {
             Game = game;
             Goals = new GameGoalsTabViewModel(game);
+            Sessions = new GameSessionsTabViewModel(game);
+
+            // The total play time of the game depends on its sessions.
+            Sessions.SessionsChanged += () => _ = ReloadAsync();
         }
 
         partial void OnSelectedTabIndexChanged(int value)
         {
             if (value == 1)
+                Sessions.Reload();
+            else if (value == 2)
                 Goals.Reload();
         }
 
@@ -109,6 +121,7 @@ namespace Game_Catalog.ViewModels
             }
 
             Game = fresh;
+            Sessions.TotalHours = fresh.TotalHours;
             RefreshAll();
         }
 

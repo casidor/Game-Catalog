@@ -59,6 +59,7 @@
 						</Style>
 					</TabStrip.Styles>
 					<TabStripItem Content="Деталі"/>
+					<TabStripItem Content="Сесії"/>
 					<TabStripItem Content="Цілі"/>
 				</TabStrip>
 			</Grid>
@@ -231,6 +232,11 @@
 					</StackPanel>
 				</ScrollViewer>
 			</Grid>
+
+			<!-- Sessions tab -->
+			<Panel Grid.Row="1" IsVisible="{Binding IsSessionsTab}">
+				<views:GameSessionsTabView DataContext="{Binding Sessions}"/>
+			</Panel>
 
 			<!-- Goals tab -->
 			<Panel Grid.Row="1" IsVisible="{Binding IsGoalsTab}">
