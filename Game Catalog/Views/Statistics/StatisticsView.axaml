@@ -1,0 +1,92 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+			 xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+			 xmlns:vm="using:Game_Catalog.ViewModels"
+			 xmlns:conv="using:Game_Catalog.Converters"
+			 x:Class="Game_Catalog.Views.StatisticsView"
+			 x:DataType="vm:StatisticsViewModel">
+
+	<UserControl.Styles>
+		<!-- Summary card of the overview column -->
+		<Style Selector="Border.statCard">
+			<Setter Property="Background" Value="{DynamicResource CardBackground}"/>
+			<Setter Property="CornerRadius" Value="8"/>
+			<Setter Property="Padding" Value="16,14"/>
+		</Style>
+		<Style Selector="TextBlock.statCaption">
+			<Setter Property="FontSize" Value="13"/>
+			<Setter Property="Opacity" Value="0.6"/>
+			<Setter Property="HorizontalAlignment" Value="Center"/>
+		</Style>
+		<Style Selector="TextBlock.statValue">
+			<Setter Property="FontSize" Value="22"/>
+			<Setter Property="FontWeight" Value="SemiBold"/>
+			<Setter Property="HorizontalAlignment" Value="Center"/>
+		</Style>
+	</UserControl.Styles>
+
+	<Grid RowDefinitions="Auto,*">
+
+		<!-- Top bar: title on the left, tabs on the right -->
+		<Border Grid.Row="0" Padding="16,12" Margin="{StaticResource CaptionButtonsInset}">
+			<Grid ColumnDefinitions="*,Auto">
+				<TextBlock Grid.Column="0" Text="Статистика"
+						   FontSize="20" FontWeight="Bold"
+						   VerticalAlignment="Center"/>
+				<TabStrip Grid.Column="1" VerticalAlignment="Center"
+						  SelectedIndex="{Binding SelectedTabIndex}">
+					<TabStrip.Styles>
+						<Style Selector="TabStripItem">
+							<Setter Property="FontSize" Value="16"/>
+							<Setter Property="MinHeight" Value="40"/>
+						</Style>
+					</TabStrip.Styles>
+					<TabStripItem Content="Огляд"/>
+				</TabStrip>
+			</Grid>
+		</Border>
+
+		<!-- Overview tab: summary cards on the left, the play time table on the right -->
+		<Grid Grid.Row="1" ColumnDefinitions="280,*"
+			  IsVisible="{Binding IsOverviewTab}">
+
+			<ScrollViewer Grid.Column="0">
+				<StackPanel Spacing="10" Margin="16,0,16,16">
+
+					<Border Classes="statCard">
+						<StackPanel Spacing="6">
+							<TextBlock Classes="statCaption" Text="🎮  Ігор у бібліотеці"/>
+							<TextBlock Classes="statValue" Text="{Binding GameCount}"/>
+						</StackPanel>
+					</Border>
+
+					<Border Classes="statCard">
+						<StackPanel Spacing="6">
+							<TextBlock Classes="statCaption" Text="⏱  Загальний час"/>
+							<TextBlock Classes="statValue"
+									   Text="{Binding TotalHours, Converter={x:Static conv:DurationConverter.Instance}}"/>
+						</StackPanel>
+					</Border>
+
+					<Border Classes="statCard">
+						<StackPanel Spacing="6">
+							<TextBlock Classes="statCaption" Text="💾  Обсяг на диску"/>
+							<TextBlock Classes="statValue"
+									   Text="{Binding SizeText, TargetNullValue={StaticResource NoValue}}"/>
+						</StackPanel>
+					</Border>
+
+					<Border Classes="statCard">
+						<StackPanel Spacing="6">
+							<TextBlock Classes="statCaption" Text="⭐  Середня оцінка"/>
+							<TextBlock Classes="statValue"
+									   Text="{Binding RatingText, TargetNullValue={StaticResource NoValue}}"/>
+						</StackPanel>
+					</Border>
+
+				</StackPanel>
+			</ScrollViewer>
+
+			<!-- Column 1: the play time table is added with the next statistic -->
+		</Grid>
+	</Grid>
+</UserControl>
