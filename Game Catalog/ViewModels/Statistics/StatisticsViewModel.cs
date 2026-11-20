@@ -19,7 +19,7 @@ namespace Game_Catalog.ViewModels
     {
         /// <summary> Index of the selected tab. </summary>
         [ObservableProperty]
-        [NotifyPropertyChangedFor(nameof(IsOverviewTab), nameof(IsStudiosTab), nameof(IsGenresTab))]
+        [NotifyPropertyChangedFor(nameof(IsOverviewTab), nameof(IsStudiosTab), nameof(IsGenresTab), nameof(IsActivityTab))]
         private int _selectedTabIndex;
 
         /// <summary> True when the overview tab is selected. </summary>
@@ -30,6 +30,9 @@ namespace Game_Catalog.ViewModels
 
         /// <summary> True when the genres tab is selected. </summary>
         public bool IsGenresTab => SelectedTabIndex == 2;
+
+        /// <summary> True when the activity tab is selected. </summary>
+        public bool IsActivityTab => SelectedTabIndex == 3;
 
         /// <summary> Raised with the id of a game the user wants to open. </summary>
         public event Action<int>? GameSelected;
@@ -98,6 +101,32 @@ namespace Game_Catalog.ViewModels
         /// <summary> True when at least one genre has games in the library. </summary>
         public bool HasGenreRows => GenreStats.Count > 0;
 
+        // Activity for a period
+
+        /// <summary> First day of the activity period, included. The last 30 days by default. </summary>
+        [ObservableProperty]
+        private DateTime? _activityFrom = DateTime.Today.AddDays(-29);
+
+        /// <summary> Last day of the activity period, included. </summary>
+        [ObservableProperty]
+        private DateTime? _activityTo = DateTime.Today;
+
+        /// <summary> Days of the period with finished sessions, newest first. </summary>
+        [ObservableProperty]
+        [NotifyPropertyChangedFor(nameof(HasActivityRows))]
+        private List<DailyActivity> _activityDays = new();
+
+        /// <summary> True when the period has at least one day with sessions. </summary>
+        public bool HasActivityRows => ActivityDays.Count > 0;
+
+        /// <summary> Text shown instead of the activity table: no sessions in the period or an incomplete or wrong period. </summary>
+        [ObservableProperty]
+        private string _activityEmptyText = string.Empty;
+
+        partial void OnActivityFromChanged(DateTime? value) => LoadActivity();
+
+        partial void OnActivityToChanged(DateTime? value) => LoadActivity();
+
         public override void OnNavigatedTo() => Load();
 
         /// <summary> Reloads all statistics from the database. </summary>
@@ -119,6 +148,41 @@ namespace Game_Catalog.ViewModels
                 StudioStats = new();
                 GenreStats = new();
                 _ = ShowErrorAsync("Помилка завантаження статистики", ex);
+            }
+
+            LoadActivity();
+        }
+
+        /// <summary>
+        /// Reloads the activity table for the chosen period. An incomplete or wrong period
+        /// is not sent to the database: the table gives way to a hint instead.
+        /// </summary>
+        private void LoadActivity()
+        {
+            if (ActivityFrom is not { } from || ActivityTo is not { } to)
+            {
+                ActivityDays = new();
+                ActivityEmptyText = "Оберіть дату початку й кінця періоду";
+                return;
+            }
+
+            if (from.Date > to.Date)
+            {
+                ActivityDays = new();
+                ActivityEmptyText = "Оберіть коректний період: дата початку пізніша за дату кінця";
+                return;
+            }
+
+            try
+            {
+                ActivityDays = StatisticsRepository.GetDailyActivity(from, to);
+                ActivityEmptyText = "За цей період сесій немає";
+            }
+            catch (DatabaseException ex)
+            {
+                ActivityDays = new();
+                ActivityEmptyText = "Не вдалося завантажити активність";
+                _ = ShowErrorAsync("Помилка завантаження активності", ex);
             }
         }
 
