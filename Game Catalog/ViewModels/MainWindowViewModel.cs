@@ -1,6 +1,7 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using Game_Catalog.Data;
+using Game_Catalog.Data.Repositories;
 using Game_Catalog.Models;
 using Game_Catalog.Services;
 using System;
@@ -82,6 +83,7 @@ namespace Game_Catalog.ViewModels
             StudioPage.StudioSelected += studio => NavigateToStudio(studio);
             LibraryPage.GameSelected += game => NavigateToGame(game, LibraryPage);
             ArchivePage.GameSelected += game => NavigateToGame(game, ArchivePage);
+            StatisticsPage.GameSelected += gameId => OpenGame(gameId, StatisticsPage);
         }
 
         /// <summary> Raised when the application cannot continue and the window must close. </summary>
@@ -154,6 +156,32 @@ namespace Game_Catalog.ViewModels
             var detailVm = new GameDetailsViewModel(game);
             detailVm.BackRequested += () => CurrentPage = backPage;
             CurrentPage = detailVm;
+        }
+
+        /// <summary>
+        /// Opens the details of a game known only by its id.
+        /// Reloads the back page instead when the game no longer exists.
+        /// </summary>
+        private void OpenGame(int gameId, ViewModelBase backPage)
+        {
+            Game? game;
+            try
+            {
+                game = GameRepository.GetById(gameId);
+            }
+            catch (DatabaseException ex)
+            {
+                _ = Dialogs.Current.ErrorAsync("Помилка завантаження гри", ex.Message, ex);
+                return;
+            }
+
+            if (game == null)
+            {
+                backPage.OnNavigatedTo();
+                return;
+            }
+
+            NavigateToGame(game, backPage);
         }
 
         /// <summary> Navigates to the studio details page. </summary>

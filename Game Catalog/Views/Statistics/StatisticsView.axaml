@@ -2,6 +2,7 @@
 			 xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
 			 xmlns:vm="using:Game_Catalog.ViewModels"
 			 xmlns:conv="using:Game_Catalog.Converters"
+			 xmlns:views="using:Game_Catalog.Views"
 			 x:Class="Game_Catalog.Views.StatisticsView"
 			 x:DataType="vm:StatisticsViewModel">
 
@@ -21,6 +22,18 @@
 			<Setter Property="FontSize" Value="22"/>
 			<Setter Property="FontWeight" Value="SemiBold"/>
 			<Setter Property="HorizontalAlignment" Value="Center"/>
+		</Style>
+
+		<!-- Clickable card: looks like a summary card, opens the game on click -->
+		<Style Selector="Button.statCard">
+			<Setter Property="Background" Value="{DynamicResource CardBackground}"/>
+			<Setter Property="CornerRadius" Value="8"/>
+			<Setter Property="Padding" Value="16,14"/>
+			<Setter Property="HorizontalAlignment" Value="Stretch"/>
+			<Setter Property="HorizontalContentAlignment" Value="Stretch"/>
+		</Style>
+		<Style Selector="Button.statCard:pressed">
+			<Setter Property="RenderTransform" Value="none"/>
 		</Style>
 	</UserControl.Styles>
 
@@ -83,10 +96,96 @@
 						</StackPanel>
 					</Border>
 
+					<!-- Longest session: opens its game on click -->
+					<Button Classes="statCard" Margin="0,2,0,0"
+							Command="{Binding OpenLongestSessionGameCommand}"
+							IsVisible="{Binding HasLongestSession}"
+							ToolTip.Tip="Відкрити гру">
+						<StackPanel Spacing="10">
+							<TextBlock Classes="statCaption" Text="🏆  Найдовша сесія"/>
+							<Grid ColumnDefinitions="Auto,*">
+								<Border Grid.Column="0" Width="60" Height="80" CornerRadius="4"
+										ClipToBounds="True"
+										Background="{DynamicResource SidebarBackground}">
+									<Panel>
+										<TextBlock Text="🎮" FontSize="24" Opacity="0.5"
+												   HorizontalAlignment="Center" VerticalAlignment="Center"/>
+										<Image Source="{Binding LongestSession.CoverImagePath, Converter={x:Static conv:PathToBitmapConverter.Instance}, ConverterParameter=160}"
+											   Stretch="UniformToFill"/>
+									</Panel>
+								</Border>
+								<StackPanel Grid.Column="1" Spacing="4" Margin="12,0,0,0"
+											VerticalAlignment="Center">
+									<TextBlock Text="{Binding LongestSession.DurationSeconds, Converter={x:Static conv:DurationConverter.Instance}}"
+											   FontSize="18" FontWeight="SemiBold"/>
+									<TextBlock Text="{Binding LongestSession.GameTitle}"
+											   TextTrimming="CharacterEllipsis"/>
+									<TextBlock Text="{Binding LongestStartText}"
+											   FontSize="12" Opacity="0.6"/>
+								</StackPanel>
+							</Grid>
+						</StackPanel>
+					</Button>
+
+					<!-- Longest session when there are no finished sessions -->
+					<Border Classes="statCard" Margin="0,2,0,0"
+							IsVisible="{Binding !HasLongestSession}">
+						<StackPanel Spacing="6">
+							<TextBlock Classes="statCaption" Text="🏆  Найдовша сесія"/>
+							<TextBlock Classes="statValue" Text="{StaticResource NoValue}"/>
+						</StackPanel>
+					</Border>
+
 				</StackPanel>
 			</ScrollViewer>
 
-			<!-- Column 1: the play time table is added with the next statistic -->
+			<!-- Games by play time -->
+			<Grid Grid.Column="1" RowDefinitions="Auto,*" Margin="0,0,16,16">
+				<TextBlock Grid.Row="0" Text="Ігри за часом гри"
+						   FontSize="14" FontWeight="SemiBold"
+						   Margin="8,0,0,8"/>
+
+				<!-- Order is fixed by the query: the most played game first -->
+				<DataGrid Grid.Row="1"
+						  ItemsSource="{Binding GamesByPlayTime}"
+						  IsVisible="{Binding HasPlayTimeRows}"
+						  AutoGenerateColumns="False"
+						  IsReadOnly="True"
+						  CanUserSortColumns="False"
+						  CanUserResizeColumns="True"
+						  CanUserReorderColumns="False"
+						  GridLinesVisibility="None"
+						  HeadersVisibility="Column"
+						  BorderThickness="0"
+						  Background="Transparent"
+						  RowHeight="44"
+						  SelectionMode="Single"
+						  views:DataGridBehavior.RowDoubleTapCommand="{Binding OpenPlayTimeGameCommand}">
+
+					<DataGrid.Styles>
+						<Style Selector="DataGridColumnHeader">
+							<Setter Property="Background" Value="Transparent"/>
+							<Setter Property="FontSize" Value="12"/>
+						</Style>
+					</DataGrid.Styles>
+
+					<DataGrid.Columns>
+						<DataGridTextColumn Header="Гра" Width="*"
+											Binding="{ReflectionBinding GameTitle, Mode=OneWay}"/>
+						<DataGridTextColumn Header="Час" Width="140"
+											Binding="{ReflectionBinding TotalHours, Mode=OneWay, Converter={x:Static conv:DurationConverter.Instance}}"/>
+						<DataGridTextColumn Header="Частка" Width="100"
+											Binding="{ReflectionBinding SharePercent, Mode=OneWay, StringFormat='{}{0:0.0} %'}"/>
+					</DataGrid.Columns>
+				</DataGrid>
+
+				<!-- Empty state -->
+				<TextBlock Grid.Row="1"
+						   IsVisible="{Binding !HasPlayTimeRows}"
+						   Text="Ще немає завершених сесій"
+						   Opacity="0.6"
+						   HorizontalAlignment="Center" VerticalAlignment="Center"/>
+			</Grid>
 		</Grid>
 	</Grid>
 </UserControl>
