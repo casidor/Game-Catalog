@@ -82,6 +82,15 @@ public static class DataGridBehavior
         return visual.FindAncestorOfType<DataGridRow>(includeSelf: true);
     }
 
+    /// <summary> Clears the selection in any selection mode: the SelectedItems collection may be changed only in the extended mode. </summary>
+    private static void ClearSelection(DataGrid grid)
+    {
+        if (grid.SelectionMode == DataGridSelectionMode.Extended)
+            grid.SelectedItems.Clear();
+        else
+            grid.SelectedItem = null;
+    }
+
     private static void OnDoubleTapped(object? sender, TappedEventArgs e)
     {
         if (sender is not DataGrid grid || RowUnder(e.Source, skipButtons: true) is not { DataContext: { } item })
@@ -106,7 +115,7 @@ public static class DataGridBehavior
                 break;
 
             case Key.Escape when grid.SelectedItems.Count > 0:
-                grid.SelectedItems.Clear();
+                ClearSelection(grid);
                 e.Handled = true;
                 break;
         }
@@ -124,13 +133,13 @@ public static class DataGridBehavior
         var row = RowUnder(e.Source, skipButtons: false);
         if (row?.DataContext is not { } item)
         {
-            grid.SelectedItems.Clear();
+            ClearSelection(grid);
             return;
         }
 
         if (!grid.SelectedItems.Contains(item))
         {
-            grid.SelectedItems.Clear();
+            ClearSelection(grid);
             grid.SelectedItem = item;
         }
     }
