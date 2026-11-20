@@ -74,5 +74,58 @@ namespace Game_Catalog.Data.Repositories
                              s.play_session_id ASC
                     LIMIT 1");
             });
+
+        /// <summary>
+        /// Returns studios that have games in the library with the number of games,
+        /// total play time and average rating, from the most played studio to the least.
+        /// </summary>
+        public static List<StudioStat> GetStudioStats() =>
+            Db.Run("Не вдалося завантажити статистику за студіями", () =>
+            {
+                using var connection = Db.Open();
+                // v_game has one row per game with its play time already summed, so the join
+                // gives one row per game of the studio: COUNT(*) counts games and AVG is not weighted by sessions.
+                // The inner join leaves out studios without games; WHERE filters games before grouping.
+                return connection.Query<StudioStat>(@"
+                    SELECT s.studio_id, s.studio_name,
+                           COUNT(*)               AS game_count,
+                           SUM(g.total_hours)     AS total_hours,
+                           AVG(g.personal_rating) AS average_rating
+                    FROM Studio s
+                    JOIN v_game g ON g.developer_id = s.studio_id
+                    WHERE g.is_archived = 0
+                      AND g.parent_game_id IS NULL
+                    GROUP BY s.studio_id, s.studio_name
+                    ORDER BY total_hours DESC,
+                             game_count DESC,
+                             s.studio_name COLLATE UKR_NOCASE ASC,
+                             s.studio_id ASC").AsList();
+            });
+
+        /// <summary>
+        /// Returns genres that have games in the library with the number of games and total play time,
+        /// from the genre with the most games to the least. A game with several genres counts in each of them.
+        /// </summary>
+        public static List<GenreStat> GetGenreStats() =>
+            Db.Run("Не вдалося завантажити статистику за жанрами", () =>
+            {
+                using var connection = Db.Open();
+                // The link table gives one row per genre and game pair (its primary key keeps pairs unique),
+                // so COUNT(*) counts games without DISTINCT. Play time comes from v_game, already summed per game.
+                return connection.Query<GenreStat>(@"
+                    SELECT ge.genre_id, ge.genre_name,
+                           COUNT(*)           AS game_count,
+                           SUM(g.total_hours) AS total_hours
+                    FROM Genre ge
+                    JOIN GameGenre gg ON gg.genre_id = ge.genre_id
+                    JOIN v_game g     ON g.game_id   = gg.game_id
+                    WHERE g.is_archived = 0
+                      AND g.parent_game_id IS NULL
+                    GROUP BY ge.genre_id, ge.genre_name
+                    ORDER BY game_count DESC,
+                             total_hours DESC,
+                             ge.genre_name COLLATE UKR_NOCASE ASC,
+                             ge.genre_id ASC").AsList();
+            });
     }
 }
