@@ -1,6 +1,8 @@
 ﻿using Dapper;
 using Game_Catalog.Models;
+using System;
 using System.Collections.Generic;
+using System.Globalization;
 
 namespace Game_Catalog.Data.Repositories
 {
@@ -10,6 +12,8 @@ namespace Game_Catalog.Data.Repositories
     /// </summary>
     public static class StatisticsRepository
     {
+        private const string DateFormat = "yyyy-MM-dd HH:mm:ss";
+
         /// <summary>
         /// Returns the overall state of the library: game count, total play time,
         /// total size of installed games and the average rating.
@@ -126,6 +130,37 @@ namespace Game_Catalog.Data.Repositories
                              total_hours DESC,
                              ge.genre_name COLLATE UKR_NOCASE ASC,
                              ge.genre_id ASC").AsList();
+            });
+
+        /// <summary>
+        /// Returns play activity by day for the period from <paramref name="from"/> to <paramref name="to"/>, both days included,
+        /// newest day first. Only finished sessions count; a session belongs to the day it started on; days without sessions are left out.
+        /// </summary>
+        public static List<DailyActivity> GetDailyActivity(DateTime from, DateTime to) =>
+            Db.Run("Не вдалося завантажити активність за період", () =>
+            {
+                using var connection = Db.Open();
+                // The period is a half-open interval [from, the day after to): start_time is compared as it is,
+                // so the index on it can be used, and the whole last day is included.
+                // Text dates in the yyyy-MM-dd HH:mm:ss format compare in chronological order.
+                return connection.Query<DailyActivity>(@"
+                    SELECT date(s.start_time)      AS activity_date,
+                           COUNT(*)                AS session_count,
+                           SUM(s.duration_seconds) AS total_seconds
+                    FROM PlaySession s
+                    JOIN Game g ON g.game_id = s.game_id
+                    WHERE g.is_archived = 0
+                      AND g.parent_game_id IS NULL
+                      AND s.duration_seconds IS NOT NULL
+                      AND s.start_time >= @From
+                      AND s.start_time <  @ToExclusive
+                    GROUP BY date(s.start_time)
+                    ORDER BY activity_date DESC",
+                    new
+                    {
+                        From = from.Date.ToString(DateFormat, CultureInfo.InvariantCulture),
+                        ToExclusive = to.Date.AddDays(1).ToString(DateFormat, CultureInfo.InvariantCulture)
+                    }).AsList();
             });
     }
 }
