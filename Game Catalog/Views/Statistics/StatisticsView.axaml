@@ -35,6 +35,25 @@
 		<Style Selector="Button.statCard:pressed">
 			<Setter Property="RenderTransform" Value="none"/>
 		</Style>
+
+		<!-- Statistic tables: fixed order from the query, read-only -->
+		<Style Selector="DataGrid.statTable">
+			<Setter Property="AutoGenerateColumns" Value="False"/>
+			<Setter Property="IsReadOnly" Value="True"/>
+			<Setter Property="CanUserSortColumns" Value="False"/>
+			<Setter Property="CanUserResizeColumns" Value="True"/>
+			<Setter Property="CanUserReorderColumns" Value="False"/>
+			<Setter Property="GridLinesVisibility" Value="None"/>
+			<Setter Property="HeadersVisibility" Value="Column"/>
+			<Setter Property="BorderThickness" Value="0"/>
+			<Setter Property="Background" Value="Transparent"/>
+			<Setter Property="RowHeight" Value="44"/>
+			<Setter Property="SelectionMode" Value="Single"/>
+		</Style>
+		<Style Selector="DataGrid.statTable DataGridColumnHeader">
+			<Setter Property="Background" Value="Transparent"/>
+			<Setter Property="FontSize" Value="12"/>
+		</Style>
 	</UserControl.Styles>
 
 	<Grid RowDefinitions="Auto,*">
@@ -54,6 +73,8 @@
 						</Style>
 					</TabStrip.Styles>
 					<TabStripItem Content="Огляд"/>
+					<TabStripItem Content="Студії"/>
+					<TabStripItem Content="Жанри"/>
 				</TabStrip>
 			</Grid>
 		</Border>
@@ -146,28 +167,10 @@
 						   Margin="8,0,0,8"/>
 
 				<!-- Order is fixed by the query: the most played game first -->
-				<DataGrid Grid.Row="1"
+				<DataGrid Grid.Row="1" Classes="statTable"
 						  ItemsSource="{Binding GamesByPlayTime}"
 						  IsVisible="{Binding HasPlayTimeRows}"
-						  AutoGenerateColumns="False"
-						  IsReadOnly="True"
-						  CanUserSortColumns="False"
-						  CanUserResizeColumns="True"
-						  CanUserReorderColumns="False"
-						  GridLinesVisibility="None"
-						  HeadersVisibility="Column"
-						  BorderThickness="0"
-						  Background="Transparent"
-						  RowHeight="44"
-						  SelectionMode="Single"
 						  views:DataGridBehavior.RowDoubleTapCommand="{Binding OpenPlayTimeGameCommand}">
-
-					<DataGrid.Styles>
-						<Style Selector="DataGridColumnHeader">
-							<Setter Property="Background" Value="Transparent"/>
-							<Setter Property="FontSize" Value="12"/>
-						</Style>
-					</DataGrid.Styles>
 
 					<DataGrid.Columns>
 						<DataGridTextColumn Header="Гра" Width="*"
@@ -186,6 +189,53 @@
 						   Opacity="0.6"
 						   HorizontalAlignment="Center" VerticalAlignment="Center"/>
 			</Grid>
+		</Grid>
+
+		<!-- Studios tab: studios with games in the library, the most played first -->
+		<Grid Grid.Row="1" Margin="16,0,16,16"
+			  IsVisible="{Binding IsStudiosTab}">
+			<DataGrid Classes="statTable"
+					  ItemsSource="{Binding StudioStats}"
+					  IsVisible="{Binding HasStudioRows}"
+					  views:DataGridBehavior.RowDoubleTapCommand="{Binding OpenStudioCommand}">
+				<DataGrid.Columns>
+					<DataGridTextColumn Header="Студія" Width="*"
+										Binding="{ReflectionBinding StudioName, Mode=OneWay}"/>
+					<DataGridTextColumn Header="Ігор" Width="100"
+										Binding="{ReflectionBinding GameCount, Mode=OneWay}"/>
+					<DataGridTextColumn Header="Час" Width="140"
+										Binding="{ReflectionBinding TotalHours, Mode=OneWay, Converter={x:Static conv:DurationConverter.Instance}}"/>
+					<DataGridTextColumn Header="Середня оцінка" Width="150"
+										Binding="{ReflectionBinding AverageRating, Mode=OneWay, StringFormat='{}{0:0.0} / 10', TargetNullValue={StaticResource NoValue}}"/>
+				</DataGrid.Columns>
+			</DataGrid>
+
+			<TextBlock IsVisible="{Binding !HasStudioRows}"
+					   Text="У бібліотеці ще немає ігор"
+					   Opacity="0.6"
+					   HorizontalAlignment="Center" VerticalAlignment="Center"/>
+		</Grid>
+
+		<!-- Genres tab: a game with several genres counts in each of them -->
+		<Grid Grid.Row="1" Margin="16,0,16,16"
+			  IsVisible="{Binding IsGenresTab}">
+			<DataGrid Classes="statTable"
+					  ItemsSource="{Binding GenreStats}"
+					  IsVisible="{Binding HasGenreRows}">
+				<DataGrid.Columns>
+					<DataGridTextColumn Header="Жанр" Width="*"
+										Binding="{ReflectionBinding GenreName, Mode=OneWay}"/>
+					<DataGridTextColumn Header="Ігор" Width="100"
+										Binding="{ReflectionBinding GameCount, Mode=OneWay}"/>
+					<DataGridTextColumn Header="Час" Width="140"
+										Binding="{ReflectionBinding TotalHours, Mode=OneWay, Converter={x:Static conv:DurationConverter.Instance}}"/>
+				</DataGrid.Columns>
+			</DataGrid>
+
+			<TextBlock IsVisible="{Binding !HasGenreRows}"
+					   Text="Жодній грі бібліотеки ще не призначено жанр"
+					   Opacity="0.6"
+					   HorizontalAlignment="Center" VerticalAlignment="Center"/>
 		</Grid>
 	</Grid>
 </UserControl>

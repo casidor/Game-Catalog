@@ -19,14 +19,23 @@ namespace Game_Catalog.ViewModels
     {
         /// <summary> Index of the selected tab. </summary>
         [ObservableProperty]
-        [NotifyPropertyChangedFor(nameof(IsOverviewTab))]
+        [NotifyPropertyChangedFor(nameof(IsOverviewTab), nameof(IsStudiosTab), nameof(IsGenresTab))]
         private int _selectedTabIndex;
 
         /// <summary> True when the overview tab is selected. </summary>
         public bool IsOverviewTab => SelectedTabIndex == 0;
 
+        /// <summary> True when the studios tab is selected. </summary>
+        public bool IsStudiosTab => SelectedTabIndex == 1;
+
+        /// <summary> True when the genres tab is selected. </summary>
+        public bool IsGenresTab => SelectedTabIndex == 2;
+
         /// <summary> Raised with the id of a game the user wants to open. </summary>
         public event Action<int>? GameSelected;
+
+        /// <summary> Raised with the id of a studio the user wants to open. </summary>
+        public event Action<int>? StudioSelected;
 
         // Library summary
 
@@ -71,6 +80,24 @@ namespace Game_Catalog.ViewModels
         /// <summary> True when at least one game has play time. </summary>
         public bool HasPlayTimeRows => GamesByPlayTime.Count > 0;
 
+        // Studios and genres
+
+        /// <summary> Studios with games in the library, from the most played to the least. </summary>
+        [ObservableProperty]
+        [NotifyPropertyChangedFor(nameof(HasStudioRows))]
+        private List<StudioStat> _studioStats = new();
+
+        /// <summary> True when at least one studio has games in the library. </summary>
+        public bool HasStudioRows => StudioStats.Count > 0;
+
+        /// <summary> Genres with games in the library, from the one with the most games to the least. </summary>
+        [ObservableProperty]
+        [NotifyPropertyChangedFor(nameof(HasGenreRows))]
+        private List<GenreStat> _genreStats = new();
+
+        /// <summary> True when at least one genre has games in the library. </summary>
+        public bool HasGenreRows => GenreStats.Count > 0;
+
         public override void OnNavigatedTo() => Load();
 
         /// <summary> Reloads all statistics from the database. </summary>
@@ -81,12 +108,16 @@ namespace Game_Catalog.ViewModels
                 Summary = StatisticsRepository.GetLibrarySummary();
                 LongestSession = StatisticsRepository.GetLongestSession();
                 GamesByPlayTime = StatisticsRepository.GetGamesByPlayTime();
+                StudioStats = StatisticsRepository.GetStudioStats();
+                GenreStats = StatisticsRepository.GetGenreStats();
             }
             catch (DatabaseException ex)
             {
                 Summary = null;
                 LongestSession = null;
                 GamesByPlayTime = new();
+                StudioStats = new();
+                GenreStats = new();
                 _ = ShowErrorAsync("Помилка завантаження статистики", ex);
             }
         }
@@ -105,6 +136,14 @@ namespace Game_Catalog.ViewModels
         {
             if (LongestSession is { } session)
                 GameSelected?.Invoke(session.GameId);
+        }
+
+        /// <summary> Opens the studio of a row of the studios table. </summary>
+        [RelayCommand]
+        private void OpenStudio(StudioStat? row)
+        {
+            if (row != null)
+                StudioSelected?.Invoke(row.StudioId);
         }
 
         private static Task ShowErrorAsync(string title, DatabaseException ex) =>

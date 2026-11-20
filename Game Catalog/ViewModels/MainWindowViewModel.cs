@@ -80,10 +80,11 @@ namespace Game_Catalog.ViewModels
                     OnPropertyChanged(nameof(ThemeToggleIcon));
             };
 
-            StudioPage.StudioSelected += studio => NavigateToStudio(studio);
+            StudioPage.StudioSelected += studio => NavigateToStudio(studio, StudioPage);
             LibraryPage.GameSelected += game => NavigateToGame(game, LibraryPage);
             ArchivePage.GameSelected += game => NavigateToGame(game, ArchivePage);
             StatisticsPage.GameSelected += gameId => OpenGame(gameId, StatisticsPage);
+            StatisticsPage.StudioSelected += studioId => OpenStudio(studioId, StatisticsPage);
         }
 
         /// <summary> Raised when the application cannot continue and the window must close. </summary>
@@ -184,11 +185,37 @@ namespace Game_Catalog.ViewModels
             NavigateToGame(game, backPage);
         }
 
-        /// <summary> Navigates to the studio details page. </summary>
-        public void NavigateToStudio(Studio studio)
+        /// <summary>
+        /// Opens the details of a studio known only by its id.
+        /// Reloads the back page instead when the studio no longer exists.
+        /// </summary>
+        private void OpenStudio(int studioId, ViewModelBase backPage)
+        {
+            Studio? studio;
+            try
+            {
+                studio = StudioRepository.GetById(studioId);
+            }
+            catch (DatabaseException ex)
+            {
+                _ = Dialogs.Current.ErrorAsync("Помилка завантаження студії", ex.Message, ex);
+                return;
+            }
+
+            if (studio == null)
+            {
+                backPage.OnNavigatedTo();
+                return;
+            }
+
+            NavigateToStudio(studio, backPage);
+        }
+
+        /// <summary> Navigates to the studio details page. "Back" returns to the page the user came from. </summary>
+        public void NavigateToStudio(Studio studio, ViewModelBase backPage)
         {
             var detailVm = new StudioDetailsViewModel(studio);
-            detailVm.BackRequested += () => CurrentPage = StudioPage;
+            detailVm.BackRequested += () => CurrentPage = backPage;
             CurrentPage = detailVm;
         }
     }
