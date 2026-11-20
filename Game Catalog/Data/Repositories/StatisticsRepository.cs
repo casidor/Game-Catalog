@@ -14,6 +14,9 @@ namespace Game_Catalog.Data.Repositories
     {
         private const string DateFormat = "yyyy-MM-dd HH:mm:ss";
 
+        /// <summary> A game kept in the library longer than this many days without any session is forgotten. </summary>
+        private const int ForgottenAfterDays = 14;
+
         /// <summary>
         /// Returns the overall state of the library: game count, total play time,
         /// total size of installed games and the average rating.
@@ -161,6 +164,31 @@ namespace Game_Catalog.Data.Repositories
                         From = from.Date.ToString(DateFormat, CultureInfo.InvariantCulture),
                         ToExclusive = to.Date.AddDays(1).ToString(DateFormat, CultureInfo.InvariantCulture)
                     }).AsList();
+            });
+
+        /// <summary>
+        /// Returns games kept in the library for more than 14 days that have no session at all,
+        /// including one in progress, from the longest kept to the shortest.
+        /// </summary>
+        public static List<ForgottenGame> GetForgottenGames() =>
+            Db.Run("Не вдалося завантажити забуті ігри", () =>
+            {
+                using var connection = Db.Open();
+                // NOT EXISTS is an anti-join: it keeps games for which no session row exists.
+                // Unlike NOT IN it is not broken by NULLs, and any session counts, finished or not.
+                return connection.Query<ForgottenGame>(@"
+                    SELECT g.game_id, g.game_title, g.added_at, g.days_in_library
+                    FROM v_game g
+                    WHERE g.is_archived = 0
+                      AND g.parent_game_id IS NULL
+                      AND g.days_in_library > @MinDays
+                      AND NOT EXISTS (SELECT 1
+                                      FROM PlaySession s
+                                      WHERE s.game_id = g.game_id)
+                    ORDER BY g.days_in_library DESC,
+                             g.game_title COLLATE UKR_NOCASE ASC,
+                             g.game_id ASC",
+                    new { MinDays = ForgottenAfterDays }).AsList();
             });
     }
 }
