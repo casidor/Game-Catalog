@@ -1,6 +1,8 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
+using System.Linq;
 
 namespace Game_Catalog.Services
 {
@@ -11,6 +13,9 @@ namespace Game_Catalog.Services
     /// </summary>
     public static class MediaStore
     {
+        /// <summary> File of the media folder: stored path and size in bytes. </summary>
+        public sealed record MediaFile(string Path, long Bytes);
+
         /// <summary> Absolute path of the media folder. </summary>
         public static readonly string Folder = Path.Combine(AppPaths.Root, "media");
 
@@ -65,6 +70,70 @@ namespace Game_Catalog.Services
                 TryDelete(fullSource);
 
             return ToStored(dest);
+        }
+
+        /// <summary> Returns all files of the media folder with their sizes. Throws <see cref="IOException"/> if the folder cannot be read. </summary>
+        public static List<MediaFile> GetFiles()
+        {
+            if (!Directory.Exists(Folder)) return new List<MediaFile>();
+
+            return Directory.EnumerateFiles(Folder, "*", SearchOption.AllDirectories)
+                .Select(file => new MediaFile(ToStored(file), new FileInfo(file).Length))
+                .ToList();
+        }
+
+        /// <summary> Returns the files whose paths are not among the referenced ones. Letter case is ignored on Windows only. </summary>
+        public static List<MediaFile> FindUnused(IEnumerable<MediaFile> files, IEnumerable<string> referencedPaths)
+        {
+            var referenced = new HashSet<string>(referencedPaths,
+                OperatingSystem.IsWindows() ? StringComparer.OrdinalIgnoreCase : StringComparer.Ordinal);
+            return files.Where(f => !referenced.Contains(f.Path)).ToList();
+        }
+
+        /// <summary>
+        /// Deletes the files, then the folders left empty inside the media folder.
+        /// Paths outside the media folder are skipped. Returns the number of files that could not be deleted.
+        /// </summary>
+        public static int DeleteFiles(IEnumerable<string> paths)
+        {
+            var root = Path.GetFullPath(Folder) + Path.DirectorySeparatorChar;
+            var failed = 0;
+
+            foreach (var path in paths)
+            {
+                var full = Path.GetFullPath(Resolve(path));
+                if (!full.StartsWith(root, PathComparison))
+                {
+                    failed++;
+                    continue;
+                }
+
+                try { File.Delete(full); }
+                catch (Exception ex) when (ex is IOException or UnauthorizedAccessException) { failed++; }
+            }
+
+            RemoveEmptyFolders();
+            return failed;
+        }
+
+        /// <summary> Removes empty folders inside the media folder, deepest first. The media folder itself stays. </summary>
+        private static void RemoveEmptyFolders()
+        {
+            if (!Directory.Exists(Folder)) return;
+
+            var folders = Directory.EnumerateDirectories(Folder, "*", SearchOption.AllDirectories)
+                .OrderByDescending(d => d.Length)
+                .ToList();
+
+            foreach (var folder in folders)
+            {
+                try
+                {
+                    if (!Directory.EnumerateFileSystemEntries(folder).Any())
+                        Directory.Delete(folder);
+                }
+                catch (Exception ex) when (ex is IOException or UnauthorizedAccessException) { }
+            }
         }
 
         /// <summary> Returns a unique path in the temporary folder for a downloaded image, creating the folder if needed. </summary>

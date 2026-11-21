@@ -151,6 +151,23 @@ public sealed class DialogService : IDialogService
     }
 
     /// <inheritdoc/>
+    public async Task OpenFolderAsync(string path)
+    {
+        if (Owner is not { } owner) return;
+
+        try
+        {
+            Directory.CreateDirectory(path);
+            if (!await owner.Launcher.LaunchDirectoryInfoAsync(new DirectoryInfo(path)))
+                await AlertAsync("Не вдалося відкрити теку", path);
+        }
+        catch (Exception ex) when (ex is IOException or UnauthorizedAccessException)
+        {
+            await ErrorAsync("Не вдалося відкрити теку", path, ex);
+        }
+    }
+
+    /// <inheritdoc/>
     public async Task<Game?> ShowGameEditorAsync(Game? game = null)
     {
         if (Owner is not { } owner) return null;

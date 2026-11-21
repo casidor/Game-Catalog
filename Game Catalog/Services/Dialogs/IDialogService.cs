@@ -40,6 +40,9 @@ public interface IDialogService
     /// <summary> Asks for an image address, downloads it into the temporary folder and returns the file path, or null if cancelled. </summary>
     Task<string?> DownloadImageAsync();
 
+    /// <summary> Opens the folder in the file manager of the OS, creating it if needed. Shows an error if it cannot be opened. </summary>
+    Task OpenFolderAsync(string path);
+
     /// <summary> Shows the game editor. The editor saves the game itself; returns the saved game, or null if cancelled. </summary>
     Task<Game?> ShowGameEditorAsync(Game? game = null);
 

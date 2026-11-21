@@ -4,19 +4,68 @@
 			 x:Class="Game_Catalog.Views.SettingsView"
 			 x:DataType="vm:SettingsViewModel">
 
-	<StackPanel Margin="24" Spacing="24" MaxWidth="400">
+	<UserControl.Styles>
+		<Style Selector="TextBlock.sectionCaption">
+			<Setter Property="FontSize" Value="14"/>
+			<Setter Property="Opacity" Value="0.6"/>
+		</Style>
+	</UserControl.Styles>
 
-		<TextBlock Text="Налаштування"
-				   FontSize="20"
-				   FontWeight="Bold"/>
+	<Grid RowDefinitions="Auto,*">
 
-		<!-- Theme selector -->
-		<StackPanel Spacing="8">
-			<TextBlock Text="Тема" FontSize="14" Opacity="0.6"/>
-			<ComboBox ItemsSource="{Binding Themes}"
-					  SelectedItem="{Binding SelectedTheme}"
-					  HorizontalAlignment="Stretch"/>
+		<!-- Top bar: title on the left, tabs on the right -->
+		<Border Grid.Row="0" Padding="16,12" Margin="{StaticResource CaptionButtonsInset}">
+			<Grid ColumnDefinitions="*,Auto">
+				<TextBlock Grid.Column="0" Text="Налаштування"
+						   FontSize="20" FontWeight="Bold"
+						   VerticalAlignment="Center"/>
+				<TabStrip Grid.Column="1" VerticalAlignment="Center"
+						  SelectedIndex="{Binding SelectedTabIndex}">
+					<TabStrip.Styles>
+						<Style Selector="TabStripItem">
+							<Setter Property="FontSize" Value="16"/>
+							<Setter Property="MinHeight" Value="40"/>
+						</Style>
+					</TabStrip.Styles>
+					<TabStripItem Content="Загальні"/>
+					<TabStripItem Content="Сховище"/>
+				</TabStrip>
+			</Grid>
+		</Border>
+
+		<!-- General tab -->
+		<StackPanel Grid.Row="1" Margin="16,4,16,16" Spacing="24"
+					MaxWidth="400" HorizontalAlignment="Left"
+					IsVisible="{Binding IsGeneralTab}">
+			<StackPanel Spacing="8">
+				<TextBlock Classes="sectionCaption" Text="Тема"/>
+				<ComboBox ItemsSource="{Binding Themes}"
+						  SelectedItem="{Binding SelectedTheme}"
+						  HorizontalAlignment="Stretch"/>
+			</StackPanel>
 		</StackPanel>
 
-	</StackPanel>
+		<!-- Storage tab: counted on demand only -->
+		<StackPanel Grid.Row="1" Margin="16,4,16,16" Spacing="8"
+					HorizontalAlignment="Left"
+					IsVisible="{Binding IsStorageTab}">
+			<TextBlock Classes="sectionCaption" Text="Медіа"/>
+
+			<TextBlock Text="Розмір ще не підраховано"
+					   IsVisible="{Binding !Storage.IsCounted}"/>
+			<TextBlock Text="{Binding Storage.UsageText}"
+					   IsVisible="{Binding Storage.IsCounted}"/>
+			<TextBlock Text="{Binding Storage.UnusedText}"
+					   IsVisible="{Binding Storage.IsCounted}"/>
+
+			<StackPanel Orientation="Horizontal" Spacing="8" Margin="0,8,0,0">
+				<Button Content="{Binding Storage.CountButtonText}"
+						Command="{Binding Storage.CountCommand}"/>
+				<Button Content="Відкрити теку"
+						Command="{Binding Storage.OpenFolderCommand}"/>
+				<Button Content="Очистити невикористані"
+						Command="{Binding Storage.CleanUnusedCommand}"/>
+			</StackPanel>
+		</StackPanel>
+	</Grid>
 </UserControl>
