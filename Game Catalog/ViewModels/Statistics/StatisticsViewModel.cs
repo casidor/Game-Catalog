@@ -19,7 +19,7 @@ namespace Game_Catalog.ViewModels
     {
         /// <summary> Index of the selected tab. </summary>
         [ObservableProperty]
-        [NotifyPropertyChangedFor(nameof(IsOverviewTab), nameof(IsStudiosTab), nameof(IsGenresTab), nameof(IsActivityTab))]
+        [NotifyPropertyChangedFor(nameof(IsOverviewTab), nameof(IsStudiosTab), nameof(IsGenresTab), nameof(IsActivityTab), nameof(IsForgottenTab))]
         private int _selectedTabIndex;
 
         /// <summary> True when the overview tab is selected. </summary>
@@ -33,6 +33,9 @@ namespace Game_Catalog.ViewModels
 
         /// <summary> True when the activity tab is selected. </summary>
         public bool IsActivityTab => SelectedTabIndex == 3;
+
+        /// <summary> True when the forgotten games tab is selected. </summary>
+        public bool IsForgottenTab => SelectedTabIndex == 4;
 
         /// <summary> Raised with the id of a game the user wants to open. </summary>
         public event Action<int>? GameSelected;
@@ -123,6 +126,16 @@ namespace Game_Catalog.ViewModels
         [ObservableProperty]
         private string _activityEmptyText = string.Empty;
 
+        // Forgotten games
+
+        /// <summary> Games kept in the library for more than 14 days without any session, the longest kept first. </summary>
+        [ObservableProperty]
+        [NotifyPropertyChangedFor(nameof(HasForgottenRows))]
+        private List<ForgottenGame> _forgottenGames = new();
+
+        /// <summary> True when at least one game is forgotten. </summary>
+        public bool HasForgottenRows => ForgottenGames.Count > 0;
+
         partial void OnActivityFromChanged(DateTime? value) => LoadActivity();
 
         partial void OnActivityToChanged(DateTime? value) => LoadActivity();
@@ -139,6 +152,7 @@ namespace Game_Catalog.ViewModels
                 GamesByPlayTime = StatisticsRepository.GetGamesByPlayTime();
                 StudioStats = StatisticsRepository.GetStudioStats();
                 GenreStats = StatisticsRepository.GetGenreStats();
+                ForgottenGames = StatisticsRepository.GetForgottenGames();
             }
             catch (DatabaseException ex)
             {
@@ -147,6 +161,7 @@ namespace Game_Catalog.ViewModels
                 GamesByPlayTime = new();
                 StudioStats = new();
                 GenreStats = new();
+                ForgottenGames = new();
                 _ = ShowErrorAsync("Помилка завантаження статистики", ex);
             }
 
@@ -200,6 +215,14 @@ namespace Game_Catalog.ViewModels
         {
             if (LongestSession is { } session)
                 GameSelected?.Invoke(session.GameId);
+        }
+
+        /// <summary> Opens a game of the forgotten games table. </summary>
+        [RelayCommand]
+        private void OpenForgottenGame(ForgottenGame? row)
+        {
+            if (row != null)
+                GameSelected?.Invoke(row.GameId);
         }
 
         /// <summary> Opens the studio of a row of the studios table. </summary>

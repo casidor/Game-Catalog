@@ -76,6 +76,7 @@
 					<TabStripItem Content="Студії"/>
 					<TabStripItem Content="Жанри"/>
 					<TabStripItem Content="Активність"/>
+					<TabStripItem Content="Забуті"/>
 				</TabStrip>
 			</Grid>
 		</Border>
@@ -273,6 +274,29 @@
 			<TextBlock Grid.Row="1"
 					   IsVisible="{Binding !HasActivityRows}"
 					   Text="{Binding ActivityEmptyText}"
+					   Opacity="0.6"
+					   HorizontalAlignment="Center" VerticalAlignment="Center"/>
+		</Grid>
+
+		<!-- Forgotten games tab: kept for more than 14 days and never played -->
+		<Grid Grid.Row="1" Margin="16,0,16,16"
+			  IsVisible="{Binding IsForgottenTab}">
+			<DataGrid Classes="statTable"
+					  ItemsSource="{Binding ForgottenGames}"
+					  IsVisible="{Binding HasForgottenRows}"
+					  views:DataGridBehavior.RowDoubleTapCommand="{Binding OpenForgottenGameCommand}">
+				<DataGrid.Columns>
+					<DataGridTextColumn Header="Гра" Width="*"
+										Binding="{ReflectionBinding GameTitle, Mode=OneWay}"/>
+					<DataGridTextColumn Header="Додано" Width="140"
+										Binding="{ReflectionBinding AddedAt, Mode=OneWay, StringFormat='{}{0:dd.MM.yyyy}'}"/>
+					<DataGridTextColumn Header="Днів у бібліотеці" Width="160"
+										Binding="{ReflectionBinding DaysInLibrary, Mode=OneWay}"/>
+				</DataGrid.Columns>
+			</DataGrid>
+
+			<TextBlock IsVisible="{Binding !HasForgottenRows}"
+					   Text="Забутих ігор немає"
 					   Opacity="0.6"
 					   HorizontalAlignment="Center" VerticalAlignment="Center"/>
 		</Grid>
