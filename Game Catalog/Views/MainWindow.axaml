@@ -76,7 +76,12 @@
 
 
 
-    <Grid ColumnDefinitions="Auto,*">
+    <!-- The root takes the focus when a click lands outside focusable controls,
+         so the window shortcuts keep receiving keys -->
+    <Grid ColumnDefinitions="Auto,*"
+          x:Name="RootGrid"
+          Focusable="True"
+          KeyboardNavigation.IsTabStop="False">
 
         <!-- Sidebar -->
         <Border Grid.Column="0"

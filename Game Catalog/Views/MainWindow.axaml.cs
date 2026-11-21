@@ -2,6 +2,7 @@ using Avalonia.Controls;
 using Avalonia.Input;
 using Avalonia.Interactivity;
 using Avalonia.Platform.Storage;
+using Avalonia.Threading;
 using Game_Catalog.Data;
 using Game_Catalog.Services;
 using Game_Catalog.ViewModels;
@@ -43,6 +44,13 @@ namespace Game_Catalog.Views
             if (DataContext is MainWindowViewModel vm)
             {
                 vm.CloseRequested += Close;
+                vm.PropertyChanged += (_, args) =>
+                {
+                    // The old page leaves the visual tree together with its focused control,
+                    // so keys would no longer reach the window: give the focus back to the root.
+                    if (args.PropertyName == nameof(MainWindowViewModel.CurrentPage))
+                        Dispatcher.UIThread.Post(() => RootGrid.Focus());
+                };
                 vm.Start();
             }
         }
@@ -64,6 +72,7 @@ namespace Game_Catalog.Views
                 $"Не вдалося зберегти налаштування.\n{message}");
             _saveErrorShown = false;
         }
+
         protected override void OnKeyDown(KeyEventArgs e)
         {
             if (e.Key == Key.F1)
