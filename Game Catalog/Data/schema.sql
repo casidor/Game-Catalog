@@ -93,9 +93,11 @@ CREATE TABLE Game (
     CHECK (game_status IN ('Planned', 'Playing', 'Completed', 'Abandoned')),
     CHECK (personal_rating IS NULL OR personal_rating BETWEEN 1 AND 10),
     CHECK (size_gb IS NULL OR size_gb >= 0),
-    CHECK (size_gb IS NULL OR install_path IS NOT NULL),
+    CHECK (size_gb IS NULL OR install_path IS NOT NULL OR executable_path IS NOT NULL),
     CHECK (is_archived IN (0, 1)),
     CHECK (parent_game_id IS NULL OR is_archived = 0),
+    CHECK (parent_game_id IS NULL
+        OR (install_path IS NULL AND executable_path IS NULL AND size_gb IS NULL)),
     FOREIGN KEY (developer_id)   REFERENCES Studio(studio_id) ON DELETE RESTRICT ON UPDATE CASCADE,
     FOREIGN KEY (parent_game_id) REFERENCES Game(game_id)     ON DELETE CASCADE  ON UPDATE CASCADE
 ) STRICT;
@@ -221,6 +223,8 @@ CREATE TABLE Achievement (
 
 CREATE UNIQUE INDEX ux_game_identity
     ON Game (game_title COLLATE NOCASE, developer_id, COALESCE(release_year, 0));
+
+CREATE UNIQUE INDEX ux_game_install_path ON Game (install_path);
 
 CREATE INDEX ix_studio_main_genre  ON Studio (main_genre);
 CREATE INDEX ix_game_developer     ON Game (developer_id);

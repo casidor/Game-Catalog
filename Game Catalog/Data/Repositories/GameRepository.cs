@@ -128,6 +128,8 @@ namespace Game_Catalog.Data.Repositories
         public static void Insert(Game game) =>
             Db.InTransaction("Не вдалося зберегти гру", (connection, tx) =>
             {
+                EnsureInstallPathUnique(connection, tx, game);
+
                 game.GameId = connection.ExecuteScalar<int>(@"
                     INSERT INTO Game (developer_id, parent_game_id, game_title, game_description,
                                       release_year, game_status, size_gb, personal_rating,
@@ -147,6 +149,8 @@ namespace Game_Catalog.Data.Repositories
         public static void Update(Game game) =>
             Db.InTransaction("Не вдалося оновити гру", (connection, tx) =>
             {
+                EnsureInstallPathUnique(connection, tx, game);
+
                 connection.Execute(@"
                     UPDATE Game
                     SET developer_id = @DeveloperId,
@@ -290,6 +294,19 @@ namespace Game_Catalog.Data.Repositories
                 game.Tags = tags[game.GameId]
                     .Select(r => new Tag { TagId = r.ItemId, TagName = r.ItemName, Color = r.ItemExtra ?? string.Empty }).ToList();
             }
+        }
+
+        /// <summary> Throws a duplicate error if another game already uses the same install folder. </summary>
+        private static void EnsureInstallPathUnique(SqliteConnection connection, SqliteTransaction tx, Game game)
+        {
+            var owner = connection.ExecuteScalar<string?>(@"
+                SELECT game_title FROM Game
+                WHERE install_path = NULLIF(trim(@InstallPath), '')
+                  AND game_id != @GameId", new { game.InstallPath, game.GameId }, tx);
+
+            if (owner != null)
+                throw new DatabaseException(DatabaseErrorKind.Duplicate,
+                    $"Не вдалося зберегти гру: ця тека вже вказана для гри «{owner}».");
         }
     }
 }
