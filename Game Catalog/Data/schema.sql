@@ -6,7 +6,9 @@ CREATE TABLE Genre (
     genre_id          INTEGER PRIMARY KEY AUTOINCREMENT,
     genre_name        TEXT NOT NULL COLLATE NOCASE UNIQUE,
     genre_description TEXT,
-    CHECK (length(trim(genre_name)) > 0)
+    CHECK (length(trim(genre_name)) > 0),
+    CHECK (genre_name = trim(genre_name)),
+    CHECK (genre_description IS NULL OR length(trim(genre_description)) > 0)
 ) STRICT;
 
 CREATE TABLE Studio (
@@ -17,6 +19,10 @@ CREATE TABLE Studio (
     main_genre      INTEGER,
     website         TEXT,
     CHECK (length(trim(studio_name)) > 0),
+    CHECK (studio_name = trim(studio_name)),
+    CHECK (country IS NULL OR length(trim(country)) > 0),
+    CHECK (foundation_year IS NULL OR foundation_year BETWEEN 1800 AND 2100),
+    CHECK (website IS NULL OR length(trim(website)) > 0),
     FOREIGN KEY (main_genre) REFERENCES Genre(genre_id) ON DELETE RESTRICT ON UPDATE CASCADE
 ) STRICT;
 
@@ -25,7 +31,10 @@ CREATE TABLE Platform (
     platform_name      TEXT NOT NULL COLLATE NOCASE UNIQUE,
     manufacturer       TEXT,
     platform_icon_path TEXT,
-    CHECK (length(trim(platform_name)) > 0)
+    CHECK (length(trim(platform_name)) > 0),
+    CHECK (platform_name = trim(platform_name)),
+    CHECK (manufacturer IS NULL OR length(trim(manufacturer)) > 0),
+    CHECK (platform_icon_path IS NULL OR length(trim(platform_icon_path)) > 0)
 ) STRICT;
 
 CREATE TABLE Tag (
@@ -33,6 +42,7 @@ CREATE TABLE Tag (
     tag_name TEXT NOT NULL COLLATE NOCASE UNIQUE,
     color    TEXT,
     CHECK (length(trim(tag_name)) > 0),
+    CHECK (tag_name = trim(tag_name)),
     CHECK (color IS NULL OR color IN (
     'Red', 'Orange', 'Amber', 'Yellow', 'Lime', 'Green', 'Teal', 'Cyan',
     'Sky', 'Blue', 'Indigo', 'Violet', 'Fuchsia', 'Pink', 'Brown', 'Olive', 'Gray'))
@@ -58,12 +68,22 @@ CREATE TABLE Game (
     added_at              TEXT NOT NULL DEFAULT (strftime('%Y-%m-%d %H:%M:%S', 'now', 'localtime')),
     is_archived           INTEGER NOT NULL DEFAULT 0,
     CHECK (length(trim(game_title)) > 0),
+    CHECK (game_title = trim(game_title)),
+    CHECK (game_description IS NULL OR length(trim(game_description)) > 0),
+    CHECK (release_year IS NULL OR release_year BETWEEN 1900 AND 2100),
+    CHECK (cover_image_path IS NULL OR length(trim(cover_image_path)) > 0),
+    CHECK (background_image_path IS NULL OR length(trim(background_image_path)) > 0),
+    CHECK (executable_path IS NULL OR length(trim(executable_path)) > 0),
+    CHECK (install_path IS NULL OR length(trim(install_path)) > 0),
+    CHECK (icon_path IS NULL OR length(trim(icon_path)) > 0),
+    CHECK (datetime(added_at) IS added_at),
     CHECK (parent_game_id IS NULL OR parent_game_id != game_id),
     CHECK (game_status IN ('Planned', 'Playing', 'Completed', 'Abandoned')),
     CHECK (personal_rating IS NULL OR personal_rating BETWEEN 1 AND 10),
     CHECK (size_gb IS NULL OR size_gb >= 0),
     CHECK (size_gb IS NULL OR install_path IS NOT NULL),
     CHECK (is_archived IN (0, 1)),
+    CHECK (parent_game_id IS NULL OR is_archived = 0),
     FOREIGN KEY (developer_id)   REFERENCES Studio(studio_id) ON DELETE RESTRICT ON UPDATE CASCADE,
     FOREIGN KEY (parent_game_id) REFERENCES Game(game_id)     ON DELETE CASCADE  ON UPDATE CASCADE
 ) STRICT;
@@ -111,6 +131,7 @@ CREATE TABLE PlaySession (
     CHECK (end_time IS NULL OR end_time > start_time),
     CHECK (end_time IS NULL OR duration_seconds <= 604800),
     CHECK (entry_method IN ('Manual', 'Auto')),
+    CHECK (note IS NULL OR length(trim(note)) > 0),
     FOREIGN KEY (game_id) REFERENCES Game(game_id) ON DELETE CASCADE ON UPDATE CASCADE
 ) STRICT;
 
@@ -125,6 +146,8 @@ CREATE TABLE Goal (
     due_date         TEXT,
     completed_at     TEXT,
     CHECK (length(trim(goal_name)) > 0),
+    CHECK (goal_name = trim(goal_name)),
+    CHECK (goal_description IS NULL OR length(trim(goal_description)) > 0),
     CHECK (goal_status IN ('Active', 'Completed', 'Cancelled')),
     CHECK (priority BETWEEN 1 AND 5),
     CHECK (datetime(created_at) IS created_at),
@@ -148,6 +171,10 @@ CREATE TABLE GameExternalId (
     page_url                TEXT,
     source_playtime_minutes INTEGER,
     CHECK (provider_name IN ('IGDB', 'Steam')),
+    CHECK (length(trim(external_id)) > 0),
+    CHECK (external_id = trim(external_id)),
+    CHECK (last_synced_at IS NULL OR datetime(last_synced_at) IS last_synced_at),
+    CHECK (page_url IS NULL OR length(trim(page_url)) > 0),
     CHECK (source_playtime_minutes IS NULL OR source_playtime_minutes >= 0),
     UNIQUE (game_id, provider_name),
     UNIQUE (provider_name, external_id),
@@ -163,6 +190,13 @@ CREATE TABLE Achievement (
     unlocked_at             TEXT,
     achievement_icon_path   TEXT,
     global_unlock_percent   REAL,
+    CHECK (length(trim(steam_achievement_code)) > 0),
+    CHECK (steam_achievement_code = trim(steam_achievement_code)),
+    CHECK (length(trim(achievement_name)) > 0),
+    CHECK (achievement_name = trim(achievement_name)),
+    CHECK (achievement_description IS NULL OR length(trim(achievement_description)) > 0),
+    CHECK (unlocked_at IS NULL OR datetime(unlocked_at) IS unlocked_at),
+    CHECK (achievement_icon_path IS NULL OR length(trim(achievement_icon_path)) > 0),
     CHECK (global_unlock_percent IS NULL OR global_unlock_percent BETWEEN 0 AND 100),
     UNIQUE (game_id, steam_achievement_code),
     FOREIGN KEY (game_id) REFERENCES Game(game_id) ON DELETE CASCADE ON UPDATE CASCADE
@@ -232,6 +266,98 @@ BEGIN
     SELECT RAISE(ABORT, 'session_in_future');
 END;
 
+CREATE TRIGGER trg_session_game_insert
+BEFORE INSERT ON PlaySession
+BEGIN
+    SELECT RAISE(ABORT, 'game_archived')
+    WHERE EXISTS (SELECT 1 FROM Game WHERE game_id = NEW.game_id AND is_archived = 1);
+    SELECT RAISE(ABORT, 'dlc_no_activity')
+    WHERE EXISTS (SELECT 1 FROM Game WHERE game_id = NEW.game_id AND parent_game_id IS NOT NULL);
+END;
+
+CREATE TRIGGER trg_session_game_update
+BEFORE UPDATE ON PlaySession
+BEGIN
+    SELECT RAISE(ABORT, 'game_archived')
+    WHERE EXISTS (SELECT 1 FROM Game WHERE game_id IN (OLD.game_id, NEW.game_id) AND is_archived = 1);
+    SELECT RAISE(ABORT, 'dlc_no_activity')
+    WHERE EXISTS (SELECT 1 FROM Game WHERE game_id = NEW.game_id AND parent_game_id IS NOT NULL);
+END;
+
+CREATE TRIGGER trg_goal_game_insert
+BEFORE INSERT ON Goal
+BEGIN
+    SELECT RAISE(ABORT, 'game_archived')
+    WHERE EXISTS (SELECT 1 FROM Game WHERE game_id = NEW.game_id AND is_archived = 1);
+    SELECT RAISE(ABORT, 'dlc_no_activity')
+    WHERE EXISTS (SELECT 1 FROM Game WHERE game_id = NEW.game_id AND parent_game_id IS NOT NULL);
+END;
+
+CREATE TRIGGER trg_goal_game_update
+BEFORE UPDATE ON Goal
+BEGIN
+    SELECT RAISE(ABORT, 'game_archived')
+    WHERE EXISTS (SELECT 1 FROM Game WHERE game_id IN (OLD.game_id, NEW.game_id) AND is_archived = 1);
+    SELECT RAISE(ABORT, 'dlc_no_activity')
+    WHERE EXISTS (SELECT 1 FROM Game WHERE game_id = NEW.game_id AND parent_game_id IS NOT NULL);
+END;
+
+CREATE TRIGGER trg_achievement_game_insert
+BEFORE INSERT ON Achievement
+BEGIN
+    SELECT RAISE(ABORT, 'dlc_no_activity')
+    WHERE EXISTS (SELECT 1 FROM Game WHERE game_id = NEW.game_id AND parent_game_id IS NOT NULL);
+END;
+
+CREATE TRIGGER trg_achievement_game_update
+BEFORE UPDATE OF game_id ON Achievement
+BEGIN
+    SELECT RAISE(ABORT, 'dlc_no_activity')
+    WHERE EXISTS (SELECT 1 FROM Game WHERE game_id = NEW.game_id AND parent_game_id IS NOT NULL);
+END;
+
+CREATE TRIGGER trg_game_dlc_insert
+BEFORE INSERT ON Game
+WHEN NEW.parent_game_id IS NOT NULL
+BEGIN
+    SELECT RAISE(ABORT, 'game_archived')
+    WHERE EXISTS (SELECT 1 FROM Game WHERE game_id = NEW.parent_game_id AND is_archived = 1);
+    SELECT RAISE(ABORT, 'dlc_parent_is_dlc')
+    WHERE EXISTS (SELECT 1 FROM Game WHERE game_id = NEW.parent_game_id AND parent_game_id IS NOT NULL);
+END;
+
+CREATE TRIGGER trg_game_dlc_update
+BEFORE UPDATE OF parent_game_id ON Game
+WHEN NEW.parent_game_id IS NOT NULL
+BEGIN
+    SELECT RAISE(ABORT, 'game_archived')
+    WHERE EXISTS (SELECT 1 FROM Game WHERE game_id = NEW.parent_game_id AND is_archived = 1);
+    SELECT RAISE(ABORT, 'dlc_parent_is_dlc')
+    WHERE EXISTS (SELECT 1 FROM Game WHERE game_id = NEW.parent_game_id AND parent_game_id IS NOT NULL);
+    SELECT RAISE(ABORT, 'game_has_dlc')
+    WHERE EXISTS (SELECT 1 FROM Game WHERE parent_game_id = NEW.game_id);
+    SELECT RAISE(ABORT, 'dlc_has_activity')
+    WHERE EXISTS (SELECT 1 FROM PlaySession WHERE game_id = NEW.game_id)
+       OR EXISTS (SELECT 1 FROM Goal WHERE game_id = NEW.game_id)
+       OR EXISTS (SELECT 1 FROM Achievement WHERE game_id = NEW.game_id);
+END;
+
+CREATE TRIGGER trg_game_dlc_of_archived_update
+BEFORE UPDATE ON Game
+WHEN OLD.parent_game_id IS NOT NULL
+ AND EXISTS (SELECT 1 FROM Game WHERE game_id = OLD.parent_game_id AND is_archived = 1)
+BEGIN
+    SELECT RAISE(ABORT, 'game_archived');
+END;
+
+CREATE TRIGGER trg_game_archive_active_session
+BEFORE UPDATE OF is_archived ON Game
+WHEN NEW.is_archived = 1 AND OLD.is_archived = 0
+ AND EXISTS (SELECT 1 FROM PlaySession WHERE game_id = NEW.game_id AND end_time IS NULL)
+BEGIN
+    SELECT RAISE(ABORT, 'game_has_active_session');
+END;
+
 -- Views
 
 CREATE VIEW v_game AS
@@ -250,7 +376,7 @@ LEFT JOIN (
 ) t ON t.game_id = g.game_id;
 
 CREATE VIEW v_play_session AS
-SELECT ps.play_session_id, ps.game_id, g.game_title, ps.start_time, ps.end_time,
+SELECT ps.play_session_id, ps.game_id, g.game_title, g.is_archived, ps.start_time, ps.end_time,
        ps.duration_seconds, ps.entry_method, ps.note
 FROM PlaySession ps
 JOIN Game g ON g.game_id = ps.game_id;

@@ -40,7 +40,8 @@ namespace Game_Catalog.Data.Repositories
                     SELECT play_session_id, game_id, game_title, start_time, end_time,
                            duration_seconds, entry_method, note
                     FROM v_play_session
-                    WHERE (@GameCount = 0 OR game_id IN @GameIds)
+                    WHERE is_archived = 0
+                      AND (@GameCount = 0 OR game_id IN @GameIds)
                       AND (@DateFrom IS NULL OR start_time >= @DateFrom)
                       AND (@DateToExclusive IS NULL OR start_time < @DateToExclusive)
                       AND (@DurationFrom IS NULL OR duration_seconds >= @DurationFrom)

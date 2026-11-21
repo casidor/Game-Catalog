@@ -86,6 +86,24 @@ namespace Game_Catalog.Data
                 19 when ex.Message.Contains("session_overlap")
                     => new(DatabaseErrorKind.Constraint,
                            $"{action}: сесія перетинається з іншою сесією цієї гри.", ex),
+                19 when ex.Message.Contains("game_archived")
+                    => new(DatabaseErrorKind.Constraint,
+                           $"{action}: гра в архіві, тому її сесії та цілі не можна змінювати.", ex),
+                19 when ex.Message.Contains("dlc_no_activity")
+                    => new(DatabaseErrorKind.Constraint,
+                           $"{action}: доповнення (DLC) не має власних сесій, цілей і досягнень, їх ведуть для основної гри.", ex),
+                19 when ex.Message.Contains("dlc_parent_is_dlc")
+                    => new(DatabaseErrorKind.Constraint,
+                           $"{action}: основною грою не може бути інше доповнення.", ex),
+                19 when ex.Message.Contains("game_has_dlc")
+                    => new(DatabaseErrorKind.Constraint,
+                           $"{action}: гра має власні доповнення, тому сама не може стати доповненням.", ex),
+                19 when ex.Message.Contains("dlc_has_activity")
+                    => new(DatabaseErrorKind.Constraint,
+                           $"{action}: гра має сесії, цілі або досягнення, тому не може стати доповненням.", ex),
+                19 when ex.Message.Contains("game_has_active_session")
+                    => new(DatabaseErrorKind.Constraint,
+                           $"{action}: у гри є незавершена сесія, спершу завершіть її.", ex),
                 19 when ex.Message.Contains("session_in_future")
                     => new(DatabaseErrorKind.Constraint,
                            $"{action}: сесія не може починатися чи завершуватися в майбутньому.", ex),
