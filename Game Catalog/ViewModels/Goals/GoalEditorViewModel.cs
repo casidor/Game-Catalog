@@ -123,7 +123,7 @@ namespace Game_Catalog.ViewModels
         {
             try
             {
-                foreach (var game in GameRepository.GetAll(new GameFilter()))
+                foreach (var game in GameRepository.GetAll(new GameFilter { IsArchived = false }))
                     Games.Add(game);
             }
             catch (DatabaseException ex)

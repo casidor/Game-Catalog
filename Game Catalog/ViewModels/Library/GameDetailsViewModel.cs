@@ -135,10 +135,30 @@ namespace Game_Catalog.ViewModels
             await ReloadAsync();
         }
 
-        /// <summary> Moves the game to the archive after confirmation. </summary>
+        /// <summary>
+        /// Moves the game to the archive after confirmation.
+        /// A session in progress blocks archiving, so the player is offered to end it in the same step.
+        /// </summary>
         [RelayCommand]
         private async Task ArchiveAsync()
         {
+            PlaySession? active;
+            try
+            {
+                active = SessionRepository.GetActive(Game.GameId);
+            }
+            catch (DatabaseException ex)
+            {
+                await ShowErrorAsync("Помилка архівації гри", ex);
+                return;
+            }
+
+            if (active != null)
+            {
+                await ArchiveEndingSessionAsync(active);
+                return;
+            }
+
             var confirmed = await Dialogs.Current.ConfirmAsync(
                 "Архівування гри",
                 $"Перенести «{Game.GameTitle}» в архів?\n" +
@@ -161,6 +181,29 @@ namespace Game_Catalog.ViewModels
             if (!confirmed) return;
 
             await SetArchivedAsync(false);
+        }
+
+        private async Task ArchiveEndingSessionAsync(PlaySession active)
+        {
+            var confirmed = await Dialogs.Current.ConfirmAsync(
+                "Архівування гри",
+                $"У «{Game.GameTitle}» триває сесія (з {active.StartTime:dd.MM.yyyy HH:mm}).\n" +
+                "Завершити її зараз і перенести гру в архів?\n" +
+                "Гра зникне з бібліотеки та статистики, але її можна відновити в розділі «Архів».",
+                "Завершити й архівувати");
+            if (!confirmed) return;
+
+            try
+            {
+                GameRepository.ArchiveEndingSession(Game.GameId);
+            }
+            catch (DatabaseException ex)
+            {
+                await ShowErrorAsync("Помилка архівації гри", ex);
+                return;
+            }
+
+            BackRequested?.Invoke();
         }
 
         private async Task SetArchivedAsync(bool archived)

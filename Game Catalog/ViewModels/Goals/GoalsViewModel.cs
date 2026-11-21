@@ -88,7 +88,7 @@ namespace Game_Catalog.ViewModels
             IsFilterPanelOpen = false;
             try
             {
-                var games = GameRepository.GetAll(new GameFilter());
+                var games = GameRepository.GetAll(new GameFilter { IsArchived = false });
 
                 _applied = _applied with
                 {

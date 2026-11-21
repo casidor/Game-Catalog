@@ -10,7 +10,7 @@ namespace Game_Catalog.Data.Repositories
     public static class GameRepository
     {
         /// <summary>
-        /// Returns games matching the filter in the order chosen in it.
+        /// Returns standalone games (DLC are excluded) matching the filter in the order chosen in it.
         /// Filtering and sorting are done by the database; games without a value of the sort field go last.
         /// </summary>
         public static List<Game> GetAll(GameFilter filter)
@@ -43,7 +43,8 @@ namespace Game_Catalog.Data.Repositories
                 using var connection = Db.Open();
                 var games = connection.Query<Game>($@"
                     SELECT * FROM v_game x
-                    WHERE (@IsArchived IS NULL OR x.is_archived = @IsArchived)
+                    WHERE x.parent_game_id IS NULL
+                      AND (@IsArchived IS NULL OR x.is_archived = @IsArchived)
                       AND (@GenreCount = 0 OR EXISTS (
                             SELECT 1 FROM GameGenre l WHERE l.game_id = x.game_id AND l.genre_id IN @GenreIds))
                       AND (@PlatformCount = 0 OR EXISTS (
@@ -174,6 +175,20 @@ namespace Game_Catalog.Data.Repositories
                 using var connection = Db.Open();
                 connection.Execute("UPDATE Game SET is_archived = @value WHERE game_id = @gameId",
                     new { value = archived ? 1 : 0, gameId });
+            });
+
+        /// <summary> Ends the session in progress now and moves the game to the archive, both or neither. </summary>
+        public static void ArchiveEndingSession(int gameId) =>
+            Db.InTransaction("Не вдалося завершити сесію й архівувати гру", (connection, tx) =>
+            {
+                connection.Execute(@"
+                    UPDATE PlaySession
+                    SET end_time = strftime('%Y-%m-%d %H:%M:%S', 'now', 'localtime')
+                    WHERE game_id = @gameId AND end_time IS NULL",
+                    new { gameId }, tx);
+
+                connection.Execute("UPDATE Game SET is_archived = 1 WHERE game_id = @gameId",
+                    new { gameId }, tx);
             });
 
         /// <summary> Deletes the game; sessions, goals, DLC and links are removed by the database. </summary>
