@@ -24,10 +24,11 @@ namespace Game_Catalog.Services
 
         private static long _totalBytes;
 
-        /// <summary> Returns the image decoded to the given width, or null if it cannot be loaded. </summary>
+        /// <summary> Returns the image decoded to the given width, or null if it cannot be loaded. Accepts stored and absolute paths. </summary>
         public static Bitmap? Get(string? path, int width)
         {
-            if (string.IsNullOrEmpty(path) || width <= 0 || !File.Exists(path))
+            path = MediaStore.Resolve(path);
+            if (path.Length == 0 || width <= 0 || !File.Exists(path))
                 return null;
 
             if (Map.TryGetValue((path, width), out var node))
@@ -63,7 +64,8 @@ namespace Game_Catalog.Services
         /// <summary> Drops all cached sizes of the given file. </summary>
         public static void Invalidate(string? path)
         {
-            if (string.IsNullOrEmpty(path)) return;
+            path = MediaStore.Resolve(path);
+            if (path.Length == 0) return;
 
             foreach (var node in Order.Where(e => e.Path == path).ToList()
                          .Select(e => Map[(e.Path, e.Width)]))

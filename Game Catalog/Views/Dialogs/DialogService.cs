@@ -93,14 +93,20 @@ public sealed class DialogService : IDialogService
     }
 
     /// <inheritdoc/>
-    public async Task<string?> PickImageAsync(string title)
+    public async Task<string?> PickImageAsync(string title, string? startFolder = null)
     {
         if (Owner is not { } owner) return null;
 
-        var files = await owner.StorageProvider.OpenFilePickerAsync(new FilePickerOpenOptions
+        var storage = owner.StorageProvider;
+        var start = startFolder != null && Directory.Exists(startFolder)
+            ? await storage.TryGetFolderFromPathAsync(startFolder)
+            : await storage.TryGetWellKnownFolderAsync(WellKnownFolder.Downloads);
+
+        var files = await storage.OpenFilePickerAsync(new FilePickerOpenOptions
         {
             Title = title,
             AllowMultiple = false,
+            SuggestedStartLocation = start,
             FileTypeFilter = [new("Зображення") { Patterns = ["*.jpg", "*.jpeg", "*.png", "*.webp"] }]
         });
         if (files.Count == 0) return null;
@@ -113,17 +119,7 @@ public sealed class DialogService : IDialogService
             return null;
         }
 
-        try
-        {
-            var dest = MediaStore.NewFilePath(Path.GetExtension(source));
-            File.Copy(source, dest, overwrite: true);
-            return dest;
-        }
-        catch (Exception ex) when (ex is IOException or UnauthorizedAccessException)
-        {
-            await ErrorAsync("Не вдалося скопіювати зображення", "Файл не збережено.", ex);
-            return null;
-        }
+        return source;
     }
 
     /// <inheritdoc/>

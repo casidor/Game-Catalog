@@ -65,16 +65,16 @@ namespace Game_Catalog.ViewModels
         public bool HasDescription => !string.IsNullOrWhiteSpace(Game.GameDescription);
 
         public Bitmap? CoverImage => ImageCache.Get(Game.CoverImagePath, 640);
-        public bool HasCover => File.Exists(Game.CoverImagePath);
+        public bool HasCover => MediaStore.Exists(Game.CoverImagePath);
 
         public Bitmap? BackgroundImage => ImageCache.Get(Game.BackgroundImagePath, 1920);
 
         /// <summary> Small copy of the background used under the blur effect. </summary>
         public Bitmap? BlurImage => ImageCache.Get(Game.BackgroundImagePath, 400);
-        public bool HasBackground => File.Exists(Game.BackgroundImagePath);
+        public bool HasBackground => MediaStore.Exists(Game.BackgroundImagePath);
 
         public Bitmap? IconImage => ImageCache.Get(Game.IconPath, 128);
-        public bool HasIcon => File.Exists(Game.IconPath);
+        public bool HasIcon => MediaStore.Exists(Game.IconPath);
 
         public GameDetailsViewModel(Game game)
         {

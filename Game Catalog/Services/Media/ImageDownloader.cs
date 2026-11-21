@@ -6,14 +6,14 @@ using System.Threading.Tasks;
 
 namespace Game_Catalog.Services
 {
-    /// <summary> Downloads an image by URL into the local covers folder. </summary>
+    /// <summary> Downloads an image by URL into the temporary folder; it reaches the media folder only when the game is saved. </summary>
     public static class ImageDownloader
     {
         private const long MaxBytes = 20L * 1024 * 1024;
         private static readonly HttpClient Http = new() { Timeout = TimeSpan.FromSeconds(20) };
 
         /// <summary>
-        /// Downloads the image and returns the local file path.
+        /// Downloads the image and returns the absolute path of the temporary file.
         /// Throws <see cref="InvalidOperationException"/> with a user-friendly message on failure.
         /// </summary>
         public static async Task<string> DownloadAsync(string url, CancellationToken ct = default)
@@ -45,7 +45,7 @@ namespace Game_Catalog.Services
                 var ext = DetectExtension(bytes)
                     ?? throw new InvalidOperationException("За цією адресою не знайдено зображення JPG, PNG або WEBP.");
 
-                var dest = MediaStore.NewFilePath(ext);
+                var dest = MediaStore.NewTempFilePath(ext);
                 await File.WriteAllBytesAsync(dest, bytes, ct);
 
                 if (!ImageInspector.IsReadable(dest))

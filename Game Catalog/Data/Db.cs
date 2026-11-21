@@ -1,4 +1,5 @@
 ﻿using Dapper;
+using Game_Catalog.Services;
 using Microsoft.Data.Sqlite;
 using System;
 using System.Globalization;
@@ -9,10 +10,8 @@ namespace Game_Catalog.Data
     /// <summary> Single entry point for opening connections and translating database errors. </summary>
     public static class Db
     {
-        /// <summary> Path to the SQLite database file in the user's AppData folder. </summary>
-        public static readonly string DefaultPath = Path.Combine(
-            Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData),
-            "GameCatalog", "game_catalog_v2.db");
+        /// <summary> Path to the SQLite database file in the application data folder. </summary>
+        public static readonly string DefaultPath = Path.Combine(AppPaths.Root, "game_catalog_v2.db");
 
         private static string ConnectionString => $"Data Source={DefaultPath}";
 

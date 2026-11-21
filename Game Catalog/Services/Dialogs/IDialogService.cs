@@ -29,10 +29,15 @@ public interface IDialogService
     /// <summary> Shows the studio editor and returns the entered studio, or null if cancelled. </summary>
     Task<Studio?> ShowStudioEditorAsync(Studio? studio = null);
 
-    /// <summary> Lets the user pick an image file, copies it to the covers folder and returns the copy path, or null if cancelled or unusable. </summary>
-    Task<string?> PickImageAsync(string title);
+    /// <summary>
+    /// Lets the user pick an image file and returns its absolute path, or null if cancelled or unusable.
+    /// The file is not copied; it is imported into the media folder when the game is saved.
+    /// </summary>
+    /// <param name="title"> Title of the picker. </param>
+    /// <param name="startFolder"> Folder to open if it exists; otherwise the Downloads folder is opened. </param>
+    Task<string?> PickImageAsync(string title, string? startFolder = null);
 
-    /// <summary> Asks for an image address, downloads it into the covers folder and returns the file path, or null if cancelled. </summary>
+    /// <summary> Asks for an image address, downloads it into the temporary folder and returns the file path, or null if cancelled. </summary>
     Task<string?> DownloadImageAsync();
 
     /// <summary> Shows the game editor. The editor saves the game itself; returns the saved game, or null if cancelled. </summary>

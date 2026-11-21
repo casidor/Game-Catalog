@@ -93,6 +93,8 @@ namespace Game_Catalog.ViewModels
         /// <summary> Creates the database if needed and shows the first page. Called once after the window is loaded. </summary>
         public void Start()
         {
+            MediaStore.ClearTemp();
+
             try { DatabaseInitializer.Initialize(); }
             catch (Exception ex)
             {

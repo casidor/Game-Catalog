@@ -11,10 +11,8 @@ namespace Game_Catalog.Services
     /// </summary>
     public static class SettingsService
     {
-        /// <summary>Path to settings.json in the user's AppData folder.</summary>
-        public static readonly string SettingsPath = Path.Combine(
-            Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData),
-            "GameCatalog", "settings.json");
+        /// <summary>Path to settings.json in the application data folder.</summary>
+        public static readonly string SettingsPath = Path.Combine(AppPaths.Root, "settings.json");
 
         private static readonly JsonSerializerOptions Options = new() { WriteIndented = true };
 

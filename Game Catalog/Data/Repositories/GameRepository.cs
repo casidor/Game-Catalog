@@ -177,6 +177,20 @@ namespace Game_Catalog.Data.Repositories
                     new { value = archived ? 1 : 0, gameId });
             });
 
+        /// <summary> Sets only the image paths of the game. Empty paths are stored as NULL. </summary>
+        public static void UpdateImages(int gameId, string coverImagePath, string backgroundImagePath, string iconPath) =>
+            Db.Run("Не вдалося зберегти зображення гри", () =>
+            {
+                using var connection = Db.Open();
+                connection.Execute(@"
+                    UPDATE Game
+                    SET cover_image_path = NULLIF(trim(@coverImagePath), ''),
+                        background_image_path = NULLIF(trim(@backgroundImagePath), ''),
+                        icon_path = NULLIF(trim(@iconPath), '')
+                    WHERE game_id = @gameId",
+                    new { gameId, coverImagePath, backgroundImagePath, iconPath });
+            });
+
         /// <summary> Ends the session in progress now and moves the game to the archive, both or neither. </summary>
         public static void ArchiveEndingSession(int gameId) =>
             Db.InTransaction("Не вдалося завершити сесію й архівувати гру", (connection, tx) =>

@@ -7,6 +7,7 @@ using Game_Catalog.Validation;
 using System;
 using System.Collections.ObjectModel;
 using System.ComponentModel.DataAnnotations;
+using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using DatabaseException = Game_Catalog.Data.DatabaseException;
@@ -56,13 +57,13 @@ namespace Game_Catalog.ViewModels
         [ObservableProperty]
         private string _description = string.Empty;
 
-        /// <summary> Local path of the cover image. </summary>
+        /// <summary> Cover image: a stored media path, or an absolute path of a file picked but not imported yet. </summary>
         [ObservableProperty] private string _coverImagePath = string.Empty;
 
-        /// <summary> Local path of the background image. </summary>
+        /// <summary> Background image: a stored media path, or an absolute path of a file picked but not imported yet. </summary>
         [ObservableProperty] private string _backgroundImagePath = string.Empty;
 
-        /// <summary> Local path of the icon. </summary>
+        /// <summary> Icon: a stored media path, or an absolute path of a file picked but not imported yet. </summary>
         [ObservableProperty] private string _iconPath = string.Empty;
 
         /// <summary> Info and warnings for the selected cover. </summary>
@@ -341,7 +342,9 @@ namespace Game_Catalog.ViewModels
                 _ => "Оберіть іконку"
             };
 
-            var path = await Dialogs.Current.PickImageAsync(title);
+            // An existing game opens its own folder of this kind, so a previously used image can be picked again.
+            var startFolder = _source != null ? MediaStore.GameFolder(_source.GameId, kind) : null;
+            var path = await Dialogs.Current.PickImageAsync(title, startFolder);
             if (path != null)
                 SetImage(kind, path);
         }
@@ -392,11 +395,11 @@ namespace Game_Catalog.ViewModels
             GameStatus = Status,
             SizeGB = _source?.SizeGB,
             PersonalRating = PersonalRating,
-            CoverImagePath = CoverImagePath,
-            BackgroundImagePath = BackgroundImagePath,
+            CoverImagePath = StoredOrPrevious(CoverImagePath, _source?.CoverImagePath),
+            BackgroundImagePath = StoredOrPrevious(BackgroundImagePath, _source?.BackgroundImagePath),
             ExecutablePath = _source?.ExecutablePath ?? string.Empty,
             InstallPath = _source?.InstallPath ?? string.Empty,
-            IconPath = IconPath,
+            IconPath = StoredOrPrevious(IconPath, _source?.IconPath),
             AddedAt = _source?.AddedAt ?? DateTime.Now,
             IsArchived = _source?.IsArchived ?? false,
             Genres = Genres.CheckedOptions
@@ -432,8 +435,52 @@ namespace Game_Catalog.ViewModels
                 return;
             }
 
+            await SaveImagesAsync(game);
+
             SavedGame = game;
             CloseRequested?.Invoke();
+        }
+
+        /// <summary> True if an image was picked but not imported into the media folder yet. </summary>
+        private static bool IsPending(string path) => path.Length > 0 && !MediaStore.IsStored(path);
+
+        /// <summary>
+        /// Path written with the game itself: a stored or cleared path as is, and for a pending image the previous one,
+        /// so a failed import leaves the old image in place.
+        /// </summary>
+        private static string StoredOrPrevious(string path, string? previous) =>
+            IsPending(path) ? previous ?? string.Empty : path;
+
+        /// <summary> Imports a pending image into the folder of the game; other paths are returned as is. </summary>
+        private static string Store(string path, int gameId, ImageKind kind) =>
+            IsPending(path) ? MediaStore.ImportGameImage(path, gameId, kind) : path;
+
+        /// <summary>
+        /// Imports picked images after the game is saved (a new game gets its id only then) and writes their paths.
+        /// The game stays saved on failure; the database keeps the previous images.
+        /// </summary>
+        private async Task SaveImagesAsync(Game game)
+        {
+            if (!IsPending(CoverImagePath) && !IsPending(BackgroundImagePath) && !IsPending(IconPath))
+                return;
+
+            try
+            {
+                var cover = Store(CoverImagePath, game.GameId, ImageKind.Cover);
+                var background = Store(BackgroundImagePath, game.GameId, ImageKind.Background);
+                var icon = Store(IconPath, game.GameId, ImageKind.Icon);
+
+                GameRepository.UpdateImages(game.GameId, cover, background, icon);
+
+                game.CoverImagePath = cover;
+                game.BackgroundImagePath = background;
+                game.IconPath = icon;
+            }
+            catch (Exception ex) when (ex is IOException or UnauthorizedAccessException or DatabaseException)
+            {
+                await Dialogs.Current.ErrorAsync("Зображення не збережено",
+                    "Гру збережено, але зображення не вдалося скопіювати.", ex);
+            }
         }
 
         /// <summary> Cancels the dialog. </summary>

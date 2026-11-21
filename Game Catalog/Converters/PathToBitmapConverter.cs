@@ -22,7 +22,7 @@ namespace Game_Catalog.Converters
         /// </summary>
         public object? Convert(object? value, Type targetType, object? parameter, CultureInfo culture)
         {
-            if (value is not string path || !File.Exists(path))
+            if (value is not string path || !MediaStore.Exists(path))
                 return null;
 
             // With a width parameter: decode through the cache.
@@ -32,7 +32,7 @@ namespace Game_Catalog.Converters
             // Without parameter: old behaviour.
             try
             {
-                return new Bitmap(path);
+                return new Bitmap(MediaStore.Resolve(path));
             }
             catch
             {

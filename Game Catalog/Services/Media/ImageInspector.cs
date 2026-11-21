@@ -34,7 +34,7 @@ namespace Game_Catalog.Services
         {
             try
             {
-                using var bmp = new Bitmap(path);
+                using var bmp = new Bitmap(MediaStore.Resolve(path));
                 return true;
             }
             catch
@@ -46,7 +46,8 @@ namespace Game_Catalog.Services
         /// <summary> Builds the info line and warnings for the given file. </summary>
         public static ImageReport Inspect(string? path, ImageKind kind)
         {
-            if (string.IsNullOrEmpty(path) || !File.Exists(path))
+            path = MediaStore.Resolve(path);
+            if (path.Length == 0 || !File.Exists(path))
                 return ImageReport.Empty;
 
             long bytes;

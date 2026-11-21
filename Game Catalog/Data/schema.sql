@@ -34,7 +34,10 @@ CREATE TABLE Platform (
     CHECK (length(trim(platform_name)) > 0),
     CHECK (platform_name = trim(platform_name)),
     CHECK (manufacturer IS NULL OR length(trim(manufacturer)) > 0),
-    CHECK (platform_icon_path IS NULL OR length(trim(platform_icon_path)) > 0)
+    CHECK (platform_icon_path IS NULL OR (platform_icon_path LIKE 'media/_%'
+        AND (platform_icon_path LIKE '%.png' OR platform_icon_path LIKE '%.jpg'
+          OR platform_icon_path LIKE '%.jpeg' OR platform_icon_path LIKE '%.webp')
+        AND instr(platform_icon_path, '..') = 0 AND instr(platform_icon_path, char(92)) = 0))
 ) STRICT;
 
 CREATE TABLE Tag (
@@ -71,11 +74,20 @@ CREATE TABLE Game (
     CHECK (game_title = trim(game_title)),
     CHECK (game_description IS NULL OR length(trim(game_description)) > 0),
     CHECK (release_year IS NULL OR release_year BETWEEN 1900 AND 2100),
-    CHECK (cover_image_path IS NULL OR length(trim(cover_image_path)) > 0),
-    CHECK (background_image_path IS NULL OR length(trim(background_image_path)) > 0),
+    CHECK (cover_image_path IS NULL OR (cover_image_path LIKE 'media/_%'
+        AND (cover_image_path LIKE '%.png' OR cover_image_path LIKE '%.jpg'
+          OR cover_image_path LIKE '%.jpeg' OR cover_image_path LIKE '%.webp')
+        AND instr(cover_image_path, '..') = 0 AND instr(cover_image_path, char(92)) = 0)),
+    CHECK (background_image_path IS NULL OR (background_image_path LIKE 'media/_%'
+        AND (background_image_path LIKE '%.png' OR background_image_path LIKE '%.jpg'
+          OR background_image_path LIKE '%.jpeg' OR background_image_path LIKE '%.webp')
+        AND instr(background_image_path, '..') = 0 AND instr(background_image_path, char(92)) = 0)),
     CHECK (executable_path IS NULL OR length(trim(executable_path)) > 0),
     CHECK (install_path IS NULL OR length(trim(install_path)) > 0),
-    CHECK (icon_path IS NULL OR length(trim(icon_path)) > 0),
+    CHECK (icon_path IS NULL OR (icon_path LIKE 'media/_%'
+        AND (icon_path LIKE '%.png' OR icon_path LIKE '%.jpg'
+          OR icon_path LIKE '%.jpeg' OR icon_path LIKE '%.webp')
+        AND instr(icon_path, '..') = 0 AND instr(icon_path, char(92)) = 0)),
     CHECK (datetime(added_at) IS added_at),
     CHECK (parent_game_id IS NULL OR parent_game_id != game_id),
     CHECK (game_status IN ('Planned', 'Playing', 'Completed', 'Abandoned')),
@@ -196,7 +208,10 @@ CREATE TABLE Achievement (
     CHECK (achievement_name = trim(achievement_name)),
     CHECK (achievement_description IS NULL OR length(trim(achievement_description)) > 0),
     CHECK (unlocked_at IS NULL OR datetime(unlocked_at) IS unlocked_at),
-    CHECK (achievement_icon_path IS NULL OR length(trim(achievement_icon_path)) > 0),
+    CHECK (achievement_icon_path IS NULL OR (achievement_icon_path LIKE 'media/_%'
+        AND (achievement_icon_path LIKE '%.png' OR achievement_icon_path LIKE '%.jpg'
+          OR achievement_icon_path LIKE '%.jpeg' OR achievement_icon_path LIKE '%.webp')
+        AND instr(achievement_icon_path, '..') = 0 AND instr(achievement_icon_path, char(92)) = 0)),
     CHECK (global_unlock_percent IS NULL OR global_unlock_percent BETWEEN 0 AND 100),
     UNIQUE (game_id, steam_achievement_code),
     FOREIGN KEY (game_id) REFERENCES Game(game_id) ON DELETE CASCADE ON UPDATE CASCADE
