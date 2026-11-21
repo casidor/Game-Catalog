@@ -43,6 +43,21 @@ public interface IDialogService
     /// <summary> Opens the folder in the file manager of the OS, creating it if needed. Shows an error if it cannot be opened. </summary>
     Task OpenFolderAsync(string path);
 
+    /// <summary> Opens an existing folder in the file manager without creating it. Shows a message if it is missing. </summary>
+    Task OpenExistingFolderAsync(string path);
+
+    /// <summary> Lets the user pick a folder and returns its absolute path, or null if cancelled. </summary>
+    /// <param name="title"> Title of the picker. </param>
+    /// <param name="startFolder"> Folder to open if it exists; otherwise the system default. </param>
+    Task<string?> PickFolderAsync(string title, string? startFolder = null);
+
+    /// <summary>
+    /// Lets the user pick the launch file of a game and returns its absolute path, or null if cancelled.
+    /// Windows shows programs and shortcuts; other OSes show all files, since programs there have no extension.
+    /// </summary>
+    /// <param name="startFolder"> Folder to open if it exists, usually the install folder; otherwise the system default. </param>
+    Task<string?> PickLaunchFileAsync(string? startFolder = null);
+
     /// <summary> Shows the game editor. The editor saves the game itself; returns the saved game, or null if cancelled. </summary>
     Task<Game?> ShowGameEditorAsync(Game? game = null);
 

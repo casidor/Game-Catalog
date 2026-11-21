@@ -168,6 +168,63 @@ public sealed class DialogService : IDialogService
     }
 
     /// <inheritdoc/>
+    public async Task OpenExistingFolderAsync(string path)
+    {
+        if (Owner is not { } owner) return;
+
+        if (!Directory.Exists(path))
+        {
+            await AlertAsync("Теку не знайдено", path);
+            return;
+        }
+
+        if (!await owner.Launcher.LaunchDirectoryInfoAsync(new DirectoryInfo(path)))
+            await AlertAsync("Не вдалося відкрити теку", path);
+    }
+
+    /// <inheritdoc/>
+    public async Task<string?> PickFolderAsync(string title, string? startFolder = null)
+    {
+        if (Owner is not { } owner) return null;
+
+        var storage = owner.StorageProvider;
+        var folders = await storage.OpenFolderPickerAsync(new FolderPickerOpenOptions
+        {
+            Title = title,
+            AllowMultiple = false,
+            SuggestedStartLocation = await TryGetFolderAsync(storage, startFolder)
+        });
+
+        return folders.Count == 0 ? null : folders[0].Path.LocalPath;
+    }
+
+    /// <inheritdoc/>
+    public async Task<string?> PickLaunchFileAsync(string? startFolder = null)
+    {
+        if (Owner is not { } owner) return null;
+
+        var storage = owner.StorageProvider;
+        var files = await storage.OpenFilePickerAsync(new FilePickerOpenOptions
+        {
+            Title = "Файл запуску гри",
+            AllowMultiple = false,
+            SuggestedStartLocation = await TryGetFolderAsync(storage, startFolder),
+            FileTypeFilter = OperatingSystem.IsWindows()
+                ? [new("Програми та ярлики") { Patterns = ["*.exe", "*.bat", "*.cmd", "*.lnk", "*.url"] },
+                   FilePickerFileTypes.All]
+                : null
+        });
+
+        return files.Count == 0 ? null : files[0].Path.LocalPath;
+    }
+
+    /// <summary> Returns the folder as a picker start location, or null if it is not set or missing. </summary>
+    private static async Task<IStorageFolder?> TryGetFolderAsync(IStorageProvider storage, string? path) =>
+        !string.IsNullOrEmpty(path) && Directory.Exists(path)
+            ? await storage.TryGetFolderFromPathAsync(path)
+            : null;
+
+    /// <inheritdoc/>
     public async Task<Game?> ShowGameEditorAsync(Game? game = null)
     {
         if (Owner is not { } owner) return null;
