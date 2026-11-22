@@ -218,6 +218,40 @@ public sealed class DialogService : IDialogService
         return files.Count == 0 ? null : files[0].Path.LocalPath;
     }
 
+    /// <inheritdoc/>
+    public async Task<string?> PickPdfSaveFileAsync(string title, string suggestedName)
+    {
+        if (Owner is not { } owner) return null;
+
+        var storage = owner.StorageProvider;
+        var file = await storage.SaveFilePickerAsync(new FilePickerSaveOptions
+        {
+            Title = title,
+            SuggestedFileName = suggestedName,
+            DefaultExtension = "pdf",
+            FileTypeChoices = [new("PDF") { Patterns = ["*.pdf"] }],
+            ShowOverwritePrompt = true,
+            SuggestedStartLocation = await storage.TryGetWellKnownFolderAsync(WellKnownFolder.Documents)
+        });
+
+        return file?.Path.LocalPath;
+    }
+
+    /// <inheritdoc/>
+    public async Task OpenFileAsync(string path)
+    {
+        if (Owner is not { } owner) return;
+
+        if (!File.Exists(path))
+        {
+            await AlertAsync("Файл не знайдено", path);
+            return;
+        }
+
+        if (!await owner.Launcher.LaunchFileInfoAsync(new FileInfo(path)))
+            await AlertAsync("Не вдалося відкрити файл", path);
+    }
+
     /// <summary> Returns the folder as a picker start location, or null if it is not set or missing. </summary>
     private static async Task<IStorageFolder?> TryGetFolderAsync(IStorageProvider storage, string? path) =>
         !string.IsNullOrEmpty(path) && Directory.Exists(path)

@@ -70,4 +70,12 @@ public interface IDialogService
     /// <param name="goal"> Goal to edit, or null to add a new one. </param>
     /// <param name="presetGameId"> Game preselected for a new goal, or null. </param>
     Task<Goal?> ShowGoalEditorAsync(Goal? goal = null, int? presetGameId = null);
+
+    /// <summary> Lets the user choose where to save a PDF file and returns its absolute path, or null if cancelled. </summary>
+    /// <param name="title"> Title of the picker. </param>
+    /// <param name="suggestedName"> File name offered by default, without the extension. </param>
+    Task<string?> PickPdfSaveFileAsync(string title, string suggestedName);
+
+    /// <summary> Opens an existing file in the default application of the OS. Shows a message if it cannot be opened. </summary>
+    Task OpenFileAsync(string path);
 }
