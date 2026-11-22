@@ -9,6 +9,7 @@ using System.Collections.ObjectModel;
 using System.ComponentModel.DataAnnotations;
 using System.IO;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 using DatabaseException = Game_Catalog.Data.DatabaseException;
 
@@ -84,10 +85,11 @@ namespace Game_Catalog.ViewModels
         partial void OnIconPathChanged(string value) =>
             IconReport = ImageInspector.Inspect(value, ImageKind.Icon);
 
-        /// <summary> Index of the selected form tab (0 = details, 1 = media). </summary>
+        /// <summary> Index of the selected form tab (0 = details, 1 = media, 2 = installation). </summary>
         [ObservableProperty]
         [NotifyPropertyChangedFor(nameof(IsDetailsTab))]
         [NotifyPropertyChangedFor(nameof(IsMediaTab))]
+        [NotifyPropertyChangedFor(nameof(IsInstallTab))]
         private int _selectedTabIndex;
 
         /// <summary> True when the details tab is selected. </summary>
@@ -95,6 +97,47 @@ namespace Game_Catalog.ViewModels
 
         /// <summary> True when the media tab is selected. </summary>
         public bool IsMediaTab => SelectedTabIndex == 1;
+
+        /// <summary> True when the installation tab is selected. </summary>
+        public bool IsInstallTab => SelectedTabIndex == 2;
+
+        /// <summary> False for a DLC: it lives in the folder of its main game and has no installation of its own. </summary>
+        public bool IsInstallAvailable => _source?.ParentGameId == null;
+
+        /// <summary> Install folder: a normalized absolute path, or empty if not set. </summary>
+        [ObservableProperty]
+        [NotifyPropertyChangedFor(nameof(IsFolderMissing))]
+        [NotifyCanExecuteChangedFor(nameof(MeasureCommand))]
+        private string _installPath = string.Empty;
+
+        /// <summary> Launch file: a normalized absolute path, or empty if not set. It may lie outside the install folder. </summary>
+        [ObservableProperty]
+        [NotifyPropertyChangedFor(nameof(IsLaunchFileMissing))]
+        [NotifyCanExecuteChangedFor(nameof(MeasureCommand))]
+        private string _executablePath = string.Empty;
+
+        /// <summary> Size on disk in GB, or null if not measured. </summary>
+        [ObservableProperty]
+        [NotifyPropertyChangedFor(nameof(SizeText))]
+        private double? _sizeGb;
+
+        /// <summary> True while the size is being measured. </summary>
+        [ObservableProperty]
+        [NotifyCanExecuteChangedFor(nameof(MeasureCommand))]
+        [NotifyCanExecuteChangedFor(nameof(ConfirmCommand))]
+        private bool _isMeasuring;
+
+        /// <summary> Cancels the running measurement; null when nothing is measured. </summary>
+        private CancellationTokenSource? _measuring;
+
+        /// <summary> True if the folder is set but does not exist on this machine. </summary>
+        public bool IsFolderMissing => InstallPath.Length > 0 && !GameInstall.FolderExists(InstallPath);
+
+        /// <summary> True if the launch file is set but does not exist on this machine. </summary>
+        public bool IsLaunchFileMissing => ExecutablePath.Length > 0 && !GameInstall.LaunchFileExists(ExecutablePath);
+
+        /// <summary> Size for display, or null if not measured. </summary>
+        public string? SizeText => SizeGb is { } s ? $"{s:0.0} ГБ" : null;
 
         /// <summary> Studios offered in the dropdown. </summary>
         public ObservableCollection<Studio> Studios { get; } = new();
@@ -189,6 +232,9 @@ namespace Game_Catalog.ViewModels
             CoverImagePath = game.CoverImagePath;
             BackgroundImagePath = game.BackgroundImagePath;
             IconPath = game.IconPath;
+            InstallPath = game.InstallPath;
+            ExecutablePath = game.ExecutablePath;
+            SizeGb = game.SizeGB;
 
             Genres.SetChecked(game.Genres.Select(g => g.GenreId));
             Platforms.SetChecked(game.Platforms.Select(p => p.PlatformId));
@@ -382,6 +428,139 @@ namespace Game_Catalog.ViewModels
             }
         }
 
+        /// <summary> Lets the user pick the install folder. </summary>
+        [RelayCommand]
+        private async Task PickInstallFolderAsync()
+        {
+            var picked = await Dialogs.Current.PickFolderAsync("Тека встановлення гри", InstallPath);
+            if (picked != null)
+                SetInstallPath(GameInstall.Normalize(picked));
+        }
+
+        /// <summary> Removes the install folder. </summary>
+        [RelayCommand]
+        private void ClearInstallFolder() => SetInstallPath(string.Empty);
+
+        /// <summary>
+        /// Changes the install folder. The size is reset, since it belonged to the old folder,
+        /// and a launch file inside the old folder is removed, since it no longer points to this installation.
+        /// </summary>
+        private void SetInstallPath(string path)
+        {
+            if (GameInstall.SamePath(path, InstallPath)) return;
+
+            StopMeasuring();
+            if (GameInstall.IsInside(ExecutablePath, InstallPath))
+                ExecutablePath = string.Empty;
+            InstallPath = path;
+            SizeGb = null;
+        }
+
+        /// <summary> Lets the user pick the launch file, starting in the install folder. </summary>
+        [RelayCommand]
+        private async Task PickLaunchFileAsync()
+        {
+            var start = InstallPath.Length > 0 ? InstallPath : Path.GetDirectoryName(ExecutablePath);
+            var picked = await Dialogs.Current.PickLaunchFileAsync(start);
+            if (picked == null) return;
+
+            var path = GameInstall.Normalize(picked);
+            if (GameInstall.IsWrongPlatform(path))
+                await Dialogs.Current.AlertAsync("Файл не запуститься на цій системі",
+                    "Це програма Windows. Шлях буде збережено, але запустити гру з застосунку на цій системі не вийде.");
+            else if (GameInstall.NeedsExecutePermission(path))
+                await OfferExecutePermissionAsync(path);
+
+            SetLaunchFile(path);
+        }
+
+        /// <summary> Removes the launch file. </summary>
+        [RelayCommand]
+        private void ClearLaunchFile() => SetLaunchFile(string.Empty);
+
+        /// <summary> Changes the launch file. Without a folder the size was measured from this file, so it is reset. </summary>
+        private void SetLaunchFile(string path)
+        {
+            if (GameInstall.SamePath(path, ExecutablePath)) return;
+
+            if (InstallPath.Length == 0)
+            {
+                StopMeasuring();
+                SizeGb = null;
+            }
+            ExecutablePath = path;
+        }
+
+        /// <summary> Linux: offers to allow running a file that has no execute permission. </summary>
+        private static async Task OfferExecutePermissionAsync(string path)
+        {
+            var allow = await Dialogs.Current.ConfirmAsync("Файл не виконуваний",
+                "Система не дозволяє запускати цей файл. Дозволити запуск?\n\n" +
+                "Зміниться лише дозвіл файлу, його вміст залишиться тим самим.",
+                "Дозволити");
+            if (!allow) return;
+
+            try
+            {
+                GameInstall.MakeExecutable(path);
+            }
+            catch (Exception ex) when (ex is IOException or UnauthorizedAccessException)
+            {
+                await Dialogs.Current.ErrorAsync("Не вдалося змінити дозвіл", path, ex);
+            }
+        }
+
+        private bool CanMeasure => !IsMeasuring && (InstallPath.Length > 0 || ExecutablePath.Length > 0);
+
+        /// <summary> Measures the size of the folder, or of the launch file if there is no folder. </summary>
+        [RelayCommand(CanExecute = nameof(CanMeasure))]
+        private async Task MeasureAsync()
+        {
+            var fromFolder = InstallPath.Length > 0;
+            if (fromFolder ? IsFolderMissing : IsLaunchFileMissing)
+            {
+                await Dialogs.Current.AlertAsync(fromFolder ? "Теку не знайдено" : "Файл не знайдено",
+                    fromFolder ? InstallPath : ExecutablePath);
+                return;
+            }
+
+            var cts = new CancellationTokenSource();
+            _measuring = cts;
+            IsMeasuring = true;
+            try
+            {
+                var size = await GameInstall.MeasureAsync(InstallPath, ExecutablePath, cts.Token);
+                // The path may have changed while the last files were being read.
+                if (!cts.IsCancellationRequested)
+                    SizeGb = size;
+            }
+            catch (OperationCanceledException)
+            {
+            }
+            catch (Exception ex) when (ex is IOException or UnauthorizedAccessException)
+            {
+                await Dialogs.Current.ErrorAsync("Не вдалося порахувати розмір",
+                    fromFolder ? InstallPath : ExecutablePath, ex);
+            }
+            finally
+            {
+                if (_measuring == cts)
+                {
+                    _measuring = null;
+                    IsMeasuring = false;
+                }
+                cts.Dispose();
+            }
+        }
+
+        /// <summary> Cancels the running measurement, if any. Called on path changes and when the window closes. </summary>
+        public void StopMeasuring()
+        {
+            _measuring?.Cancel();
+            _measuring = null;
+            IsMeasuring = false;
+        }
+
         /// <summary> Builds a game from the entered data. Fields that are not on the form are kept from the edited game. </summary>
         private Game BuildGame() => new Game
         {
@@ -393,12 +572,12 @@ namespace Game_Catalog.ViewModels
             GameDescription = Description,
             ReleaseYear = ReleaseYear,
             GameStatus = Status,
-            SizeGB = _source?.SizeGB,
+            SizeGB = SizeGb,
             PersonalRating = PersonalRating,
             CoverImagePath = StoredOrPrevious(CoverImagePath, _source?.CoverImagePath),
             BackgroundImagePath = StoredOrPrevious(BackgroundImagePath, _source?.BackgroundImagePath),
-            ExecutablePath = _source?.ExecutablePath ?? string.Empty,
-            InstallPath = _source?.InstallPath ?? string.Empty,
+            ExecutablePath = ExecutablePath,
+            InstallPath = InstallPath,
             IconPath = StoredOrPrevious(IconPath, _source?.IconPath),
             AddedAt = _source?.AddedAt ?? DateTime.Now,
             IsArchived = _source?.IsArchived ?? false,
@@ -411,9 +590,12 @@ namespace Game_Catalog.ViewModels
         };
 
         /// <summary> Validates the form and saves the game. On a database error the form stays open. </summary>
-        [RelayCommand]
+        [RelayCommand(CanExecute = nameof(CanConfirm))]
         private async Task ConfirmAsync()
         {
+            // Enter executes the command directly, bypassing the disabled button.
+            if (!CanConfirm) return;
+
             ValidateAllProperties();
             if (HasErrors)
             {
@@ -440,6 +622,9 @@ namespace Game_Catalog.ViewModels
             SavedGame = game;
             CloseRequested?.Invoke();
         }
+
+        /// <summary> Saving waits for the size measurement, so a half-measured size is never written. </summary>
+        private bool CanConfirm => !IsMeasuring;
 
         /// <summary> True if an image was picked but not imported into the media folder yet. </summary>
         private static bool IsPending(string path) => path.Length > 0 && !MediaStore.IsStored(path);
@@ -487,6 +672,7 @@ namespace Game_Catalog.ViewModels
         [RelayCommand]
         private void Cancel()
         {
+            StopMeasuring();
             SavedGame = null;
             CloseRequested?.Invoke();
         }

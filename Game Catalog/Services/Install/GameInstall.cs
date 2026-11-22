@@ -59,6 +59,20 @@ namespace Game_Catalog.Services
             }
         }
 
+        /// <summary> Compares paths the way the file system of this OS does: ignoring case on Windows only. </summary>
+        public static bool SamePath(string a, string b) =>
+            string.Equals(a, b, OperatingSystem.IsWindows() ? StringComparison.OrdinalIgnoreCase : StringComparison.Ordinal);
+
+        /// <summary> True if the file lies inside the folder at any depth. Both paths are expected to be normalized. </summary>
+        public static bool IsInside(string filePath, string folderPath)
+        {
+            if (filePath.Length == 0 || folderPath.Length == 0) return false;
+
+            var prefix = Path.EndsInDirectorySeparator(folderPath) ? folderPath : folderPath + Path.DirectorySeparatorChar;
+            return filePath.StartsWith(prefix,
+                OperatingSystem.IsWindows() ? StringComparison.OrdinalIgnoreCase : StringComparison.Ordinal);
+        }
+
         /// <summary> True if the install folder is set and exists. </summary>
         public static bool FolderExists(string? installPath) =>
             !string.IsNullOrEmpty(installPath) && Directory.Exists(installPath);

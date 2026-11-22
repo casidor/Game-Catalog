@@ -22,6 +22,14 @@ public partial class AddGameWindow : Window
             vm.CloseRequested += Close;
     }
 
+    /// <summary> Stops a running size measurement when the window is closed, including by the title bar button. </summary>
+    protected override void OnClosed(EventArgs e)
+    {
+        if (DataContext is AddGameViewModel vm)
+            vm.StopMeasuring();
+        base.OnClosed(e);
+    }
+
     protected override void OnKeyDown(KeyEventArgs e)
     {
         if (DataContext is not AddGameViewModel vm) { base.OnKeyDown(e); return; }
