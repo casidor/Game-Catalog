@@ -469,7 +469,7 @@ namespace Game_Catalog.ViewModels
                 await Dialogs.Current.AlertAsync("Файл не запуститься на цій системі",
                     "Це програма Windows. Шлях буде збережено, але запустити гру з застосунку на цій системі не вийде.");
             else if (GameInstall.NeedsExecutePermission(path))
-                await OfferExecutePermissionAsync(path);
+                await InstallPrompts.AllowExecutionAsync(path);
 
             SetLaunchFile(path);
         }
@@ -489,25 +489,6 @@ namespace Game_Catalog.ViewModels
                 SizeGb = null;
             }
             ExecutablePath = path;
-        }
-
-        /// <summary> Linux: offers to allow running a file that has no execute permission. </summary>
-        private static async Task OfferExecutePermissionAsync(string path)
-        {
-            var allow = await Dialogs.Current.ConfirmAsync("Файл не виконуваний",
-                "Система не дозволяє запускати цей файл. Дозволити запуск?\n\n" +
-                "Зміниться лише дозвіл файлу, його вміст залишиться тим самим.",
-                "Дозволити");
-            if (!allow) return;
-
-            try
-            {
-                GameInstall.MakeExecutable(path);
-            }
-            catch (Exception ex) when (ex is IOException or UnauthorizedAccessException)
-            {
-                await Dialogs.Current.ErrorAsync("Не вдалося змінити дозвіл", path, ex);
-            }
         }
 
         private bool CanMeasure => !IsMeasuring && (InstallPath.Length > 0 || ExecutablePath.Length > 0);

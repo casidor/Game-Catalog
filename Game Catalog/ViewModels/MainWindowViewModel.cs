@@ -6,6 +6,7 @@ using Game_Catalog.Models;
 using Game_Catalog.Services;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 
 namespace Game_Catalog.ViewModels
@@ -91,6 +92,43 @@ namespace Game_Catalog.ViewModels
         public event Action? CloseRequested;
 
         /// <summary> Creates the database if needed and shows the first page. Called once after the window is loaded. </summary>
+        /// <summary>
+        /// Asks what to do with sessions still in progress before the application exits.
+        /// Returns false if the application should stay open because the sessions could not be ended.
+        /// </summary>
+        public async Task<bool> ConfirmExitAsync()
+        {
+            List<PlaySession> active;
+            try
+            {
+                active = SessionRepository.GetAllActive();
+            }
+            catch (DatabaseException)
+            {
+                // Nothing can be ended without the database; do not hold the exit.
+                return true;
+            }
+            if (active.Count == 0) return true;
+
+            var list = string.Join("\n", active.Select(s => $"• {s.GameTitle} (з {s.StartTime:dd.MM HH:mm})"));
+            var stop = await Dialogs.Current.ConfirmAsync("Сесія ще триває",
+                $"Не завершено:\n{list}\n\n" +
+                "Завершити зараз? Якщо вийти без завершення, сесія триватиме, доки ви її не завершите.",
+                "Завершити й вийти", "Вийти");
+            if (!stop) return true;
+
+            try
+            {
+                SessionRepository.StopAll();
+                return true;
+            }
+            catch (DatabaseException ex)
+            {
+                await Dialogs.Current.AlertAsync("Не вдалося завершити сесію", ex.Message);
+                return false;
+            }
+        }
+
         public void Start()
         {
             MediaStore.ClearTemp();

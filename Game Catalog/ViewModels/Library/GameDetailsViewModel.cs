@@ -1,4 +1,5 @@
 ﻿using Avalonia.Media.Imaging;
+using Avalonia.Threading;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using Game_Catalog.Data.Repositories;
@@ -13,7 +14,7 @@ using DatabaseException = Game_Catalog.Data.DatabaseException;
 namespace Game_Catalog.ViewModels
 {
     /// <summary> ViewModel for the game details page. </summary>
-    public partial class GameDetailsViewModel : ViewModelBase
+    public partial class GameDetailsViewModel : ViewModelBase, IDisposable
     {
         /// <summary> The game being displayed. </summary>
         public Game Game { get; private set; }
@@ -76,6 +77,42 @@ namespace Game_Catalog.ViewModels
         public Bitmap? IconImage => ImageCache.Get(Game.IconPath, 128);
         public bool HasIcon => MediaStore.Exists(Game.IconPath);
 
+        /// <summary> Session in progress for this game, or null. Loaded when the page is shown and after every change. </summary>
+        [ObservableProperty]
+        [NotifyPropertyChangedFor(nameof(IsPlaying), nameof(ShowPlay), nameof(ShowStartSession), nameof(ElapsedText))]
+        private PlaySession? _activeSession;
+
+        /// <summary> Updates the elapsed time of the running session once a second. Runs only while a session is open. </summary>
+        private readonly DispatcherTimer _ticker = new() { Interval = TimeSpan.FromSeconds(1) };
+
+        /// <summary> The main button is shown for active standalone games: archived games are read-only, DLC has no sessions. </summary>
+        public bool HasMainAction => !Game.IsArchived && Game.ParentGameId == null;
+
+        /// <summary> True while a session of this game is in progress. </summary>
+        public bool IsPlaying => ActiveSession != null;
+
+        /// <summary> "Play" is offered when the game has a launch file. </summary>
+        public bool ShowPlay => HasMainAction && !IsPlaying && Game.ExecutablePath.Length > 0;
+
+        /// <summary> Without a launch file the same place offers to start a session by hand. </summary>
+        public bool ShowStartSession => HasMainAction && !IsPlaying && Game.ExecutablePath.Length == 0;
+
+        /// <summary> Elapsed time of the running session as h:mm:ss, or empty if nothing is running. </summary>
+        public string ElapsedText
+        {
+            get
+            {
+                if (ActiveSession is not { } session) return string.Empty;
+
+                var elapsed = DateTime.Now - session.StartTime;
+                if (elapsed < TimeSpan.Zero) elapsed = TimeSpan.Zero;
+                return $"{(int)elapsed.TotalHours}:{elapsed.Minutes:00}:{elapsed.Seconds:00}";
+            }
+        }
+
+        /// <summary> True if the install folder is set, so it can be opened. </summary>
+        public bool HasInstallFolder => Game.InstallPath.Length > 0;
+
         public GameDetailsViewModel(Game game)
         {
             Game = game;
@@ -84,6 +121,35 @@ namespace Game_Catalog.ViewModels
 
             // The total play time of the game depends on its sessions.
             Sessions.SessionsChanged += () => _ = ReloadAsync();
+
+            _ticker.Tick += (_, _) => OnPropertyChanged(nameof(ElapsedText));
+        }
+
+        /// <summary> Loads the running session when the page is shown. </summary>
+        public override void OnNavigatedTo() => _ = LoadActiveSessionAsync();
+
+        /// <summary> Stops the timer when the page is left. </summary>
+        public void Dispose() => _ticker.Stop();
+
+        partial void OnActiveSessionChanged(PlaySession? value)
+        {
+            if (value != null)
+                _ticker.Start();
+            else
+                _ticker.Stop();
+        }
+
+        /// <summary> Reads the open session of the game from the database. </summary>
+        private async Task LoadActiveSessionAsync()
+        {
+            try
+            {
+                ActiveSession = SessionRepository.GetActive(Game.GameId);
+            }
+            catch (DatabaseException ex)
+            {
+                await ShowErrorAsync("Помилка завантаження поточної сесії", ex);
+            }
         }
 
         partial void OnSelectedTabIndexChanged(int value)
@@ -123,6 +189,103 @@ namespace Game_Catalog.ViewModels
             Game = fresh;
             Sessions.TotalHours = fresh.TotalHours;
             RefreshAll();
+            await LoadActiveSessionAsync();
+        }
+
+        /// <summary>
+        /// Launches the game and starts a session; the session is the fallback timer until automatic tracking exists.
+        /// A session is created only if the game has actually started.
+        /// </summary>
+        [RelayCommand]
+        private async Task PlayAsync()
+        {
+            var path = Game.ExecutablePath;
+            var outcome = GameInstall.Launch(path);
+
+            if (outcome.Result == LaunchResult.NotExecutable && await InstallPrompts.AllowExecutionAsync(path))
+                outcome = GameInstall.Launch(path);
+
+            switch (outcome.Result)
+            {
+                case LaunchResult.Started:
+                    // The game is already running and cannot be taken back, so a failure here is only reported.
+                    await BeginSessionAsync("Гру запущено, але сесію не розпочато");
+                    break;
+
+                case LaunchResult.NotFound:
+                    if (await Dialogs.Current.ConfirmAsync("Файл запуску не знайдено",
+                            $"Файлу немає на цьому комп'ютері:\n{path}\n\nВідкрити редактор, щоб вказати його заново?",
+                            "Відкрити редактор"))
+                        await EditAsync();
+                    break;
+
+                case LaunchResult.WrongPlatform:
+                    if (await Dialogs.Current.ConfirmAsync("Гра не запуститься на цій системі",
+                            "Файл запуску є програмою Windows. Почати сесію без запуску гри?",
+                            "Почати сесію"))
+                        await BeginSessionAsync("Не вдалося розпочати сесію");
+                    break;
+
+                case LaunchResult.Failed:
+                    await Dialogs.Current.ErrorAsync("Не вдалося запустити гру", path, outcome.Error!);
+                    break;
+
+                case LaunchResult.Cancelled:      // the player declined the administrator prompt
+
+                case LaunchResult.NotExecutable:  // the player declined the execute permission
+                    break;
+            }
+        }
+
+        /// <summary> Starts a session by hand for a game that is not launched from the application. </summary>
+        [RelayCommand]
+        private Task StartSessionAsync() => BeginSessionAsync("Не вдалося розпочати сесію");
+
+        /// <summary> Ends the running session now. </summary>
+        [RelayCommand]
+        private async Task StopSessionAsync()
+        {
+            if (ActiveSession is not { } session) return;
+
+            try
+            {
+                SessionRepository.Stop(session.PlaySessionId);
+            }
+            catch (DatabaseException ex)
+            {
+                await ShowErrorAsync("Не вдалося завершити сесію", ex);
+                return;
+            }
+
+            await AfterSessionChangeAsync();
+        }
+
+        /// <summary> Opens the install folder in the file manager. </summary>
+        [RelayCommand]
+        private Task OpenInstallFolderAsync() => Dialogs.Current.OpenExistingFolderAsync(Game.InstallPath);
+
+        /// <summary> Opens a session at the current time; the time is taken by the database. </summary>
+        private async Task BeginSessionAsync(string errorTitle)
+        {
+            try
+            {
+                SessionRepository.Start(Game.GameId);
+            }
+            catch (DatabaseException ex)
+            {
+                await ShowErrorAsync(errorTitle, ex);
+                return;
+            }
+
+            await AfterSessionChangeAsync();
+        }
+
+        /// <summary> Reloads the game (total time, running session) and the sessions tab if it is open. </summary>
+        private async Task AfterSessionChangeAsync()
+        {
+            await ReloadAsync();
+            if (IsSessionsTab)
+                Sessions.Reload();
         }
 
         /// <summary> Opens the editor (it saves the game itself) and reloads the page. </summary>

@@ -83,7 +83,25 @@
 							</Panel>
 						</Border>
 
-						<!-- Actions: edit plus a menu with the rest. The main action row will go above this one -->
+						<!-- Main action: play, start a session by hand, or end the running one -->
+						<Panel Margin="0,0,0,8" IsVisible="{Binding HasMainAction}">
+							<Button Classes="accent" Height="40"
+									HorizontalAlignment="Stretch" HorizontalContentAlignment="Center"
+									Content="▶ Грати" Command="{Binding PlayCommand}"
+									IsVisible="{Binding ShowPlay}"/>
+							<Button Classes="accent" Height="40"
+									HorizontalAlignment="Stretch" HorizontalContentAlignment="Center"
+									Content="▶ Почати сесію" Command="{Binding StartSessionCommand}"
+									IsVisible="{Binding ShowStartSession}"/>
+							<Button Height="40"
+									HorizontalAlignment="Stretch" HorizontalContentAlignment="Center"
+									Command="{Binding StopSessionCommand}"
+									IsVisible="{Binding IsPlaying}">
+								<TextBlock Text="{Binding ElapsedText, StringFormat='■ Завершити · {0}'}"/>
+							</Button>
+						</Panel>
+
+						<!-- Actions: edit plus a menu with the rest -->
 						<Grid ColumnDefinitions="2*,8,*" Margin="0,0,0,8">
 							<Button Grid.Column="0" Content="✏ Редагувати"
 									Command="{Binding EditCommand}"
@@ -92,6 +110,8 @@
 									HorizontalAlignment="Stretch">
 								<Button.Flyout>
 									<MenuFlyout>
+										<MenuItem Header="📂 Відкрити теку гри" Command="{Binding OpenInstallFolderCommand}"
+												  IsVisible="{Binding HasInstallFolder}"/>
 										<MenuItem Header="📦 В архів" Command="{Binding ArchiveCommand}"
 												  IsVisible="{Binding !IsArchived}"/>
 										<MenuItem Header="♻ Відновити" Command="{Binding RestoreCommand}"

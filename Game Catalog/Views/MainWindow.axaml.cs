@@ -21,6 +21,9 @@ namespace Game_Catalog.Views
         /// <summary>Prevents stacking multiple simultaneous save-error dialogs.</summary>
         private bool _saveErrorShown;
 
+        /// <summary>Set once the exit has been confirmed, so the repeated close goes through.</summary>
+        private bool _exitConfirmed;
+
         /// <summary>Currently open developer query window, if any.</summary>
         private QueryEditorWindow? _queryWindow;
 
@@ -52,6 +55,25 @@ namespace Game_Catalog.Views
                         Dispatcher.UIThread.Post(() => RootGrid.Focus());
                 };
                 vm.Start();
+            }
+        }
+
+        /// <summary>
+        /// Asks about sessions still in progress before closing. The question is asynchronous,
+        /// so the first close is cancelled and repeated after the answer. OS shutdown is not held.
+        /// </summary>
+        protected override async void OnClosing(WindowClosingEventArgs e)
+        {
+            base.OnClosing(e);
+            if (_exitConfirmed || e.Cancel || e.CloseReason == WindowCloseReason.OSShutdown
+                || DataContext is not MainWindowViewModel vm)
+                return;
+
+            e.Cancel = true;
+            if (await vm.ConfirmExitAsync())
+            {
+                _exitConfirmed = true;
+                Close();
             }
         }
 
