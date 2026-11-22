@@ -35,6 +35,9 @@ namespace Game_Catalog.ViewModels
         /// <summary> The statistics page. </summary>
         public StatisticsViewModel StatisticsPage { get; } = new();
 
+        /// <summary> The reports page. </summary>
+        public ReportsViewModel ReportsPage { get; } = new();
+
         /// <summary> The archive page. </summary>
         public GamesListViewModel ArchivePage { get; } = new(isArchive: true);
 
@@ -69,6 +72,7 @@ namespace Game_Catalog.ViewModels
                 new NavItem("⏱", "Сесії", SessionsPage),
                 new NavItem("🎯", "Цілі", GoalsPage),
                 new NavItem("📊", "Статистика", StatisticsPage),
+                new NavItem("📄", "Звіти", ReportsPage),
                 new NavItem("📦", "Архів", ArchivePage),
                 new NavItem("🏷", "Довідники", DictionariesPage)
             };

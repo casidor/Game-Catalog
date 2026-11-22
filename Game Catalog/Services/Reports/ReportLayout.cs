@@ -2,68 +2,225 @@
 using QuestPDF.Helpers;
 using QuestPDF.Infrastructure;
 using System;
+using System.Collections.Generic;
 using System.Globalization;
+using System.Linq;
 using System.Threading.Tasks;
 
 namespace Game_Catalog.Services
 {
-    /// <summary> Common page layout and table styles shared by all PDF reports. </summary>
+    /// <summary> Horizontal alignment of a report column. </summary>
+    public enum ReportAlign
+    {
+        Left,
+        Center,
+        Right
+    }
+
+    /// <summary>
+    /// Column of a report table: the header and how to get the cell text from a row.
+    /// A column with a <see cref="Width"/> in points has a fixed size, for short values such as numbers,
+    /// dates and statuses. A column without it shares the rest of the table width with the other such
+    /// columns in proportion to <see cref="Weight"/>, and its text wraps, for titles and lists.
+    /// <see cref="Bold"/> is for the column that names the row, <see cref="Badge"/> for statuses.
+    /// </summary>
+    public sealed record ReportColumn<T>(string Header, Func<T, string> Value,
+        float? Width = null, float Weight = 1, ReportAlign Align = ReportAlign.Left, bool Bold = false, bool Badge = false);
+
+    /// <summary> Summary value shown as a card on the first page of a report, such as a total or the period. </summary>
+    public sealed record ReportFact(string Label, string Value);
+
+    /// <summary> Common page layout and table style shared by all PDF reports. </summary>
     public static class ReportLayout
     {
         /// <summary> Text shown in a cell when the value is missing. </summary>
         public const string Missing = "–";
 
+        private const string AppName = "Бібліотека відеоігор";
+
+        private const string TextColor = "#0F172A";
+        private const string MutedColor = "#64748B";
+        private const string MissingColor = "#94A3B8";
+        private const string AccentColor = "#5A64A8";
+        private const string LineColor = "#CBD5E1";
+        private const string CardBackground = "#F8FAFC";
+        private const string HeaderBackground = "#F1F5F9";
+        private const string HeaderTextColor = "#475569";
+        private const string RowBackground = "#FFFFFF";
+        private const string StripeBackground = "#F8FAFC";
+        private const string BadgeBackground = "#E2E8F0";
+
+        private const float PageMargin = 42.5f;   // 1.5 cm in points
+        private const float TableBorder = 0.5f;
+        private const float CellPadding = 8f;     // horizontal padding of every cell
+        private const float BadgePadding = 8f;    // horizontal padding inside a badge
+
         private static readonly CultureInfo Culture = CultureInfo.GetCultureInfo("uk-UA");
 
-        /// <summary> Creates an A4 report with the title, the generation time, page numbers and the given content. </summary>
-        /// <param name="title"> Report title shown in the header and stored in the PDF metadata. </param>
-        /// <param name="parameters"> Line with the report parameters, such as the period, or null if there are none. </param>
+        /// <summary>
+        /// Creates an A4 report. The title and the summary cards are shown on the first page only;
+        /// the footer with the app name and the page number is on every page.
+        /// </summary>
+        /// <param name="title"> Report title, also stored in the PDF metadata. </param>
+        /// <param name="facts"> Summary values shown as cards under the title, such as totals or the period. </param>
         /// <param name="landscape"> True for wide tables that do not fit a portrait page. </param>
-        /// <param name="content"> Draws the report body, usually a table. </param>
-        public static Document Create(string title, string? parameters, bool landscape, Action<IContainer> content) =>
-            Document.Create(document => document.Page(page =>
-                {
-                    page.Size(landscape ? PageSizes.A4.Landscape() : PageSizes.A4);
-                    page.Margin(1.5f, Unit.Centimetre);
-                    page.DefaultTextStyle(style => style.FontSize(10));
+        /// <param name="columns"> Columns of the report table. </param>
+        /// <param name="rows"> Rows of the report table, in the order they are printed. </param>
+        public static Document Create<T>(string title, IReadOnlyList<ReportFact> facts, bool landscape,
+            IReadOnlyList<ReportColumn<T>> columns, IReadOnlyList<T> rows)
+        {
+            var size = landscape ? PageSizes.A4.Landscape() : PageSizes.A4;
 
-                    page.Header().Element(header => ComposeHeader(header, title, parameters));
-                    page.Content().PaddingVertical(10).Element(content);
-                    page.Footer().AlignCenter().Text(text =>
+            return Document.Create(document => document.Page(page =>
+                {
+                    page.Size(size);
+                    page.Margin(PageMargin);
+                    page.DefaultTextStyle(style => style.FontSize(10).FontColor(TextColor));
+
+                    page.Content().Column(column =>
                     {
-                        text.Span("Сторінка ");
-                        text.CurrentPageNumber();
-                        text.Span(" з ");
-                        text.TotalPages();
+                        column.Item().Element(intro => ComposeIntro(intro, title, facts));
+                        column.Item().PaddingTop(16).Element(table => ComposeTable(table, columns, rows));
                     });
+                    page.Footer().PaddingTop(8).Element(ComposeFooter);
                 }))
                 .WithMetadata(new DocumentMetadata { Title = title });
+        }
 
         /// <summary> Generates the PDF file in the background, replacing the file if it exists. </summary>
         public static Task SaveAsync(Document document, string path) =>
             Task.Run(() => document.GeneratePdf(path));
 
-        /// <summary> Style of a table header cell. The header is repeated on every page. </summary>
-        public static IContainer HeaderCell(this IContainer container) =>
-            container.Background(Colors.Grey.Lighten3)
-                .BorderBottom(1).BorderColor(Colors.Grey.Darken1)
-                .PaddingVertical(4).PaddingHorizontal(4)
-                .DefaultTextStyle(style => style.SemiBold());
+        /// <summary>
+        /// Draws a table with a header repeated on every page, an outer border
+        /// and striped rows. Missing values are muted.
+        /// Every cell has the same padding. Text wraps between words; QuestPDF itself splits a word
+        /// that is wider than the whole column, so a long title without spaces does not break the layout.
+        /// </summary>
+        private static void ComposeTable<T>(IContainer container, IReadOnlyList<ReportColumn<T>> columns,
+            IReadOnlyList<T> rows)
+        {
+            var cells = rows.Select(row => columns.Select(column => column.Value(row)).ToArray()).ToList();
 
-        /// <summary> Style of a table body cell. </summary>
-        public static IContainer BodyCell(this IContainer container) =>
-            container.BorderBottom(0.5f).BorderColor(Colors.Grey.Lighten2)
-                .PaddingVertical(3).PaddingHorizontal(4);
+            container.Border(TableBorder).BorderColor(LineColor).Table(table =>
+            {
+                table.ColumnsDefinition(definition =>
+                {
+                    foreach (var column in columns)
+                    {
+                        if (column.Width is { } width)
+                            definition.ConstantColumn(width);
+                        else
+                            definition.RelativeColumn(column.Weight);
+                    }
+                });
 
-        private static void ComposeHeader(IContainer container, string title, string? parameters)
+                table.Header(header =>
+                {
+                    foreach (var column in columns)
+                        Align(HeaderCell(header.Cell()), column.Align).Text(column.Header);
+                });
+
+                for (var r = 0; r < cells.Count; r++)
+                {
+                    // Zebra: every second row (odd index, counting from 0) gets the stripe colour.
+                    var background = r % 2 == 1 ? StripeBackground : RowBackground;
+                    for (var c = 0; c < columns.Count; c++)
+                        ComposeCell(BodyCell(table.Cell().Background(background)), columns[c], cells[r][c]);
+                }
+            });
+        }
+
+        private static void ComposeCell<T>(IContainer container, ReportColumn<T> column, string value)
+        {
+            if (value == Missing)
+            {
+                Align(container, column.Align).Text(value).FontColor(MissingColor);
+                return;
+            }
+
+            if (column.Badge)
+            {
+                // The badge takes the full column width, so all badges are the same size,
+                // and only the height of its text, so it does not stretch to a tall row.
+                container.ShrinkVertical()
+                    .Background(BadgeBackground).CornerRadius(8)
+                    .PaddingHorizontal(BadgePadding).PaddingVertical(1)
+                    .AlignCenter().Text(value);
+                return;
+            }
+
+            var text = Align(container, column.Align).Text(value);
+            if (column.Bold)
+                text.SemiBold();
+        }
+
+        private static IContainer HeaderCell(IContainer container) =>
+            container.Background(HeaderBackground)
+                .BorderBottom(1).BorderColor(LineColor)
+                .PaddingVertical(6).PaddingHorizontal(CellPadding)
+                .DefaultTextStyle(style => style.SemiBold().FontColor(HeaderTextColor));
+
+        private static IContainer BodyCell(IContainer container) =>
+            container.PaddingVertical(6).PaddingHorizontal(CellPadding);
+
+        private static IContainer Align(IContainer container, ReportAlign align) => align switch
+        {
+            ReportAlign.Center => container.AlignCenter(),
+            ReportAlign.Right => container.AlignRight(),
+            _ => container.AlignLeft()
+        };
+
+        /// <summary> Title with an accent bar and the generation time, then a row of summary cards. </summary>
+        private static void ComposeIntro(IContainer container, string title, IReadOnlyList<ReportFact> facts)
         {
             container.Column(column =>
             {
-                column.Item().Text(title).FontSize(16).SemiBold();
-                if (parameters != null)
-                    column.Item().Text(parameters);
-                column.Item().Text($"Сформовано: {DateTime.Now.ToString("dd.MM.yyyy HH:mm", Culture)}")
-                    .FontColor(Colors.Grey.Darken1);
+                column.Item().Row(row =>
+                {
+                    row.ConstantItem(4).Background(AccentColor);
+                    row.ConstantItem(12);
+                    row.RelativeItem().AlignMiddle().Text(title).FontSize(24).Bold();
+                    row.AutoItem().AlignMiddle()
+                        .Text($"Сформовано: {DateTime.Now.ToString("dd.MM.yyyy HH:mm", Culture)}")
+                        .FontColor(MutedColor);
+                });
+
+                if (facts.Count == 0) return;
+
+                column.Item().PaddingTop(16).Row(row =>
+                {
+                    row.Spacing(12);
+                    foreach (var fact in facts)
+                    {
+                        row.RelativeItem()
+                            .Border(0.5f).BorderColor(LineColor).CornerRadius(6).Background(CardBackground)
+                            .PaddingVertical(10).PaddingHorizontal(12)
+                            .AlignCenter()
+                            .Text(text =>
+                            {
+                                text.DefaultTextStyle(style => style.FontSize(12));
+                                text.Span($"{fact.Label}: ");
+                                text.Span(fact.Value).Bold();
+                            });
+                    }
+                });
+            });
+        }
+
+        private static void ComposeFooter(IContainer container)
+        {
+            container.BorderTop(0.5f).BorderColor(LineColor).PaddingTop(6).Row(row =>
+            {
+                row.RelativeItem().Text(AppName).FontColor(MutedColor);
+                row.RelativeItem().AlignRight().Text(text =>
+                {
+                    text.DefaultTextStyle(style => style.FontColor(MutedColor));
+                    text.Span("Сторінка ");
+                    text.CurrentPageNumber();
+                    text.Span(" з ");
+                    text.TotalPages();
+                });
             });
         }
     }

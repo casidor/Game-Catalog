@@ -1,0 +1,55 @@
+﻿<UserControl xmlns="https://github.com/avaloniaui"
+			 xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+			 xmlns:vm="using:Game_Catalog.ViewModels"
+			 x:Class="Game_Catalog.Views.ReportsView"
+			 x:DataType="vm:ReportsViewModel">
+
+	<UserControl.Styles>
+		<!-- One card per report: title and description on the left, the generate button on the right -->
+		<Style Selector="Border.reportCard">
+			<Setter Property="Background" Value="{DynamicResource CardBackground}"/>
+			<Setter Property="CornerRadius" Value="8"/>
+			<Setter Property="Padding" Value="16,14"/>
+		</Style>
+		<Style Selector="TextBlock.reportTitle">
+			<Setter Property="FontSize" Value="16"/>
+			<Setter Property="FontWeight" Value="SemiBold"/>
+		</Style>
+		<Style Selector="TextBlock.reportDescription">
+			<Setter Property="Opacity" Value="0.7"/>
+			<Setter Property="TextWrapping" Value="Wrap"/>
+		</Style>
+		<Style Selector="TextBlock.reportEmpty">
+			<Setter Property="Opacity" Value="0.5"/>
+		</Style>
+	</UserControl.Styles>
+
+	<Grid RowDefinitions="Auto,*">
+
+		<!-- Top bar -->
+		<Border Grid.Row="0" Padding="16,12" Margin="{StaticResource CaptionButtonsInset}">
+			<TextBlock Text="Звіти" FontSize="20" FontWeight="Bold" VerticalAlignment="Center"/>
+		</Border>
+
+		<ScrollViewer Grid.Row="1">
+			<StackPanel Spacing="10" Margin="16,0,16,16">
+
+				<Border Classes="reportCard">
+					<Grid ColumnDefinitions="*,Auto">
+						<StackPanel Grid.Column="0" Spacing="4" VerticalAlignment="Center">
+							<TextBlock Classes="reportTitle" Text="Бібліотека ігор"/>
+							<TextBlock Classes="reportDescription"
+									   Text="Ігри бібліотеки без архівних і доповнень: студія, жанри, платформи, рік, статус, оцінка, час гри та обсяг на диску"/>
+							<TextBlock Classes="reportEmpty" Text="У бібліотеці немає ігор"
+									   IsVisible="{Binding !HasLibraryGames}"/>
+						</StackPanel>
+						<Button Grid.Column="1" Margin="16,0,0,0" VerticalAlignment="Center"
+								Content="Сформувати PDF…"
+								Command="{Binding SaveLibraryReportCommand}"/>
+					</Grid>
+				</Border>
+
+			</StackPanel>
+		</ScrollViewer>
+	</Grid>
+</UserControl>
