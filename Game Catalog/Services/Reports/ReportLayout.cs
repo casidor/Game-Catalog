@@ -30,9 +30,10 @@ namespace Game_Catalog.Services
     /// <summary>
     /// Grouping of report rows: rows with the same <see cref="Key"/> follow each other
     /// under a full-width row with the <see cref="Title"/>, such as the goals of one game.
-    /// The rows must already be ordered by the key.
+    /// An optional <see cref="Summary"/> is shown muted on the right of the title row, such as the totals of a day;
+    /// both are taken from the first row of the group. The rows must already be ordered by the key.
     /// </summary>
-    public sealed record ReportGrouping<T>(Func<T, object> Key, Func<T, string> Title);
+    public sealed record ReportGrouping<T>(Func<T, object> Key, Func<T, string> Title, Func<T, string>? Summary = null);
 
     /// <summary> Summary value shown as a card on the first page of a report, such as a total or the period. </summary>
     public sealed record ReportFact(string Label, string Value);
@@ -144,6 +145,7 @@ namespace Game_Catalog.Services
                         end++;
 
                     var title = grouping.Title(rows[start]);
+                    var summary = grouping.Summary?.Invoke(rows[start]);
                     var from = start;
                     var to = end;
                     table.Cell().ColumnSpan((uint)columns.Count)
@@ -154,7 +156,12 @@ namespace Game_Catalog.Services
                             group.Cell().ColumnSpan((uint)columns.Count)
                                 .Background(GroupBackground)
                                 .PaddingVertical(6).PaddingHorizontal(CellPadding)
-                                .Text(title).SemiBold();
+                                .Row(row =>
+                                {
+                                    row.RelativeItem().Text(title).SemiBold();
+                                    if (summary != null)
+                                        row.AutoItem().Text(summary).FontColor(MutedColor);
+                                });
                             ComposeRows(group, columns, cells, from, to);
                         });
 
@@ -256,7 +263,8 @@ namespace Game_Catalog.Services
                         row.RelativeItem()
                             .Border(0.5f).BorderColor(LineColor).CornerRadius(6).Background(CardBackground)
                             .PaddingVertical(10).PaddingHorizontal(12)
-                            .AlignCenter()
+                            // Cards in a row share the height of the tallest one, so a short text is centred vertically too.
+                            .AlignCenter().AlignMiddle()
                             .Text(text =>
                             {
                                 text.DefaultTextStyle(style => style.FontSize(12));

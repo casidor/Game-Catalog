@@ -64,6 +64,33 @@
 					</Grid>
 				</Border>
 
+				<Border Classes="reportCard">
+					<Grid ColumnDefinitions="*,Auto">
+						<StackPanel Grid.Column="0" Spacing="4" VerticalAlignment="Center">
+							<TextBlock Classes="reportTitle" Text="Ігрова активність за період"/>
+							<TextBlock Classes="reportDescription"
+									   Text="Завершені ігрові сесії за обраний період, згруповані за днем: гра, час початку, тривалість і спосіб додавання"/>
+							<StackPanel Orientation="Horizontal" Spacing="8" Margin="0,4,0,0">
+								<TextBlock Text="Період:" VerticalAlignment="Center" Opacity="0.6"/>
+								<CalendarDatePicker SelectedDate="{Binding ActivityFrom}"
+													SelectedDateFormat="Custom"
+													CustomDateFormatString="dd.MM.yyyy"
+													Width="150"/>
+								<TextBlock Text="–" VerticalAlignment="Center"/>
+								<CalendarDatePicker SelectedDate="{Binding ActivityTo}"
+													SelectedDateFormat="Custom"
+													CustomDateFormatString="dd.MM.yyyy"
+													Width="150"/>
+							</StackPanel>
+							<TextBlock Classes="reportEmpty" Text="{Binding ActivityEmptyText}"
+									   IsVisible="{Binding !HasActivityRows}"/>
+						</StackPanel>
+						<Button Grid.Column="1" Margin="16,0,0,0" VerticalAlignment="Center"
+								Content="Сформувати PDF…"
+								Command="{Binding SaveActivityReportCommand}"/>
+					</Grid>
+				</Border>
+
 			</StackPanel>
 		</ScrollViewer>
 	</Grid>
