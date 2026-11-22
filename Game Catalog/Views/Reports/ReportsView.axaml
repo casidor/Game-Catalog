@@ -49,6 +49,21 @@
 					</Grid>
 				</Border>
 
+				<Border Classes="reportCard">
+					<Grid ColumnDefinitions="*,Auto">
+						<StackPanel Grid.Column="0" Spacing="4" VerticalAlignment="Center">
+							<TextBlock Classes="reportTitle" Text="Цілі гравця"/>
+							<TextBlock Classes="reportDescription"
+									   Text="Цілі ігор бібліотеки без архівних, згруповані за грою: опис, пріоритет, дати, статус і залишок днів до терміну"/>
+							<TextBlock Classes="reportEmpty" Text="Цілей немає"
+									   IsVisible="{Binding !HasGoals}"/>
+						</StackPanel>
+						<Button Grid.Column="1" Margin="16,0,0,0" VerticalAlignment="Center"
+								Content="Сформувати PDF…"
+								Command="{Binding SaveGoalReportCommand}"/>
+					</Grid>
+				</Border>
+
 			</StackPanel>
 		</ScrollViewer>
 	</Grid>

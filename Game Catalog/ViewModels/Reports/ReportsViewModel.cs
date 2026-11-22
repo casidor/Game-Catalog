@@ -24,6 +24,15 @@ namespace Game_Catalog.ViewModels
         /// <summary> True when the library report has at least one game. </summary>
         public bool HasLibraryGames => LibraryGameCount > 0;
 
+        /// <summary> Number of goals the goals report would list. </summary>
+        [ObservableProperty]
+        [NotifyPropertyChangedFor(nameof(HasGoals))]
+        [NotifyCanExecuteChangedFor(nameof(SaveGoalReportCommand))]
+        private int _goalCount;
+
+        /// <summary> True when the goals report has at least one goal. </summary>
+        public bool HasGoals => GoalCount > 0;
+
         public override void OnNavigatedTo() => Load();
 
         /// <summary> Checks which reports have data. </summary>
@@ -33,28 +42,42 @@ namespace Game_Catalog.ViewModels
             {
                 // The library summary counts the same games as the report: standalone and not archived.
                 LibraryGameCount = StatisticsRepository.GetLibrarySummary().GameCount;
+                GoalCount = ReportRepository.GetGoalSummary().TotalCount;
             }
             catch (DatabaseException ex)
             {
                 LibraryGameCount = 0;
+                GoalCount = 0;
                 _ = ShowErrorAsync("Помилка завантаження звітів", ex);
             }
         }
 
-        /// <summary> Asks where to save the library report, generates it and opens the file. </summary>
+        /// <summary> Saves the library report. The totals come from the same query as the statistics page. </summary>
         [RelayCommand(CanExecute = nameof(HasLibraryGames))]
-        private async Task SaveLibraryReportAsync()
+        private Task SaveLibraryReportAsync() =>
+            SaveReportAsync(LibraryReport.Title, path => ReportLayout.SaveAsync(
+                LibraryReport.Create(ReportRepository.GetLibraryReport(), StatisticsRepository.GetLibrarySummary()), path));
+
+        /// <summary> Saves the goals report. </summary>
+        [RelayCommand(CanExecute = nameof(HasGoals))]
+        private Task SaveGoalReportAsync() =>
+            SaveReportAsync(GoalReport.Title, path => ReportLayout.SaveAsync(
+                GoalReport.Create(ReportRepository.GetGoalReport(), ReportRepository.GetGoalSummary()), path));
+
+        /// <summary>
+        /// Asks where to save a report, generates it and opens the file.
+        /// The data is loaded inside <paramref name="save"/>, so database errors are reported here too.
+        /// </summary>
+        /// <param name="title"> Report title, used for the picker and the suggested file name. </param>
+        /// <param name="save"> Loads the data, builds the document and writes it to the given path. </param>
+        private static async Task SaveReportAsync(string title, Func<string, Task> save)
         {
-            var path = await Dialogs.Current.PickPdfSaveFileAsync(
-                $"Звіт «{LibraryReport.Title}»", $"{LibraryReport.Title} {DateTime.Today:yyyy-MM-dd}");
+            var path = await Dialogs.Current.PickPdfSaveFileAsync($"Звіт «{title}»", $"{title} {DateTime.Today:yyyy-MM-dd}");
             if (path == null) return;
 
             try
             {
-                // The totals come from the same aggregate query as the statistics page.
-                var summary = StatisticsRepository.GetLibrarySummary();
-                var rows = ReportRepository.GetLibraryReport();
-                await ReportLayout.SaveAsync(LibraryReport.Create(rows, summary), path);
+                await save(path);
             }
             catch (DatabaseException ex)
             {

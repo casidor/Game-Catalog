@@ -27,6 +27,13 @@ namespace Game_Catalog.Services
     public sealed record ReportColumn<T>(string Header, Func<T, string> Value,
         float? Width = null, float Weight = 1, ReportAlign Align = ReportAlign.Left, bool Bold = false, bool Badge = false);
 
+    /// <summary>
+    /// Grouping of report rows: rows with the same <see cref="Key"/> follow each other
+    /// under a full-width row with the <see cref="Title"/>, such as the goals of one game.
+    /// The rows must already be ordered by the key.
+    /// </summary>
+    public sealed record ReportGrouping<T>(Func<T, object> Key, Func<T, string> Title);
+
     /// <summary> Summary value shown as a card on the first page of a report, such as a total or the period. </summary>
     public sealed record ReportFact(string Label, string Value);
 
@@ -49,11 +56,16 @@ namespace Game_Catalog.Services
         private const string RowBackground = "#FFFFFF";
         private const string StripeBackground = "#F8FAFC";
         private const string BadgeBackground = "#E2E8F0";
+        private const string GroupBackground = "#E2E8F0";
 
         private const float PageMargin = 42.5f;   // 1.5 cm in points
         private const float TableBorder = 0.5f;
         private const float CellPadding = 8f;     // horizontal padding of every cell
         private const float BadgePadding = 8f;    // horizontal padding inside a badge
+
+        // Room a group needs on a page before it may start there: its title row and about one row.
+        // With less room left, a group that does not fit the page starts on the next one.
+        private const float GroupKeepSpace = 60f;
 
         private static readonly CultureInfo Culture = CultureInfo.GetCultureInfo("uk-UA");
 
@@ -66,8 +78,9 @@ namespace Game_Catalog.Services
         /// <param name="landscape"> True for wide tables that do not fit a portrait page. </param>
         /// <param name="columns"> Columns of the report table. </param>
         /// <param name="rows"> Rows of the report table, in the order they are printed. </param>
+        /// <param name="grouping"> Groups the rows under title rows, or null for a plain table. </param>
         public static Document Create<T>(string title, IReadOnlyList<ReportFact> facts, bool landscape,
-            IReadOnlyList<ReportColumn<T>> columns, IReadOnlyList<T> rows)
+            IReadOnlyList<ReportColumn<T>> columns, IReadOnlyList<T> rows, ReportGrouping<T>? grouping = null)
         {
             var size = landscape ? PageSizes.A4.Landscape() : PageSizes.A4;
 
@@ -80,7 +93,7 @@ namespace Game_Catalog.Services
                     page.Content().Column(column =>
                     {
                         column.Item().Element(intro => ComposeIntro(intro, title, facts));
-                        column.Item().PaddingTop(16).Element(table => ComposeTable(table, columns, rows));
+                        column.Item().PaddingTop(16).Element(table => ComposeTable(table, columns, rows, grouping));
                     });
                     page.Footer().PaddingTop(8).Element(ComposeFooter);
                 }))
@@ -98,22 +111,13 @@ namespace Game_Catalog.Services
         /// that is wider than the whole column, so a long title without spaces does not break the layout.
         /// </summary>
         private static void ComposeTable<T>(IContainer container, IReadOnlyList<ReportColumn<T>> columns,
-            IReadOnlyList<T> rows)
+            IReadOnlyList<T> rows, ReportGrouping<T>? grouping)
         {
             var cells = rows.Select(row => columns.Select(column => column.Value(row)).ToArray()).ToList();
 
             container.Border(TableBorder).BorderColor(LineColor).Table(table =>
             {
-                table.ColumnsDefinition(definition =>
-                {
-                    foreach (var column in columns)
-                    {
-                        if (column.Width is { } width)
-                            definition.ConstantColumn(width);
-                        else
-                            definition.RelativeColumn(column.Weight);
-                    }
-                });
+                DefineColumns(table, columns);
 
                 table.Header(header =>
                 {
@@ -121,14 +125,70 @@ namespace Game_Catalog.Services
                         Align(HeaderCell(header.Cell()), column.Align).Text(column.Header);
                 });
 
-                for (var r = 0; r < cells.Count; r++)
+                if (grouping == null)
                 {
-                    // Zebra: every second row (odd index, counting from 0) gets the stripe colour.
-                    var background = r % 2 == 1 ? StripeBackground : RowBackground;
-                    for (var c = 0; c < columns.Count; c++)
-                        ComposeCell(BodyCell(table.Cell().Background(background)), columns[c], cells[r][c]);
+                    ComposeRows(table, columns, cells, 0, cells.Count);
+                    return;
+                }
+
+                // Every group is one cell across the whole table with its own inner table:
+                // the title row and the rows of the group, with the same columns as the outer table.
+                // EnsureSpace works on the whole group: if the group has to break across pages
+                // and there is too little room left for its title and first rows, it starts on the next page.
+                var start = 0;
+                while (start < cells.Count)
+                {
+                    var key = grouping.Key(rows[start]);
+                    var end = start + 1;
+                    while (end < cells.Count && Equals(grouping.Key(rows[end]), key))
+                        end++;
+
+                    var title = grouping.Title(rows[start]);
+                    var from = start;
+                    var to = end;
+                    table.Cell().ColumnSpan((uint)columns.Count)
+                        .EnsureSpace(GroupKeepSpace)
+                        .Table(group =>
+                        {
+                            DefineColumns(group, columns);
+                            group.Cell().ColumnSpan((uint)columns.Count)
+                                .Background(GroupBackground)
+                                .PaddingVertical(6).PaddingHorizontal(CellPadding)
+                                .Text(title).SemiBold();
+                            ComposeRows(group, columns, cells, from, to);
+                        });
+
+                    start = end;
                 }
             });
+        }
+
+        /// <summary> Fixed columns get their width in points, the others share the rest by weight. </summary>
+        private static void DefineColumns<T>(TableDescriptor table, IReadOnlyList<ReportColumn<T>> columns)
+        {
+            table.ColumnsDefinition(definition =>
+            {
+                foreach (var column in columns)
+                {
+                    if (column.Width is { } width)
+                        definition.ConstantColumn(width);
+                    else
+                        definition.RelativeColumn(column.Weight);
+                }
+            });
+        }
+
+        /// <summary> Draws the rows from <paramref name="from"/> up to <paramref name="to"/>, not included, as zebra stripes. </summary>
+        private static void ComposeRows<T>(TableDescriptor table, IReadOnlyList<ReportColumn<T>> columns,
+            List<string[]> cells, int from, int to)
+        {
+            for (var r = from; r < to; r++)
+            {
+                // Zebra: every second row (odd index, counting from the first row) gets the stripe colour.
+                var background = (r - from) % 2 == 1 ? StripeBackground : RowBackground;
+                for (var c = 0; c < columns.Count; c++)
+                    ComposeCell(BodyCell(table.Cell().Background(background)), columns[c], cells[r][c]);
+            }
         }
 
         private static void ComposeCell<T>(IContainer container, ReportColumn<T> column, string value)

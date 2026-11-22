@@ -37,5 +37,46 @@ namespace Game_Catalog.Data.Repositories
                       AND g.parent_game_id IS NULL
                     ORDER BY g.game_title COLLATE UKR_NOCASE, g.game_id").AsList();
             });
+
+        /// <summary>
+        /// Returns the rows of the "Player goals" report, grouped by game.
+        /// Within a game the goals that need attention come first: overdue, active, completed, cancelled,
+        /// then by priority and the nearest due date.
+        /// </summary>
+        public static List<GoalReportRow> GetGoalReport() =>
+            Db.Run("Не вдалося завантажити дані звіту про цілі", () =>
+            {
+                using var connection = Db.Open();
+                // DLC need no filter here: a trigger does not let a DLC have goals.
+                return connection.Query<GoalReportRow>(@"
+                    SELECT game_id, game_title, goal_name, goal_description, priority,
+                           created_at, due_date, display_status, completed_at, days_left
+                    FROM v_goal
+                    WHERE is_archived = 0
+                    ORDER BY game_title COLLATE UKR_NOCASE, game_id,
+                             CASE display_status
+                                 WHEN 'Overdue'   THEN 0
+                                 WHEN 'Active'    THEN 1
+                                 WHEN 'Completed' THEN 2
+                                 ELSE 3
+                             END,
+                             priority, due_date NULLS LAST, goal_id").AsList();
+            });
+
+        /// <summary> Returns the number of goals of games that are not archived, in total and by status. </summary>
+        public static GoalSummary GetGoalSummary() =>
+            Db.Run("Не вдалося завантажити кількість цілей", () =>
+            {
+                using var connection = Db.Open();
+                // COUNT with FILTER gives 0 rather than NULL when there are no goals.
+                return connection.QuerySingle<GoalSummary>(@"
+                    SELECT COUNT(*)                                             AS total_count,
+                           COUNT(*) FILTER (WHERE display_status = 'Active')    AS active_count,
+                           COUNT(*) FILTER (WHERE display_status = 'Overdue')   AS overdue_count,
+                           COUNT(*) FILTER (WHERE display_status = 'Completed') AS completed_count,
+                           COUNT(*) FILTER (WHERE display_status = 'Cancelled') AS cancelled_count
+                    FROM v_goal
+                    WHERE is_archived = 0");
+            });
     }
 }
