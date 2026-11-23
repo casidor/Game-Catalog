@@ -1,4 +1,4 @@
-using Avalonia.Controls;
+﻿using Avalonia.Controls;
 using Avalonia.Input;
 using Avalonia.Interactivity;
 using Avalonia.Platform.Storage;
@@ -24,8 +24,10 @@ namespace Game_Catalog.Views
         /// <summary>Set once the exit has been confirmed, so the repeated close goes through.</summary>
         private bool _exitConfirmed;
 
-        /// <summary>Currently open developer query window, if any.</summary>
+#if DEBUG
+        /// <summary>Currently open developer query window, if any. Debug builds only.</summary>
         private QueryEditorWindow? _queryWindow;
+#endif
 
         /// <summary>Initializes the window and loads XAML.</summary>
         public MainWindow()
@@ -116,6 +118,8 @@ namespace Game_Catalog.Views
                 "Tab / Shift+Tab — перехід між полями форми");
 
             }
+#if DEBUG
+            // The developer query editor can change any data, so it is not available in release builds.
             if (e.Key == Key.F12)
             {
                 e.Handled = true;
@@ -130,6 +134,7 @@ namespace Game_Catalog.Views
                     _queryWindow.Show();
                 }
             }
+#endif
             base.OnKeyDown(e);
         }
     }
