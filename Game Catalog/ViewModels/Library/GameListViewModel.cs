@@ -4,6 +4,7 @@ using Game_Catalog.Converters;
 using Game_Catalog.Data.Repositories;
 using Game_Catalog.Models;
 using Game_Catalog.Services;
+using Game_Catalog.Validation;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -260,7 +261,7 @@ namespace Game_Catalog.ViewModels
             HashSet<int> matches;
             try
             {
-                matches = GameRepository.GetMatchIds(SearchText);
+                matches = GameRepository.GetMatchIds(TextRules.NormalizeName(SearchText));
             }
             catch (DatabaseException ex)
             {

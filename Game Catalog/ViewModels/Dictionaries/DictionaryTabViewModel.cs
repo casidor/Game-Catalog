@@ -2,6 +2,7 @@
 using CommunityToolkit.Mvvm.Input;
 using Game_Catalog.Models;
 using Game_Catalog.Services;
+using Game_Catalog.Validation;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -127,7 +128,7 @@ namespace Game_Catalog.ViewModels
             HashSet<int> matches;
             try
             {
-                matches = LoadMatchIds(SearchText);
+                matches = LoadMatchIds(TextRules.NormalizeName(SearchText));
             }
             catch (DatabaseException ex)
             {
