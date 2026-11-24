@@ -3,6 +3,7 @@ using CommunityToolkit.Mvvm.Input;
 using Game_Catalog.Data.Repositories;
 using Game_Catalog.Models;
 using Game_Catalog.Services;
+using Game_Catalog.Validation;
 using System;
 using System.Collections.ObjectModel;
 using System.ComponentModel.DataAnnotations;
@@ -212,6 +213,7 @@ namespace Game_Catalog.ViewModels
         [RelayCommand]
         private async Task ConfirmAsync()
         {
+            Note = TextRules.NormalizeFree(Note);
             ValidateAllProperties();
             if (HasErrors) return;
 

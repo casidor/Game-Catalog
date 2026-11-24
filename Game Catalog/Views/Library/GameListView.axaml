@@ -3,6 +3,7 @@
 			 xmlns:vm="using:Game_Catalog.ViewModels"
 			 xmlns:models="using:Game_Catalog.Models"
 			 xmlns:conv="using:Game_Catalog.Converters"
+			 xmlns:val="using:Game_Catalog.Validation"
 			 x:Class="Game_Catalog.Views.GamesListView"
 			 x:DataType="vm:GamesListViewModel">
 
@@ -442,10 +443,10 @@
 								<TextBlock Text="Рік випуску" FontSize="15" FontWeight="SemiBold"/>
 								<Grid ColumnDefinitions="Auto,8,*,16,Auto,8,*">
 									<TextBlock Grid.Column="0" Text="від" VerticalAlignment="Center"/>
-									<NumericUpDown Grid.Column="2" FormatString="0"
+									<NumericUpDown Grid.Column="2" FormatString="0" Minimum="{x:Static val:YearLimits.ReleaseYearMinimum}" Maximum="{x:Static val:YearLimits.ReleaseYearMaximum}"
 												   Value="{Binding DraftYearFrom, Converter={x:Static conv:DecimalToNullableIntConverter.Instance}}"/>
 									<TextBlock Grid.Column="4" Text="до" VerticalAlignment="Center"/>
-									<NumericUpDown Grid.Column="6" FormatString="0"
+									<NumericUpDown Grid.Column="6" FormatString="0" Minimum="{x:Static val:YearLimits.ReleaseYearMinimum}" Maximum="{x:Static val:YearLimits.ReleaseYearMaximum}"
 												   Value="{Binding DraftYearTo, Converter={x:Static conv:DecimalToNullableIntConverter.Instance}}"/>
 								</Grid>
 							</StackPanel>

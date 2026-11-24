@@ -14,14 +14,14 @@ namespace Game_Catalog.ViewModels
         [Required(ErrorMessage = "Назва не може бути порожньою")]
         [MinLength(2, ErrorMessage = "Назва занадто коротка")]
         [MaxLength(100, ErrorMessage = "Назва не може перевищувати 100 символів")]
-        [NotWhiteSpace(ErrorMessage = "Назва не може бути лише з пробілів")]
+        [NameText]
         [NotifyDataErrorInfo]
         [ObservableProperty]
         private string _platformName = string.Empty;
 
         /// <summary> Optional manufacturer of the platform. </summary>
         [MaxLength(100, ErrorMessage = "Назва виробника не може перевищувати 100 символів")]
-        [NotWhiteSpace(ErrorMessage = "Назва виробника не може складатися лише з пробілів")]
+        [NameText("Назва виробника")]
         [NotifyDataErrorInfo]
         [ObservableProperty]
         private string _manufacturer = string.Empty;
@@ -67,6 +67,8 @@ namespace Game_Catalog.ViewModels
         [RelayCommand]
         private void Confirm()
         {
+            PlatformName = TextRules.NormalizeName(PlatformName);
+            Manufacturer = TextRules.NormalizeName(Manufacturer);
             ValidateAllProperties();
             if (HasErrors) return;
             Confirmed = true;

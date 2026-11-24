@@ -24,7 +24,7 @@ namespace Game_Catalog.ViewModels
         [Required(ErrorMessage = "Назва не може бути порожньою")]
         [MinLength(2, ErrorMessage = "Назва занадто коротка")]
         [MaxLength(200, ErrorMessage = "Назва не може перевищувати 200 символів")]
-        [NotWhiteSpace(ErrorMessage = "Назва не може бути лише з пробілів")]
+        [NameText]
         [NotifyDataErrorInfo]
         [ObservableProperty]
         private string _title = string.Empty;
@@ -37,7 +37,7 @@ namespace Game_Catalog.ViewModels
         private Studio? _selectedStudio;
 
         /// <summary> Release year. Null if unknown. </summary>
-        [CurrentYearRange(1970, 5, ErrorMessage = "Некоректний рік випуску")]
+        [CurrentYearRange(YearLimits.MinReleaseYear, YearLimits.ReleaseYearsAhead)]
         [NotifyDataErrorInfo]
         [ObservableProperty]
         private int? _releaseYear;
@@ -577,6 +577,8 @@ namespace Game_Catalog.ViewModels
             // Enter executes the command directly, bypassing the disabled button.
             if (!CanConfirm) return;
 
+            Title = TextRules.NormalizeName(Title);
+            Description = TextRules.NormalizeFree(Description);
             ValidateAllProperties();
             if (HasErrors)
             {

@@ -22,7 +22,7 @@ namespace Game_Catalog.ViewModels
         [Required(ErrorMessage = "Назва не може бути порожньою")]
         [MinLength(2, ErrorMessage = "Назва занадто коротка")]
         [MaxLength(100, ErrorMessage = "Назва не може перевищувати 100 символів")]
-        [NotWhiteSpace(ErrorMessage = "Назва не може бути лише з пробілів")]
+        [NameText]
         [NotifyDataErrorInfo]
         [ObservableProperty]
         private string _studioName = string.Empty;
@@ -37,7 +37,7 @@ namespace Game_Catalog.ViewModels
         private string _countrySearchText = string.Empty;
 
         /// <summary> Year the studio was founded. Null if unknown. </summary>
-        [CurrentYearRange(1950, ErrorMessage = "Некоректний рік заснування")]
+        [CurrentYearRange(YearLimits.MinFoundationYear)]
         [NotifyDataErrorInfo]
         [ObservableProperty]
         private int? _foundationYear;
@@ -180,6 +180,8 @@ namespace Game_Catalog.ViewModels
         [RelayCommand]
         private void Confirm()
         {
+            StudioName = TextRules.NormalizeName(StudioName);
+            Website = Website.Trim();
             ValidateAllProperties();
             if (HasErrors) return;
             Confirmed = true;

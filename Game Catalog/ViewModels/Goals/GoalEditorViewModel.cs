@@ -26,8 +26,9 @@ namespace Game_Catalog.ViewModels
 
         /// <summary> Short name of the goal. </summary>
         [Required(ErrorMessage = "Назва не може бути порожньою")]
+        [MinLength(2, ErrorMessage = "Назва занадто коротка")]
         [MaxLength(100, ErrorMessage = "Назва не може перевищувати 100 символів")]
-        [NotWhiteSpace(ErrorMessage = "Назва не може бути лише з пробілів")]
+        [NameText]
         [NotifyDataErrorInfo]
         [ObservableProperty]
         private string _goalName = string.Empty;
@@ -181,6 +182,8 @@ namespace Game_Catalog.ViewModels
         [RelayCommand]
         private async Task ConfirmAsync()
         {
+            GoalName = TextRules.NormalizeName(GoalName);
+            GoalDescription = TextRules.NormalizeFree(GoalDescription);
             ValidateAllProperties();
             if (HasErrors) return;
 

@@ -23,7 +23,7 @@ namespace Game_Catalog.Validation
             if (value is not int year)
                 return new ValidationResult("Вкажіть коректний рік");
 
-            int maxYear = DateTime.Now.Year + MaxYearOffset;
+            int maxYear = YearLimits.MaxYear(MaxYearOffset);
             if (year < MinYear || year > maxYear)
                 return new ValidationResult(ErrorMessage ?? $"Рік має бути між {MinYear} і {maxYear}");
 

@@ -14,7 +14,7 @@ namespace Game_Catalog.ViewModels
         [Required(ErrorMessage = "Назва не може бути порожньою")]
         [MinLength(2, ErrorMessage = "Назва занадто коротка")]
         [MaxLength(100, ErrorMessage = "Назва не може перевищувати 100 символів")]
-        [NotWhiteSpace(ErrorMessage = "Назва не може бути лише з пробілів")]
+        [NameText]
         [NotifyDataErrorInfo]
         [ObservableProperty]
         private string _genreName = string.Empty;
@@ -63,6 +63,8 @@ namespace Game_Catalog.ViewModels
         [RelayCommand]
         private void Confirm()
         {
+            GenreName = TextRules.NormalizeName(GenreName);
+            GenreDescription = TextRules.NormalizeFree(GenreDescription);
             ValidateAllProperties();
             if (HasErrors) return;
             Confirmed = true;

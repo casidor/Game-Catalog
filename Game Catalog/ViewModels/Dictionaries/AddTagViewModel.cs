@@ -15,7 +15,7 @@ namespace Game_Catalog.ViewModels
         [Required(ErrorMessage = "Назва не може бути порожньою")]
         [MinLength(2, ErrorMessage = "Назва занадто коротка")]
         [MaxLength(50, ErrorMessage = "Назва не може перевищувати 50 символів")]
-        [NotWhiteSpace(ErrorMessage = "Назва не може бути лише з пробілів")]
+        [NameText]
         [NotifyDataErrorInfo]
         [ObservableProperty]
         private string _tagName = string.Empty;
@@ -65,6 +65,7 @@ namespace Game_Catalog.ViewModels
         [RelayCommand]
         private void Confirm()
         {
+            TagName = TextRules.NormalizeName(TagName);
             ValidateAllProperties();
             if (HasErrors) return;
             Confirmed = true;
