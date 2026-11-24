@@ -128,6 +128,7 @@ namespace Game_Catalog.Data.Repositories
         public static void Insert(Game game) =>
             Db.InTransaction("Не вдалося зберегти гру", (connection, tx) =>
             {
+                EnsureTitleUnique(connection, tx, game);
                 EnsureInstallPathUnique(connection, tx, game);
 
                 game.GameId = connection.ExecuteScalar<int>(@"
@@ -149,6 +150,7 @@ namespace Game_Catalog.Data.Repositories
         public static void Update(Game game) =>
             Db.InTransaction("Не вдалося оновити гру", (connection, tx) =>
             {
+                EnsureTitleUnique(connection, tx, game);
                 EnsureInstallPathUnique(connection, tx, game);
 
                 connection.Execute(@"
@@ -294,6 +296,27 @@ namespace Game_Catalog.Data.Repositories
                 game.Tags = tags[game.GameId]
                     .Select(r => new Tag { TagId = r.ItemId, TagName = r.ItemName, Color = r.ItemExtra ?? string.Empty }).ToList();
             }
+        }
+
+        /// <summary>
+        /// Throws a duplicate error if another game has the same title, developer and release year.
+        /// Repeats the unique index of the schema, but compares titles ignoring case in any alphabet,
+        /// while the index ignores case of Latin letters only.
+        /// </summary>
+        private static void EnsureTitleUnique(SqliteConnection connection, SqliteTransaction tx, Game game)
+        {
+            var exists = connection.ExecuteScalar<bool>(@"
+                SELECT EXISTS (
+                    SELECT 1 FROM Game
+                    WHERE lower_ua(game_title) = lower_ua(trim(@GameTitle))
+                      AND developer_id = @DeveloperId
+                      AND COALESCE(release_year, 0) = COALESCE(@ReleaseYear, 0)
+                      AND game_id != @GameId)",
+                new { game.GameTitle, game.DeveloperId, game.ReleaseYear, game.GameId }, tx);
+
+            if (exists)
+                throw new DatabaseException(DatabaseErrorKind.Duplicate,
+                    "Не вдалося зберегти гру: гра з такою назвою, студією й роком уже існує.");
         }
 
         /// <summary> Throws a duplicate error if another game already uses the same install folder. </summary>
