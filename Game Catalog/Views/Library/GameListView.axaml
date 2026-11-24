@@ -4,6 +4,7 @@
 			 xmlns:models="using:Game_Catalog.Models"
 			 xmlns:conv="using:Game_Catalog.Converters"
 			 xmlns:val="using:Game_Catalog.Validation"
+			 xmlns:v="using:Game_Catalog.Views"
 			 x:Class="Game_Catalog.Views.GamesListView"
 			 x:DataType="vm:GamesListViewModel">
 
@@ -443,11 +444,15 @@
 								<TextBlock Text="Рік випуску" FontSize="15" FontWeight="SemiBold"/>
 								<Grid ColumnDefinitions="Auto,8,*,16,Auto,8,*">
 									<TextBlock Grid.Column="0" Text="від" VerticalAlignment="Center"/>
-									<NumericUpDown Grid.Column="2" FormatString="0" Minimum="{x:Static val:YearLimits.ReleaseYearMinimum}" Maximum="{x:Static val:YearLimits.ReleaseYearMaximum}"
-												   Value="{Binding DraftYearFrom, Converter={x:Static conv:DecimalToNullableIntConverter.Instance}}"/>
+									<v:SpinBoundedNumericUpDown Grid.Column="2" FormatString="0" Minimum="{x:Static val:YearLimits.ReleaseYearMinimum}" Maximum="{x:Static val:YearLimits.ReleaseYearMaximum}"
+															SpinMinimum="{x:Static val:YearLimits.ReleaseYearMinimum}" SpinMaximum="{x:Static val:YearLimits.ReleaseYearMaximum}"
+															SpinStart="{x:Static val:YearLimits.CurrentYear}" ShowButtonSpinner="False"
+															Value="{Binding DraftYearFrom, Converter={x:Static conv:DecimalToNullableIntConverter.Instance}}"/>
 									<TextBlock Grid.Column="4" Text="до" VerticalAlignment="Center"/>
-									<NumericUpDown Grid.Column="6" FormatString="0" Minimum="{x:Static val:YearLimits.ReleaseYearMinimum}" Maximum="{x:Static val:YearLimits.ReleaseYearMaximum}"
-												   Value="{Binding DraftYearTo, Converter={x:Static conv:DecimalToNullableIntConverter.Instance}}"/>
+									<v:SpinBoundedNumericUpDown Grid.Column="6" FormatString="0" Minimum="{x:Static val:YearLimits.ReleaseYearMinimum}" Maximum="{x:Static val:YearLimits.ReleaseYearMaximum}"
+															SpinMinimum="{x:Static val:YearLimits.ReleaseYearMinimum}" SpinMaximum="{x:Static val:YearLimits.ReleaseYearMaximum}"
+															SpinStart="{x:Static val:YearLimits.CurrentYear}" ShowButtonSpinner="False"
+															Value="{Binding DraftYearTo, Converter={x:Static conv:DecimalToNullableIntConverter.Instance}}"/>
 								</Grid>
 							</StackPanel>
 							<Border Height="1" Background="{DynamicResource SidebarBorder}"/>
@@ -456,11 +461,11 @@
 								<TextBlock Text="Особиста оцінка" FontSize="15" FontWeight="SemiBold"/>
 								<Grid ColumnDefinitions="Auto,8,*,16,Auto,8,*">
 									<TextBlock Grid.Column="0" Text="від" VerticalAlignment="Center"/>
-									<NumericUpDown Grid.Column="2" FormatString="0" Minimum="1" Maximum="10"
-												   Value="{Binding DraftRatingFrom, Converter={x:Static conv:DecimalToNullableIntConverter.Instance}}"/>
+									<v:SpinBoundedNumericUpDown Grid.Column="2" FormatString="0" Minimum="1" Maximum="10" SpinMinimum="1" SpinMaximum="10"
+															Value="{Binding DraftRatingFrom, Converter={x:Static conv:DecimalToNullableIntConverter.Instance}}"/>
 									<TextBlock Grid.Column="4" Text="до" VerticalAlignment="Center"/>
-									<NumericUpDown Grid.Column="6" FormatString="0" Minimum="1" Maximum="10"
-												   Value="{Binding DraftRatingTo, Converter={x:Static conv:DecimalToNullableIntConverter.Instance}}"/>
+									<v:SpinBoundedNumericUpDown Grid.Column="6" FormatString="0" Minimum="1" Maximum="10" SpinMinimum="1" SpinMaximum="10"
+															Value="{Binding DraftRatingTo, Converter={x:Static conv:DecimalToNullableIntConverter.Instance}}"/>
 								</Grid>
 							</StackPanel>
 							<Border Height="1" Background="{DynamicResource SidebarBorder}"/>
@@ -469,11 +474,13 @@
 								<TextBlock Text="Розмір на диску (ГБ)" FontSize="15" FontWeight="SemiBold"/>
 								<Grid ColumnDefinitions="Auto,8,*,16,Auto,8,*">
 									<TextBlock Grid.Column="0" Text="від" VerticalAlignment="Center"/>
-									<NumericUpDown Grid.Column="2" FormatString="0.##" Minimum="0" Increment="0.5"
-												   Value="{Binding DraftSizeFrom, Converter={x:Static conv:DecimalToNullableDoubleConverter.Instance}}"/>
+									<v:SpinBoundedNumericUpDown Grid.Column="2" FormatString="0.##" Minimum="0" Maximum="10000" Increment="0.5"
+															SpinMinimum="0" SpinMaximum="10000" AllowsFraction="True" ShowButtonSpinner="False"
+															Value="{Binding DraftSizeFrom, Converter={x:Static conv:DecimalToNullableDoubleConverter.Instance}}"/>
 									<TextBlock Grid.Column="4" Text="до" VerticalAlignment="Center"/>
-									<NumericUpDown Grid.Column="6" FormatString="0.##" Minimum="0" Increment="0.5"
-												   Value="{Binding DraftSizeTo, Converter={x:Static conv:DecimalToNullableDoubleConverter.Instance}}"/>
+									<v:SpinBoundedNumericUpDown Grid.Column="6" FormatString="0.##" Minimum="0" Maximum="10000" Increment="0.5"
+															SpinMinimum="0" SpinMaximum="10000" AllowsFraction="True" ShowButtonSpinner="False"
+															Value="{Binding DraftSizeTo, Converter={x:Static conv:DecimalToNullableDoubleConverter.Instance}}"/>
 								</Grid>
 							</StackPanel>
 							<Border Height="1" Background="{DynamicResource SidebarBorder}"/>
@@ -482,11 +489,13 @@
 								<TextBlock Text="Час гри (год)" FontSize="15" FontWeight="SemiBold"/>
 								<Grid ColumnDefinitions="Auto,8,*,16,Auto,8,*">
 									<TextBlock Grid.Column="0" Text="від" VerticalAlignment="Center"/>
-									<NumericUpDown Grid.Column="2" FormatString="0.##" Minimum="0" Increment="1"
-												   Value="{Binding DraftHoursFrom, Converter={x:Static conv:DecimalToNullableDoubleConverter.Instance}}"/>
+									<v:SpinBoundedNumericUpDown Grid.Column="2" FormatString="0.##" Minimum="0" Maximum="100000" Increment="1"
+															SpinMinimum="0" SpinMaximum="100000" AllowsFraction="True" ShowButtonSpinner="False"
+															Value="{Binding DraftHoursFrom, Converter={x:Static conv:DecimalToNullableDoubleConverter.Instance}}"/>
 									<TextBlock Grid.Column="4" Text="до" VerticalAlignment="Center"/>
-									<NumericUpDown Grid.Column="6" FormatString="0.##" Minimum="0" Increment="1"
-												   Value="{Binding DraftHoursTo, Converter={x:Static conv:DecimalToNullableDoubleConverter.Instance}}"/>
+									<v:SpinBoundedNumericUpDown Grid.Column="6" FormatString="0.##" Minimum="0" Maximum="100000" Increment="1"
+															SpinMinimum="0" SpinMaximum="100000" AllowsFraction="True" ShowButtonSpinner="False"
+															Value="{Binding DraftHoursTo, Converter={x:Static conv:DecimalToNullableDoubleConverter.Instance}}"/>
 								</Grid>
 							</StackPanel>
 

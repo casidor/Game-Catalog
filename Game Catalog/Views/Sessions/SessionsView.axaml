@@ -4,6 +4,7 @@
 			 xmlns:models="using:Game_Catalog.Models"
 			 xmlns:conv="using:Game_Catalog.Converters"
 			 xmlns:sessions="using:Game_Catalog.Views"
+			 xmlns:v="using:Game_Catalog.Views"
 			 x:Class="Game_Catalog.Views.SessionsView"
 			 x:DataType="vm:SessionsViewModel">
 
@@ -176,11 +177,13 @@
 								<TextBlock Text="Тривалість (год)" FontSize="15" FontWeight="SemiBold"/>
 								<Grid ColumnDefinitions="Auto,8,*,16,Auto,8,*">
 									<TextBlock Grid.Column="0" Text="від" VerticalAlignment="Center"/>
-									<NumericUpDown Grid.Column="2" FormatString="0.##" Minimum="0" Increment="0.5"
-												   Value="{Binding DraftHoursFrom, Converter={x:Static conv:DecimalToNullableDoubleConverter.Instance}}"/>
+									<v:SpinBoundedNumericUpDown Grid.Column="2" FormatString="0.##" Minimum="0" Maximum="168" Increment="0.5"
+															SpinMinimum="0" SpinMaximum="168" AllowsFraction="True" ShowButtonSpinner="False"
+															Value="{Binding DraftHoursFrom, Converter={x:Static conv:DecimalToNullableDoubleConverter.Instance}}"/>
 									<TextBlock Grid.Column="4" Text="до" VerticalAlignment="Center"/>
-									<NumericUpDown Grid.Column="6" FormatString="0.##" Minimum="0" Increment="0.5"
-												   Value="{Binding DraftHoursTo, Converter={x:Static conv:DecimalToNullableDoubleConverter.Instance}}"/>
+									<v:SpinBoundedNumericUpDown Grid.Column="6" FormatString="0.##" Minimum="0" Maximum="168" Increment="0.5"
+															SpinMinimum="0" SpinMaximum="168" AllowsFraction="True" ShowButtonSpinner="False"
+															Value="{Binding DraftHoursTo, Converter={x:Static conv:DecimalToNullableDoubleConverter.Instance}}"/>
 								</Grid>
 							</StackPanel>
 
