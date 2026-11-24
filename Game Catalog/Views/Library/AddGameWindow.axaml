@@ -4,6 +4,8 @@
 		xmlns:models="using:Game_Catalog.Models"
 		xmlns:svc="using:Game_Catalog.Services"
 		xmlns:conv="using:Game_Catalog.Converters"
+		xmlns:val="using:Game_Catalog.Validation"
+		xmlns:v="using:Game_Catalog.Views"
 		x:Class="Game_Catalog.Views.AddGameWindow"
 		x:DataType="vm:AddGameViewModel"
 		Title="{Binding WindowTitle}"
@@ -214,8 +216,12 @@
 				<Grid ColumnDefinitions="*,12,*,12,*">
 					<StackPanel Grid.Column="0" Spacing="4">
 						<TextBlock Text="Рік випуску"/>
-						<NumericUpDown FormatString="0"
-									   Value="{Binding ReleaseYear, Converter={x:Static conv:DecimalToNullableIntConverter.Instance}}"/>
+						<v:SpinBoundedNumericUpDown FormatString="0"
+													SpinMinimum="{x:Static val:YearLimits.ReleaseYearMinimum}"
+													SpinMaximum="{x:Static val:YearLimits.ReleaseYearMaximum}"
+													SpinStart="{x:Static val:YearLimits.CurrentYear}"
+													ShowButtonSpinner="False"
+													Value="{Binding ReleaseYear, Converter={x:Static conv:DecimalToNullableIntConverter.Instance}}"/>
 					</StackPanel>
 					<StackPanel Grid.Column="2" Spacing="4">
 						<TextBlock Text="Статус"/>
@@ -231,8 +237,8 @@
 					</StackPanel>
 					<StackPanel Grid.Column="4" Spacing="4">
 						<TextBlock Text="Оцінка (1-10)"/>
-						<NumericUpDown FormatString="0"
-									   Value="{Binding PersonalRating, Converter={x:Static conv:DecimalToNullableIntConverter.Instance}}"/>
+						<v:SpinBoundedNumericUpDown FormatString="0" SpinMinimum="1" SpinMaximum="10"
+													Value="{Binding PersonalRating, Converter={x:Static conv:DecimalToNullableIntConverter.Instance}}"/>
 					</StackPanel>
 				</Grid>
 

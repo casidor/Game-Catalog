@@ -23,6 +23,9 @@ namespace Game_Catalog.Validation
 
         // NumericUpDown takes decimal bounds, so the input fields read these properties.
 
+        /// <summary> The current year, where an empty year field starts spinning from. </summary>
+        public static decimal CurrentYear => DateTime.Today.Year;
+
         /// <summary> Lowest value of a release year field. </summary>
         public static decimal ReleaseYearMinimum => MinReleaseYear;
 

@@ -2,6 +2,8 @@
 		xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
 		xmlns:vm="using:Game_Catalog.ViewModels"
 		xmlns:conv="using:Game_Catalog.Converters"
+		xmlns:val="using:Game_Catalog.Validation"
+		xmlns:v="using:Game_Catalog.Views"
 		x:Class="Game_Catalog.Views.AddStudioWindow"
 		x:DataType="vm:AddStudioViewModel"
 		Title="{Binding WindowTitle}"
@@ -64,8 +66,12 @@
 		</DropDownButton>
 
 		<TextBlock Text="Рік заснування"/>
-		<NumericUpDown Value="{Binding FoundationYear, Converter={x:Static conv:DecimalToNullableIntConverter.Instance}}"
-					   FormatString="0"/>
+		<v:SpinBoundedNumericUpDown FormatString="0"
+									SpinMinimum="{x:Static val:YearLimits.FoundationYearMinimum}"
+									SpinMaximum="{x:Static val:YearLimits.FoundationYearMaximum}"
+									SpinStart="{x:Static val:YearLimits.CurrentYear}"
+									ShowButtonSpinner="False"
+									Value="{Binding FoundationYear, Converter={x:Static conv:DecimalToNullableIntConverter.Instance}}"/>
 
 		<TextBlock Text="Основний жанр"/>
 		<Grid ColumnDefinitions="*,Auto">
