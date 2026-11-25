@@ -101,8 +101,14 @@ namespace Game_Catalog.ViewModels
         /// <summary> True when the installation tab is selected. </summary>
         public bool IsInstallTab => SelectedTabIndex == 2;
 
+        /// <summary>
+        /// True for a DLC. It has no installation of its own, takes its genres, platforms and tags from the main game,
+        /// and needs only a cover, since it has no details page and is never launched.
+        /// </summary>
+        public bool IsDlc => _parentGameId != null;
+
         /// <summary> False for a DLC: it lives in the folder of its main game and has no installation of its own. </summary>
-        public bool IsInstallAvailable => _source?.ParentGameId == null;
+        public bool IsInstallAvailable => !IsDlc;
 
         /// <summary> Install folder: a normalized absolute path, or empty if not set. </summary>
         [ObservableProperty]
@@ -199,6 +205,9 @@ namespace Game_Catalog.ViewModels
 
         private readonly Game? _source;
 
+        /// <summary> Main game of a DLC; null for a standalone game. </summary>
+        private readonly int? _parentGameId;
+
         /// <summary> Initializes the dialog for adding a new game. </summary>
         public AddGameViewModel()
         {
@@ -217,11 +226,22 @@ namespace Game_Catalog.ViewModels
             LoadTags();
         }
 
-        /// <summary> Initializes the dialog for editing an existing game. </summary>
+        /// <summary> Initializes the dialog for adding a DLC to the given game: the main game is fixed and its studio is preselected. </summary>
+        public static AddGameViewModel ForNewDlc(Game parent) => new(parent.GameId, parent.DeveloperId);
+
+        private AddGameViewModel(int parentGameId, int developerId) : this()
+        {
+            WindowTitle = "Додати доповнення";
+            _parentGameId = parentGameId;
+            SelectedStudio = Studios.FirstOrDefault(s => s.StudioId == developerId);
+        }
+
+        /// <summary> Initializes the dialog for editing an existing game or DLC. </summary>
         public AddGameViewModel(Game game) : this()
         {
-            WindowTitle = "Редагувати гру";
+            WindowTitle = game.ParentGameId == null ? "Редагувати гру" : "Редагувати доповнення";
             _source = game;
+            _parentGameId = game.ParentGameId;
 
             Title = game.GameTitle;
             SelectedStudio = Studios.FirstOrDefault(s => s.StudioId == game.DeveloperId);
@@ -542,13 +562,16 @@ namespace Game_Catalog.ViewModels
             IsMeasuring = false;
         }
 
-        /// <summary> Builds a game from the entered data. Fields that are not on the form are kept from the edited game. </summary>
+        /// <summary>
+        /// Builds a game from the entered data. Fields that are not on the form are kept from the edited game.
+        /// A DLC gets no background, icon or links: they are hidden on its form.
+        /// </summary>
         private Game BuildGame() => new Game
         {
             GameId = _source?.GameId ?? 0,
             DeveloperId = SelectedStudio!.StudioId,
             DeveloperName = SelectedStudio.StudioName,
-            ParentGameId = _source?.ParentGameId,
+            ParentGameId = _parentGameId,
             GameTitle = Title,
             GameDescription = Description,
             ReleaseYear = ReleaseYear,
@@ -556,17 +579,17 @@ namespace Game_Catalog.ViewModels
             SizeGB = SizeGb,
             PersonalRating = PersonalRating,
             CoverImagePath = StoredOrPrevious(CoverImagePath, _source?.CoverImagePath),
-            BackgroundImagePath = StoredOrPrevious(BackgroundImagePath, _source?.BackgroundImagePath),
+            BackgroundImagePath = IsDlc ? string.Empty : StoredOrPrevious(BackgroundImagePath, _source?.BackgroundImagePath),
             ExecutablePath = ExecutablePath,
             InstallPath = InstallPath,
-            IconPath = StoredOrPrevious(IconPath, _source?.IconPath),
+            IconPath = IsDlc ? string.Empty : StoredOrPrevious(IconPath, _source?.IconPath),
             AddedAt = _source?.AddedAt ?? DateTime.Now,
             IsArchived = _source?.IsArchived ?? false,
-            Genres = Genres.CheckedOptions
+            Genres = IsDlc ? new() : Genres.CheckedOptions
                 .Select(o => new Genre { GenreId = o.Id, GenreName = o.Name }).ToList(),
-            Platforms = Platforms.CheckedOptions
+            Platforms = IsDlc ? new() : Platforms.CheckedOptions
                 .Select(o => new Platform { PlatformId = o.Id, PlatformName = o.Name }).ToList(),
-            Tags = Tags.CheckedOptions
+            Tags = IsDlc ? new() : Tags.CheckedOptions
                 .Select(o => new Tag { TagId = o.Id, TagName = o.Name }).ToList()
         };
 

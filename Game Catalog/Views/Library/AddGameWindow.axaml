@@ -122,8 +122,8 @@
 						   Margin="0,-6,0,0"
 						   Foreground="{DynamicResource SystemControlErrorTextForegroundBrush}"/>
 
-				<!-- Genres, platforms, tags -->
-				<Grid ColumnDefinitions="*,12,*,12,*">
+				<!-- Genres, platforms, tags; a DLC takes them from its main game -->
+				<Grid ColumnDefinitions="*,12,*,12,*" IsVisible="{Binding !IsDlc}">
 
 					<StackPanel Grid.Column="0" Spacing="4">
 						<TextBlock Text="Жанри"/>
@@ -257,7 +257,7 @@
 
 				<StackPanel Grid.Column="0" Spacing="20">
 
-					<StackPanel Spacing="6">
+					<StackPanel Spacing="6" IsVisible="{Binding !IsDlc}">
 						<TextBlock Text="Іконка" FontWeight="SemiBold"/>
 						<StackPanel Orientation="Horizontal" Spacing="4">
 							<Button Classes="media" Content="➕" ToolTip.Tip="Обрати файл"
@@ -323,7 +323,7 @@
 					</StackPanel>
 				</StackPanel>
 
-				<StackPanel Grid.Column="2" Spacing="6">
+				<StackPanel Grid.Column="2" Spacing="6" IsVisible="{Binding !IsDlc}">
 					<TextBlock Text="Фон" FontWeight="SemiBold"/>
 					<StackPanel Orientation="Horizontal" Spacing="4">
 						<Button Classes="media" Content="➕" ToolTip.Tip="Обрати файл"
