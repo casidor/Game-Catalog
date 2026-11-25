@@ -47,8 +47,23 @@
 				  ItemsSource="{Binding Rows}"
 				  IsVisible="{Binding !IsEmpty}"
 				  CanUserSortColumns="True"
-				  DoubleTapped="OnRowDoubleTapped"
+				  SelectionMode="Extended"
+				  SelectedItem="{Binding SelectedRow, Mode=TwoWay}"
+				  v:DataGridBehavior.SelectedItems="{Binding SelectedRows}"
+				  v:DataGridBehavior.RowDoubleTapCommand="{Binding OpenStudioCommand}"
+				  v:DataGridBehavior.DeleteCommand="{Binding DeleteSelectedCommand}"
 				  x:Name="StudiosGrid">
+
+			<DataGrid.ContextMenu>
+				<ContextMenu>
+					<MenuItem Header="Редагувати"
+							  Command="{Binding EditSelectedCommand}"/>
+					<Separator/>
+					<MenuItem Header="{Binding DeleteSelectedHeader}"
+							  Command="{Binding DeleteSelectedCommand}"
+							  InputGesture="Delete"/>
+				</ContextMenu>
+			</DataGrid.ContextMenu>
 
 			<DataGrid.Columns>
 				<DataGridTextColumn Header="Назва" Width="2*"
@@ -63,20 +78,6 @@
 				<DataGridTextColumn Header="Основний жанр" Width="*"
 									Binding="{ReflectionBinding MainGenreName, TargetNullValue={StaticResource NoValue}}"
 									CanUserSort="False"/>
-				<DataGridTemplateColumn Header="" Width="100" CanUserSort="False" CanUserResize="False">
-					<DataGridTemplateColumn.CellTemplate>
-						<DataTemplate x:DataType="vm:StudioRow">
-							<StackPanel Orientation="Horizontal" Spacing="4" HorizontalAlignment="Center">
-								<Button Content="✏" ToolTip.Tip="Редагувати"
-										Command="{Binding $parent[DataGrid].((vm:StudioViewModel)DataContext).EditCommand}"
-										CommandParameter="{Binding Studio}"/>
-								<Button Content="🗑" ToolTip.Tip="Видалити"
-										Command="{Binding $parent[DataGrid].((vm:StudioViewModel)DataContext).DeleteCommand}"
-										CommandParameter="{Binding Studio}"/>
-							</StackPanel>
-						</DataTemplate>
-					</DataGridTemplateColumn.CellTemplate>
-				</DataGridTemplateColumn>
 			</DataGrid.Columns>
 		</DataGrid>
 

@@ -1,7 +1,6 @@
 using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Input;
-using Avalonia.VisualTree;
 using Game_Catalog.Models;
 using Game_Catalog.ViewModels;
 
@@ -44,16 +43,5 @@ public partial class StudioView : UserControl
     {
         if (DataContext is StudioViewModel vm)
             vm.CancelFiltersCommand.Execute(null);
-    }
-
-    /// <summary> Opens the details of the studio whose row was double-clicked. </summary>
-    private void OnRowDoubleTapped(object? sender, TappedEventArgs e)
-    {
-        if (e.Source is not Visual source) return;
-        if (source.FindAncestorOfType<Button>(includeSelf: true) != null) return;
-        if (source.FindAncestorOfType<DataGridRow>(includeSelf: true) is not { DataContext: StudioRow row }) return;
-
-        if (DataContext is StudioViewModel vm)
-            vm.OpenStudioCommand.Execute(row.Studio);
     }
 }

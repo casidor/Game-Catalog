@@ -13,7 +13,10 @@ using DatabaseException = Game_Catalog.Data.DatabaseException;
 
 namespace Game_Catalog.ViewModels
 {
-    /// <summary> ViewModel for the studios page: filtering, sorting and search done by the database, plus deletion. </summary>
+    /// <summary>
+    /// ViewModel for the studios page: filtering, sorting and search done by the database,
+    /// selection of several rows, editing and deleting.
+    /// </summary>
     public partial class StudioViewModel : ViewModelBase
     {
         /// <summary> Filter currently applied to the list. </summary>
@@ -21,6 +24,12 @@ namespace Game_Catalog.ViewModels
 
         /// <summary> Rows of the studios table. </summary>
         public ObservableCollection<StudioRow> Rows { get; } = new();
+
+        /// <summary> Rows selected in the table, mirrored from the grid by DataGridBehavior. </summary>
+        public ObservableCollection<StudioRow> SelectedRows { get; } = new();
+
+        /// <summary> Single selected row of the grid; set here to select a studio again after it was edited. </summary>
+        [ObservableProperty] private StudioRow? _selectedRow;
 
         /// <summary> Country checkboxes of the filter panel. </summary>
         public ObservableCollection<FilterOption> CountryOptions { get; } = new();
@@ -68,7 +77,23 @@ namespace Game_Catalog.ViewModels
         /// <summary> True when the applied filter leaves no studios. </summary>
         public bool IsFilteredEmpty => Rows.Count == 0 && HasActiveFilter;
 
+        /// <summary> Context menu caption with the number of selected studios. </summary>
+        public string DeleteSelectedHeader => $"Видалити ({SelectedRows.Count})";
+
+        public StudioViewModel()
+        {
+            SelectedRows.CollectionChanged += (_, _) => OnSelectionChanged();
+        }
+
         partial void OnSearchTextChanged(string value) => UpdateMatches();
+
+        /// <summary> Refreshes the menu caption and the commands that depend on the selection. </summary>
+        private void OnSelectionChanged()
+        {
+            OnPropertyChanged(nameof(DeleteSelectedHeader));
+            EditSelectedCommand.NotifyCanExecuteChanged();
+            DeleteSelectedCommand.NotifyCanExecuteChanged();
+        }
 
         /// <summary> Sorts by the clicked table column: same column flips the direction. </summary>
         public void SortByColumn(StudioSortField field)
@@ -240,9 +265,9 @@ namespace Game_Catalog.ViewModels
         /// <summary> Raised when the user opens a studio to view its details. </summary>
         public event Action<Studio>? StudioSelected;
 
-        /// <summary> Opens the details page of the studio. </summary>
+        /// <summary> Opens the details page of the studio of a double-clicked row. </summary>
         [RelayCommand]
-        private void OpenStudio(Studio studio) => StudioSelected?.Invoke(studio);
+        private void OpenStudio(StudioRow row) => StudioSelected?.Invoke(row.Studio);
 
         /// <summary> Opens the editor and saves a new studio. </summary>
         [RelayCommand]
@@ -263,10 +288,11 @@ namespace Game_Catalog.ViewModels
             Load();
         }
 
-        /// <summary> Opens the editor for the given studio and saves the changes. </summary>
-        [RelayCommand]
-        private async Task EditAsync(Studio studio)
+        /// <summary> Opens the editor for the only selected studio and selects it again after saving. </summary>
+        [RelayCommand(CanExecute = nameof(HasSingleSelection))]
+        private async Task EditSelectedAsync()
         {
+            var studio = SelectedRows[0].Studio;
             var edited = await Dialogs.Current.ShowStudioEditorAsync(studio);
             if (edited == null) return;
 
@@ -280,39 +306,84 @@ namespace Game_Catalog.ViewModels
                 return;
             }
             Load();
+            SelectedRow = Rows.FirstOrDefault(r => r.Studio.StudioId == studio.StudioId);
         }
 
-        /// <summary> Deletes the studio after confirmation unless it still has games. </summary>
-        [RelayCommand]
-        private async Task DeleteAsync(Studio studio)
-        {
-            var confirmed = await Dialogs.Current.ConfirmAsync(
-                "Видалення студії",
-                $"Видалити студію «{studio.StudioName}»? Цю дію не можна скасувати.",
-                "Видалити");
-            if (!confirmed) return;
+        private bool HasSingleSelection() => SelectedRows.Count == 1;
 
-            bool deleted;
+        /// <summary>
+        /// Deletes the selected studios after one confirmation. Studios that still have games cannot be deleted,
+        /// so they are named in the confirmation and skipped; the rest are deleted together.
+        /// </summary>
+        [RelayCommand(CanExecute = nameof(HasSelection))]
+        private async Task DeleteSelectedAsync()
+        {
+            var rows = SelectedRows.ToList();
+
+            HashSet<int> withGames;
             try
             {
-                deleted = StudioRepository.Delete(studio.StudioId);
+                withGames = StudioRepository.GetIdsWithGames(rows.Select(r => r.Studio.StudioId).ToList());
             }
             catch (DatabaseException ex)
             {
-                await ShowErrorAsync("Помилка видалення студії", ex);
+                await ShowErrorAsync("Помилка видалення студій", ex);
                 return;
             }
 
-            if (!deleted)
+            var blocked = rows.Where(r => withGames.Contains(r.Studio.StudioId)).ToList();
+            var free = rows.Where(r => !withGames.Contains(r.Studio.StudioId)).ToList();
+
+            // Nothing can be deleted: only explain why.
+            if (free.Count == 0)
             {
                 await Dialogs.Current.AlertAsync(
-                    "Неможливо видалити студію",
-                    $"Студія «{studio.StudioName}» має ігри в бібліотеці або архіві.\n" +
-                    "Спочатку видаліть або перепризначте ці ігри.");
+                    rows.Count == 1 ? "Неможливо видалити студію" : "Неможливо видалити студії",
+                    rows.Count == 1
+                        ? $"Студія «{rows[0].StudioName}» має ігри в бібліотеці або архіві.\n" +
+                          "Спочатку видаліть ці ігри або перепризначте їх іншій студії."
+                        : "Усі вибрані студії мають ігри в бібліотеці або архіві:\n" +
+                          $"{NamesList(blocked)}\n\n" +
+                          "Спочатку видаліть ці ігри або перепризначте їх іншим студіям.");
                 return;
             }
 
+            var question = free.Count == 1
+                ? $"Видалити студію «{free[0].StudioName}»?"
+                : blocked.Count == 0
+                    ? $"Видалити {Plural.Count(free.Count, "студію", "студії", "студій")}?"
+                    : $"Видалити решту {Plural.Count(free.Count, "студію", "студії", "студій")}?";
+            var skipped = blocked.Count == 0
+                ? string.Empty
+                : $"Ці студії мають ігри в бібліотеці або архіві, тому їх буде пропущено:\n{NamesList(blocked)}\n\n";
+
+            var confirmed = await Dialogs.Current.ConfirmAsync(
+                free.Count == 1 ? "Видалення студії" : "Видалення студій",
+                $"{skipped}{question}\nЦю дію неможливо скасувати.",
+                "Видалити");
+            if (!confirmed) return;
+
+            try
+            {
+                StudioRepository.Delete(free.Select(r => r.Studio.StudioId).ToList());
+            }
+            catch (DatabaseException ex)
+            {
+                await ShowErrorAsync("Помилка видалення студій", ex);
+                return;
+            }
             Load();
+        }
+
+        private bool HasSelection() => SelectedRows.Count > 0;
+
+        /// <summary> Names of the studios as a bulleted list; a long list is cut after the first few names. </summary>
+        private static string NamesList(IReadOnlyList<StudioRow> rows)
+        {
+            const int shown = 10;
+            var lines = rows.Take(shown).Select(r => $"• {r.StudioName}");
+            var text = string.Join("\n", lines);
+            return rows.Count > shown ? $"{text}\n…і ще {rows.Count - shown}" : text;
         }
 
         /// <summary> Shows a plain alert for our own errors and a detailed one for database failures. </summary>
