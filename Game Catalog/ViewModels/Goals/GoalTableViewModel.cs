@@ -217,7 +217,7 @@ namespace Game_Catalog.ViewModels
                     "Видалити")
                 : await Dialogs.Current.ConfirmAsync(
                     "Видалення цілей",
-                    $"Видалити {GoalsCount(rows.Count)}?\nЦю дію неможливо скасувати.",
+                    $"Видалити {Plural.Count(rows.Count, "ціль", "цілі", "цілей")}?\nЦю дію неможливо скасувати.",
                     "Видалити");
             if (!confirmed) return;
 
@@ -254,18 +254,6 @@ namespace Game_Catalog.ViewModels
                 return;
             }
             DataChanged?.Invoke();
-        }
-
-        /// <summary> Number of goals with the matching Ukrainian word form: "1 ціль", "3 цілі", "5 цілей". </summary>
-        private static string GoalsCount(int count)
-        {
-            var word = (count % 10, count % 100) switch
-            {
-                (1, not 11) => "ціль",
-                (>= 2 and <= 4, not (>= 12 and <= 14)) => "цілі",
-                _ => "цілей"
-            };
-            return $"{count} {word}";
         }
 
         /// <summary> Shows a plain alert for our own errors and a detailed one for database failures. </summary>

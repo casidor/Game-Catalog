@@ -129,7 +129,7 @@ namespace Game_Catalog.ViewModels
                     "Видалити")
                 : await Dialogs.Current.ConfirmAsync(
                     "Видалення сесій",
-                    $"Видалити {SessionsCount(sessions.Count)}?\nЦю дію неможливо скасувати.",
+                    $"Видалити {Plural.Count(sessions.Count, "сесію", "сесії", "сесій")}?\nЦю дію неможливо скасувати.",
                     "Видалити");
             if (!confirmed) return;
 
@@ -146,18 +146,6 @@ namespace Game_Catalog.ViewModels
         }
 
         private bool HasSelection() => !IsReadOnly && SelectedRows.Count > 0;
-
-        /// <summary> Number of sessions in the accusative case: "1 сесію", "3 сесії", "5 сесій". </summary>
-        private static string SessionsCount(int count)
-        {
-            var word = (count % 10, count % 100) switch
-            {
-                (1, not 11) => "сесію",
-                (>= 2 and <= 4, not (>= 12 and <= 14)) => "сесії",
-                _ => "сесій"
-            };
-            return $"{count} {word}";
-        }
 
         /// <summary> Shows a plain alert for our own errors and a detailed one for database failures. </summary>
         private static Task ShowErrorAsync(string title, DatabaseException ex) =>

@@ -28,7 +28,7 @@ namespace Game_Catalog.Services
         private static readonly ReportGrouping<ActivityReportRow> ByDay = new(
             r => r.StartTime.Date,
             r => $"{r.StartTime:dd.MM.yyyy}, {Ukrainian.DateTimeFormat.GetDayName(r.StartTime.DayOfWeek)}",
-            r => $"{r.DaySessionCount} {SessionsWord(r.DaySessionCount)} · {DurationText(r.DayTotalSeconds)}");
+            r => $"{Plural.Count(r.DaySessionCount, "сесія", "сесії", "сесій")} · {DurationText(r.DayTotalSeconds)}");
 
         /// <summary> Creates the report document for the period from its rows. </summary>
         /// <param name="rows"> Sessions of the period in chronological order, with the totals counted by the database. </param>
@@ -49,15 +49,6 @@ namespace Game_Catalog.Services
 
             return ReportLayout.Create(Title, facts, landscape: false, Columns, rows, ByDay);
         }
-
-        /// <summary> Ukrainian form of the word "session" for the number: 1 сесія, 2 сесії, 5 сесій, 11 сесій. </summary>
-        private static string SessionsWord(int count) =>
-            (count % 10, count % 100) switch
-            {
-                (1, not 11) => "сесія",
-                (2 or 3 or 4, not (12 or 13 or 14)) => "сесії",
-                _ => "сесій"
-            };
 
         // The texts are taken from the converters of the UI, so the report reads the same as the app.
         private static string DurationText(int seconds) =>

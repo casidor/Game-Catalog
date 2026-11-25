@@ -114,7 +114,7 @@ namespace Game_Catalog.ViewModels
                     "Видалити")
                 : await Dialogs.Current.ConfirmAsync(
                     "Видалення доповнень",
-                    $"Видалити {DlcCount(rows.Count)}?\nЦю дію неможливо скасувати.",
+                    $"Видалити {Plural.Count(rows.Count, "доповнення", "доповнення", "доповнень")}?\nЦю дію неможливо скасувати.",
                     "Видалити");
             if (!confirmed) return;
 
@@ -131,18 +131,6 @@ namespace Game_Catalog.ViewModels
         }
 
         private bool HasSelection() => !IsReadOnly && SelectedRows.Count > 0;
-
-        /// <summary> Number of DLC with the matching Ukrainian word form: "1 доповнення", "3 доповнення", "5 доповнень". </summary>
-        private static string DlcCount(int count)
-        {
-            var word = (count % 10, count % 100) switch
-            {
-                (1, not 11) => "доповнення",
-                (>= 2 and <= 4, not (>= 12 and <= 14)) => "доповнення",
-                _ => "доповнень"
-            };
-            return $"{count} {word}";
-        }
 
         /// <summary> Shows a plain alert for our own errors and a detailed one for database failures. </summary>
         private static Task ShowErrorAsync(string title, DatabaseException ex) =>
