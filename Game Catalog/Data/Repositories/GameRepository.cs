@@ -124,6 +124,21 @@ namespace Game_Catalog.Data.Repositories
                 return game;
             });
 
+        /// <summary>
+        /// Returns the DLC of the game, oldest first, then by title; DLC without a year go last.
+        /// DLC have no genres, platforms or tags of their own, so links are not loaded.
+        /// </summary>
+        public static List<Game> GetDlcs(int parentGameId) =>
+            Db.Run("Не вдалося завантажити доповнення", () =>
+            {
+                using var connection = Db.Open();
+                return connection.Query<Game>(@"
+                    SELECT * FROM v_game
+                    WHERE parent_game_id = @parentGameId
+                    ORDER BY release_year ASC NULLS LAST, game_title COLLATE UKR_NOCASE ASC, game_id ASC",
+                    new { parentGameId }).AsList();
+            });
+
         /// <summary> Inserts the game with its links in one transaction and sets its generated id. </summary>
         public static void Insert(Game game) =>
             Db.InTransaction("Не вдалося зберегти гру", (connection, tx) =>
