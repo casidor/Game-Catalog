@@ -1,0 +1,142 @@
+﻿<UserControl xmlns="https://github.com/avaloniaui"
+			 xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+			 xmlns:vm="using:Game_Catalog.ViewModels"
+			 xmlns:conv="using:Game_Catalog.Converters"
+			 xmlns:views="using:Game_Catalog.Views"
+			 x:Class="Game_Catalog.Views.GameDlcTabView"
+			 x:DataType="vm:GameDlcTabViewModel">
+
+	<Grid RowDefinitions="40,*" Margin="8,0,8,8">
+
+		<!-- Summary row: the count on the left, adding on the right -->
+		<Grid Grid.Row="0" ColumnDefinitions="*,Auto" Margin="8,0"
+			  IsVisible="{Binding !IsEmpty}">
+			<TextBlock Grid.Column="0" Text="{Binding SummaryText}"
+					   Opacity="0.7" VerticalAlignment="Center"/>
+			<Button Grid.Column="1" Content="+ Додати доповнення"
+					Command="{Binding AddCommand}"
+					IsVisible="{Binding CanAdd}"
+					VerticalAlignment="Center"/>
+		</Grid>
+
+		<!-- DLC of the game; the details of the selected one open under its row -->
+		<DataGrid Grid.Row="1"
+				  IsVisible="{Binding !IsEmpty}"
+				  ItemsSource="{Binding Rows}"
+				  AutoGenerateColumns="False"
+				  IsReadOnly="True"
+				  CanUserSortColumns="False"
+				  CanUserResizeColumns="True"
+				  CanUserReorderColumns="False"
+				  GridLinesVisibility="None"
+				  HeadersVisibility="Column"
+				  BorderThickness="0"
+				  Background="Transparent"
+				  RowHeight="44"
+				  Margin="8,0"
+				  SelectionMode="Extended"
+				  RowDetailsVisibilityMode="VisibleWhenSelected"
+				  SelectedItem="{Binding SelectedRow, Mode=TwoWay}"
+				  views:DataGridBehavior.SelectedItems="{Binding SelectedRows}"
+				  views:DataGridBehavior.RowDoubleTapCommand="{Binding EditCommand}"
+				  views:DataGridBehavior.DeleteCommand="{Binding DeleteSelectedCommand}"
+				  x:Name="DlcGrid">
+
+			<DataGrid.ContextMenu>
+				<ContextMenu>
+					<MenuItem Header="Редагувати"
+							  Command="{Binding EditSelectedCommand}"/>
+					<Separator/>
+					<MenuItem Header="{Binding DeleteSelectedHeader}"
+							  Command="{Binding DeleteSelectedCommand}"
+							  InputGesture="Delete"/>
+				</ContextMenu>
+			</DataGrid.ContextMenu>
+
+			<DataGrid.Styles>
+				<Style Selector="DataGridColumnHeader">
+					<Setter Property="Background" Value="Transparent"/>
+					<Setter Property="FontSize" Value="12"/>
+				</Style>
+			</DataGrid.Styles>
+
+			<DataGrid.Columns>
+				<DataGridTemplateColumn Header="Назва" Width="*">
+					<DataGridTemplateColumn.CellTemplate>
+						<DataTemplate x:DataType="vm:DlcRow">
+							<TextBlock Text="{Binding Title}"
+									   TextTrimming="CharacterEllipsis" MaxLines="1"
+									   VerticalAlignment="Center" Margin="12,0"/>
+						</DataTemplate>
+					</DataGridTemplateColumn.CellTemplate>
+				</DataGridTemplateColumn>
+				<DataGridTemplateColumn Header="Рік" Width="90">
+					<DataGridTemplateColumn.CellTemplate>
+						<DataTemplate x:DataType="vm:DlcRow">
+							<TextBlock Text="{Binding YearText, TargetNullValue={StaticResource NoValue}}"
+									   VerticalAlignment="Center" Margin="12,0"/>
+						</DataTemplate>
+					</DataGridTemplateColumn.CellTemplate>
+				</DataGridTemplateColumn>
+				<DataGridTemplateColumn Header="Статус" Width="160">
+					<DataGridTemplateColumn.CellTemplate>
+						<DataTemplate x:DataType="vm:DlcRow">
+							<TextBlock Text="{Binding Status, Converter={x:Static conv:GameStatusConverter.Instance}}"
+									   VerticalAlignment="Center" Margin="12,0"/>
+						</DataTemplate>
+					</DataGridTemplateColumn.CellTemplate>
+				</DataGridTemplateColumn>
+				<DataGridTemplateColumn Header="Оцінка" Width="90">
+					<DataGridTemplateColumn.CellTemplate>
+						<DataTemplate x:DataType="vm:DlcRow">
+							<TextBlock Text="{Binding RatingText, TargetNullValue={StaticResource NoValue}}"
+									   VerticalAlignment="Center" Margin="12,0"/>
+						</DataTemplate>
+					</DataGridTemplateColumn.CellTemplate>
+				</DataGridTemplateColumn>
+			</DataGrid.Columns>
+
+			<!-- Details of the selected DLC: cover, studio, date added and description -->
+			<DataGrid.RowDetailsTemplate>
+				<DataTemplate x:DataType="vm:DlcRow">
+					<Grid ColumnDefinitions="Auto,16,*" Margin="20,8,20,16">
+						<Border Grid.Column="0" Width="90" Height="120" CornerRadius="6" ClipToBounds="True"
+								Background="{DynamicResource CardBackground}">
+							<Panel>
+								<Image Stretch="UniformToFill"
+									   Source="{Binding CoverImagePath, Converter={x:Static conv:PathToBitmapConverter.Instance}, ConverterParameter=320}"
+									   IsVisible="{Binding CoverImagePath, Converter={x:Static StringConverters.IsNotNullOrEmpty}}"/>
+								<TextBlock Text="🎮" FontSize="32"
+										   HorizontalAlignment="Center" VerticalAlignment="Center"
+										   IsVisible="{Binding CoverImagePath, Converter={x:Static StringConverters.IsNullOrEmpty}}"/>
+							</Panel>
+						</Border>
+						<StackPanel Grid.Column="2" Spacing="6">
+							<TextBlock Text="{Binding DeveloperName}" Opacity="0.8"/>
+							<TextBlock Text="{Binding AddedText}" FontSize="12" Opacity="0.6"/>
+							<TextBlock Text="{Binding Description}"
+									   IsVisible="{Binding HasDescription}"
+									   TextWrapping="Wrap" MaxLines="5" TextTrimming="CharacterEllipsis"/>
+							<TextBlock Text="Опису немає"
+									   IsVisible="{Binding !HasDescription}"
+									   Opacity="0.5"/>
+						</StackPanel>
+					</Grid>
+				</DataTemplate>
+			</DataGrid.RowDetailsTemplate>
+		</DataGrid>
+
+		<!-- Empty state -->
+		<StackPanel Grid.Row="0" Grid.RowSpan="2"
+					IsVisible="{Binding IsEmpty}"
+					HorizontalAlignment="Center" VerticalAlignment="Center" Spacing="16">
+			<TextBlock Text="Доповнень для цієї гри ще немає"
+					   Opacity="0.6" HorizontalAlignment="Center"/>
+			<Button Content="+ Додати перше доповнення"
+					Command="{Binding AddCommand}"
+					IsVisible="{Binding CanAdd}"
+					HorizontalAlignment="Center"/>
+		</StackPanel>
+	</Grid>
+
+</UserControl>

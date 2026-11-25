@@ -22,9 +22,9 @@ namespace Game_Catalog.ViewModels
         /// <summary> Raised when the user leaves the page: back, or after archiving, restoring or deleting. </summary>
         public event Action? BackRequested;
 
-        /// <summary> Index of the selected page tab: 0 details, 1 sessions, 2 goals. </summary>
+        /// <summary> Index of the selected page tab: 0 details, 1 sessions, 2 goals, 3 DLC. </summary>
         [ObservableProperty]
-        [NotifyPropertyChangedFor(nameof(IsDetailsTab), nameof(IsSessionsTab), nameof(IsGoalsTab))]
+        [NotifyPropertyChangedFor(nameof(IsDetailsTab), nameof(IsSessionsTab), nameof(IsGoalsTab), nameof(IsDlcTab))]
         private int _selectedTabIndex;
 
         /// <summary> True when the details tab is selected. </summary>
@@ -36,11 +36,17 @@ namespace Game_Catalog.ViewModels
         /// <summary> True when the goals tab is selected. </summary>
         public bool IsGoalsTab => SelectedTabIndex == 2;
 
+        /// <summary> True when the DLC tab is selected. </summary>
+        public bool IsDlcTab => SelectedTabIndex == 3;
+
         /// <summary> Sessions tab of the game. Loaded every time the tab is opened. </summary>
         public GameSessionsTabViewModel Sessions { get; }
 
         /// <summary> Goals tab of the game. Loaded every time the tab is opened. </summary>
         public GameGoalsTabViewModel Goals { get; }
+
+        /// <summary> DLC tab of the game. Loaded every time the tab is opened. </summary>
+        public GameDlcTabViewModel Dlc { get; }
 
         public string Title => Game.GameTitle;
         public bool IsArchived => Game.IsArchived;
@@ -118,6 +124,7 @@ namespace Game_Catalog.ViewModels
             Game = game;
             Goals = new GameGoalsTabViewModel(game);
             Sessions = new GameSessionsTabViewModel(game);
+            Dlc = new GameDlcTabViewModel(game);
 
             // The total play time of the game depends on its sessions.
             Sessions.SessionsChanged += () => _ = ReloadAsync();
@@ -158,6 +165,8 @@ namespace Game_Catalog.ViewModels
                 Sessions.Reload();
             else if (value == 2)
                 Goals.Reload();
+            else if (value == 3)
+                Dlc.Reload();
         }
 
         /// <summary> Raises change notifications for everything shown on the page. </summary>

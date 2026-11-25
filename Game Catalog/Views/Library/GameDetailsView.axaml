@@ -61,6 +61,7 @@
 					<TabStripItem Content="Деталі"/>
 					<TabStripItem Content="Сесії"/>
 					<TabStripItem Content="Цілі"/>
+					<TabStripItem Content="DLC"/>
 				</TabStrip>
 			</Grid>
 
@@ -261,6 +262,11 @@
 			<!-- Goals tab -->
 			<Panel Grid.Row="1" IsVisible="{Binding IsGoalsTab}">
 				<views:GameGoalsTabView DataContext="{Binding Goals}"/>
+			</Panel>
+
+			<!-- DLC tab -->
+			<Panel Grid.Row="1" IsVisible="{Binding IsDlcTab}">
+				<views:GameDlcTabView DataContext="{Binding Dlc}"/>
 			</Panel>
 
 		</Grid>

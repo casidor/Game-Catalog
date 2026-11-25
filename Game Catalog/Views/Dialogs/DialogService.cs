@@ -269,6 +269,16 @@ public sealed class DialogService : IDialogService
     }
 
     /// <inheritdoc/>
+    public async Task<Game?> ShowNewDlcEditorAsync(Game parent)
+    {
+        if (Owner is not { } owner) return null;
+
+        var vm = AddGameViewModel.ForNewDlc(parent);
+        await new AddGameWindow { DataContext = vm }.ShowDialog(owner);
+        return vm.SavedGame;
+    }
+
+    /// <inheritdoc/>
     public async Task<PlaySession?> ShowSessionEditorAsync(PlaySession? session = null, int? presetGameId = null)
     {
         if (Owner is not { } owner) return null;

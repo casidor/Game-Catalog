@@ -234,6 +234,16 @@ namespace Game_Catalog.Data.Repositories
                 connection.Execute("DELETE FROM Game WHERE game_id = @gameId", new { gameId });
             });
 
+        /// <summary> Deletes the DLC in one transaction. Rows that are not DLC are left alone. </summary>
+        public static void DeleteDlcs(IReadOnlyCollection<int> dlcIds) =>
+            Db.InTransaction("Не вдалося видалити доповнення", (connection, tx) =>
+            {
+                foreach (var dlcId in dlcIds)
+                    connection.Execute(
+                        "DELETE FROM Game WHERE game_id = @dlcId AND parent_game_id IS NOT NULL",
+                        new { dlcId }, tx);
+            });
+
         /// <summary> Parameters of the Game table. The status is sent as text because the column is TEXT. </summary>
         private static object ToParams(Game game) => new
         {
