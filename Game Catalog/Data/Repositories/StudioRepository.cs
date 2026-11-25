@@ -98,6 +98,21 @@ namespace Game_Catalog.Data.Repositories
                     ORDER BY country COLLATE UKR_NOCASE").AsList();
             });
 
+        /// <summary>
+        /// Returns which of the given studios still have games (archived ones and DLC included),
+        /// that is, which of them the database would refuse to delete.
+        /// </summary>
+        public static HashSet<int> GetIdsWithGames(IReadOnlyCollection<int> studioIds) =>
+            Db.Run("Не вдалося перевірити ігри студій", () =>
+            {
+                using var connection = Db.Open();
+                return connection.Query<int>(@"
+                    SELECT DISTINCT developer_id
+                    FROM Game
+                    WHERE developer_id IN @studioIds",
+                    new { studioIds }).ToHashSet();
+            });
+
         /// <summary> Inserts the studio and sets its generated id. </summary>
         public static void Insert(Studio studio) =>
             Db.Run("Не вдалося зберегти студію", () =>
@@ -143,6 +158,18 @@ namespace Game_Catalog.Data.Repositories
                 {
                     return false;
                 }
+            });
+
+        /// <summary>
+        /// Deletes the studios with one statement, so all of them or none: a studio that still has games
+        /// stops the whole statement (ON DELETE RESTRICT).
+        /// So studios with games must be left out first, see <see cref="GetIdsWithGames"/>.
+        /// </summary>
+        public static void Delete(IReadOnlyCollection<int> studioIds) =>
+            Db.Run("Не вдалося видалити студії", () =>
+            {
+                using var connection = Db.Open();
+                connection.Execute("DELETE FROM Studio WHERE studio_id IN @studioIds", new { studioIds });
             });
 
         /// <summary> Throws a duplicate error if another studio has the same name, ignoring case and edge spaces. </summary>
