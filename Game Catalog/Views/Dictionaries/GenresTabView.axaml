@@ -2,7 +2,6 @@
 			 xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
 			 xmlns:vm="using:Game_Catalog.ViewModels"
 			 xmlns:models="using:Game_Catalog.Models"
-			 xmlns:conv="using:Game_Catalog.Converters"
 			 x:Class="Game_Catalog.Views.GenresTabView"
 			 x:DataType="vm:GenresViewModel">
 
@@ -28,32 +27,11 @@
 
 		<!-- Table: sorted by the database, search matches are highlighted -->
 		<DataGrid Grid.Row="1"
+				  Classes="table searchable dbSort"
 				  ItemsSource="{Binding Rows}"
 				  IsVisible="{Binding !IsEmpty}"
-				  AutoGenerateColumns="False"
-				  IsReadOnly="True"
 				  CanUserSortColumns="True"
-				  CanUserResizeColumns="True"
-				  CanUserReorderColumns="False"
-				  GridLinesVisibility="None"
-				  HeadersVisibility="Column"
-				  BorderThickness="0"
-				  Background="Transparent"
-				  RowHeight="44"
-				  Margin="8,0"
-				  Classes="dbSort"
 				  x:Name="GenresGrid">
-
-			<DataGrid.Styles>
-				<Style Selector="DataGridColumnHeader">
-					<Setter Property="Background" Value="Transparent"/>
-					<Setter Property="FontSize" Value="12"/>
-				</Style>
-				<Style Selector="DataGridRow">
-					<Setter Property="Background"
-							Value="{ReflectionBinding IsMatch, Converter={x:Static conv:SearchMatchBrushConverter.Instance}}"/>
-				</Style>
-			</DataGrid.Styles>
 
 			<DataGrid.Columns>
 				<DataGridTextColumn Header="Назва" Width="220"

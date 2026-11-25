@@ -9,18 +9,8 @@
 
 	<!-- Sessions table shared by the sessions page and the sessions tab of the game details -->
 	<DataGrid ItemsSource="{Binding Rows}"
-			  AutoGenerateColumns="False"
-			  IsReadOnly="True"
+			  Classes="table dbSort"
 			  CanUserSortColumns="True"
-			  CanUserResizeColumns="True"
-			  CanUserReorderColumns="False"
-			  GridLinesVisibility="None"
-			  HeadersVisibility="Column"
-			  BorderThickness="0"
-			  Background="Transparent"
-			  RowHeight="44"
-			  Margin="8,0"
-			  Classes="dbSort"
 			  SelectionMode="Extended"
 			  SelectedItem="{Binding SelectedRow, Mode=TwoWay}"
 			  views:DataGridBehavior.SelectedItems="{Binding SelectedRows}"
@@ -38,13 +28,6 @@
 						  InputGesture="Delete"/>
 			</ContextMenu>
 		</DataGrid.ContextMenu>
-
-		<DataGrid.Styles>
-			<Style Selector="DataGridColumnHeader">
-				<Setter Property="Background" Value="Transparent"/>
-				<Setter Property="FontSize" Value="12"/>
-			</Style>
-		</DataGrid.Styles>
 
 		<DataGrid.Columns>
 			<DataGridTextColumn Header="Гра" Width="2*"

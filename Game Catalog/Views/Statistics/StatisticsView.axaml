@@ -36,23 +36,11 @@
 			<Setter Property="RenderTransform" Value="none"/>
 		</Style>
 
-		<!-- Statistic tables: fixed order from the query, read-only -->
+		<!-- Statistic tables: fixed order from the query, one row at a time, no page margin -->
 		<Style Selector="DataGrid.statTable">
-			<Setter Property="AutoGenerateColumns" Value="False"/>
-			<Setter Property="IsReadOnly" Value="True"/>
 			<Setter Property="CanUserSortColumns" Value="False"/>
-			<Setter Property="CanUserResizeColumns" Value="True"/>
-			<Setter Property="CanUserReorderColumns" Value="False"/>
-			<Setter Property="GridLinesVisibility" Value="None"/>
-			<Setter Property="HeadersVisibility" Value="Column"/>
-			<Setter Property="BorderThickness" Value="0"/>
-			<Setter Property="Background" Value="Transparent"/>
-			<Setter Property="RowHeight" Value="44"/>
 			<Setter Property="SelectionMode" Value="Single"/>
-		</Style>
-		<Style Selector="DataGrid.statTable DataGridColumnHeader">
-			<Setter Property="Background" Value="Transparent"/>
-			<Setter Property="FontSize" Value="12"/>
+			<Setter Property="Margin" Value="0"/>
 		</Style>
 	</UserControl.Styles>
 
@@ -169,7 +157,7 @@
 						   Margin="8,0,0,8"/>
 
 				<!-- Order is fixed by the query: the most played game first -->
-				<DataGrid Grid.Row="1" Classes="statTable"
+				<DataGrid Grid.Row="1" Classes="table statTable"
 						  ItemsSource="{Binding GamesByPlayTime}"
 						  IsVisible="{Binding HasPlayTimeRows}"
 						  views:DataGridBehavior.RowDoubleTapCommand="{Binding OpenPlayTimeGameCommand}">
@@ -196,7 +184,7 @@
 		<!-- Studios tab: studios with games in the library, the most played first -->
 		<Grid Grid.Row="1" Margin="16,0,16,16"
 			  IsVisible="{Binding IsStudiosTab}">
-			<DataGrid Classes="statTable"
+			<DataGrid Classes="table statTable"
 					  ItemsSource="{Binding StudioStats}"
 					  IsVisible="{Binding HasStudioRows}"
 					  views:DataGridBehavior.RowDoubleTapCommand="{Binding OpenStudioCommand}">
@@ -221,7 +209,7 @@
 		<!-- Genres tab: a game with several genres counts in each of them -->
 		<Grid Grid.Row="1" Margin="16,0,16,16"
 			  IsVisible="{Binding IsGenresTab}">
-			<DataGrid Classes="statTable"
+			<DataGrid Classes="table statTable"
 					  ItemsSource="{Binding GenreStats}"
 					  IsVisible="{Binding HasGenreRows}">
 				<DataGrid.Columns>
@@ -257,7 +245,7 @@
 									Width="150"/>
 			</StackPanel>
 
-			<DataGrid Grid.Row="1" Classes="statTable"
+			<DataGrid Grid.Row="1" Classes="table statTable"
 					  ItemsSource="{Binding ActivityDays}"
 					  IsVisible="{Binding HasActivityRows}">
 				<DataGrid.Columns>
@@ -281,7 +269,7 @@
 		<!-- Forgotten games tab: kept for more than 14 days and never played -->
 		<Grid Grid.Row="1" Margin="16,0,16,16"
 			  IsVisible="{Binding IsForgottenTab}">
-			<DataGrid Classes="statTable"
+			<DataGrid Classes="table statTable"
 					  ItemsSource="{Binding ForgottenGames}"
 					  IsVisible="{Binding HasForgottenRows}"
 					  views:DataGridBehavior.RowDoubleTapCommand="{Binding OpenForgottenGameCommand}">
