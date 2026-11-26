@@ -4,18 +4,24 @@ using Avalonia.Input;
 using Avalonia.Interactivity;
 using Avalonia.VisualTree;
 using System.Collections;
+using System.Collections.Specialized;
+using System.Linq;
 using System.Windows.Input;
 
 namespace Game_Catalog.Views;
 
 /// <summary>
 /// Shared table behavior, set up from XAML through attached properties:
-/// mirrors the selected rows into the ViewModel, opens a row on double click, deletes the selection with Delete,
-/// clears the selection with Escape and selects rows on right click the way a file manager does.
+/// keeps the selected rows in step with a list of the ViewModel both ways, opens a row on double click,
+/// deletes the selection with Delete, clears the selection with Escape and selects rows on right click
+/// the way a file manager does.
 /// </summary>
 public static class DataGridBehavior
 {
-    /// <summary> List of the ViewModel that always holds the rows selected in the grid (grid to ViewModel only). </summary>
+    /// <summary>
+    /// List of the ViewModel that holds the rows selected in the grid. Works both ways: a selection made in the grid
+    /// is copied into the list, and rows the ViewModel puts into the list get selected in the grid.
+    /// </summary>
     public static readonly AttachedProperty<IList?> SelectedItemsProperty =
         AvaloniaProperty.RegisterAttached<DataGrid, IList?>("SelectedItems", typeof(DataGridBehavior));
 
@@ -31,9 +37,32 @@ public static class DataGridBehavior
     private static readonly AttachedProperty<bool> IsHookedProperty =
         AvaloniaProperty.RegisterAttached<DataGrid, bool>("IsHooked", typeof(DataGridBehavior));
 
+    /// <summary> Link of a grid with the selection list of its ViewModel. </summary>
+    private static readonly AttachedProperty<SelectionLink?> LinkProperty =
+        AvaloniaProperty.RegisterAttached<DataGrid, SelectionLink?>("Link", typeof(DataGridBehavior));
+
+    /// <summary>
+    /// Keeps a grid and the selection list of its ViewModel in step. While one side is being copied into the other,
+    /// IsSyncing is set, so the change it causes on the other side is not copied back.
+    /// </summary>
+    private sealed class SelectionLink
+    {
+        /// <summary> The list being watched for changes made by the ViewModel. </summary>
+        public INotifyCollectionChanged? Source;
+
+        /// <summary> Reacts to changes of the list; made once per grid. </summary>
+        public NotifyCollectionChangedEventHandler? Handler;
+
+        public bool IsSyncing;
+    }
+
     static DataGridBehavior()
     {
-        SelectedItemsProperty.Changed.AddClassHandler<DataGrid>((grid, _) => { Hook(grid); SyncSelection(grid); });
+        SelectedItemsProperty.Changed.AddClassHandler<DataGrid>((grid, e) =>
+        {
+            Hook(grid);
+            Link(grid, e.NewValue as IList);
+        });
         RowDoubleTapCommandProperty.Changed.AddClassHandler<DataGrid>((grid, _) => Hook(grid));
         DeleteCommandProperty.Changed.AddClassHandler<DataGrid>((grid, _) => Hook(grid));
     }
@@ -61,15 +90,80 @@ public static class DataGridBehavior
         grid.AddHandler(Control.ContextRequestedEvent, OnContextRequested, RoutingStrategies.Tunnel);
     }
 
+    /// <summary>
+    /// Starts watching the new ViewModel list instead of the previous one and selects in the grid
+    /// whatever the list already holds.
+    /// </summary>
+    private static void Link(DataGrid grid, IList? list)
+    {
+        var link = grid.GetValue(LinkProperty);
+        if (link == null)
+        {
+            link = new SelectionLink();
+            link.Handler = (_, _) => ApplyToGrid(grid);
+            grid.SetValue(LinkProperty, link);
+        }
+
+        if (link.Source != null)
+            link.Source.CollectionChanged -= link.Handler;
+        link.Source = list as INotifyCollectionChanged;
+        if (link.Source != null)
+            link.Source.CollectionChanged += link.Handler;
+
+        ApplyToGrid(grid);
+    }
+
     /// <summary> Copies the current selection of the grid into the ViewModel list. </summary>
     private static void SyncSelection(DataGrid grid)
     {
-        if (GetSelectedItems(grid) is not { } target)
+        var link = grid.GetValue(LinkProperty);
+        if (GetSelectedItems(grid) is not { } target || link == null || link.IsSyncing)
             return;
 
-        target.Clear();
-        foreach (var item in grid.SelectedItems)
-            target.Add(item);
+        link.IsSyncing = true;
+        try
+        {
+            target.Clear();
+            foreach (var item in grid.SelectedItems)
+                target.Add(item);
+        }
+        finally
+        {
+            link.IsSyncing = false;
+        }
+    }
+
+    /// <summary>
+    /// Selects in the grid the rows the ViewModel list holds. Items that are not rows of the grid are skipped;
+    /// a single-selection grid takes only the first one.
+    /// </summary>
+    private static void ApplyToGrid(DataGrid grid)
+    {
+        var link = grid.GetValue(LinkProperty);
+        if (GetSelectedItems(grid) is not { } source || link == null || link.IsSyncing)
+            return;
+
+        var rows = grid.ItemsSource?.Cast<object>().ToHashSet() ?? new();
+        var items = source.Cast<object>().Where(rows.Contains).ToList();
+
+        link.IsSyncing = true;
+        try
+        {
+            if (grid.SelectionMode == DataGridSelectionMode.Extended)
+            {
+                grid.SelectedItems.Clear();
+                foreach (var item in items)
+                    grid.SelectedItems.Add(item);
+            }
+            else
+            {
+                grid.SelectedItem = items.FirstOrDefault();
+            }
+        }
+        finally
+        {
+            link.IsSyncing = false;
+        }
     }
 
     /// <summary> Returns the row under the event source, or null for the header, the empty area or a button inside a row. </summary>
