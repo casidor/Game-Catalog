@@ -367,7 +367,7 @@ namespace Game_Catalog.ViewModels
 
             try
             {
-                GameRepository.ArchiveEndingSession(Game.GameId);
+                GameRepository.Archive(new[] { Game.GameId });
             }
             catch (DatabaseException ex)
             {
@@ -382,7 +382,10 @@ namespace Game_Catalog.ViewModels
         {
             try
             {
-                GameRepository.SetArchived(Game.GameId, archived);
+                if (archived)
+                    GameRepository.Archive(new[] { Game.GameId });
+                else
+                    GameRepository.Restore(new[] { Game.GameId });
             }
             catch (DatabaseException ex)
             {
@@ -407,7 +410,7 @@ namespace Game_Catalog.ViewModels
 
             try
             {
-                GameRepository.Delete(Game.GameId);
+                GameRepository.Delete(new[] { Game.GameId });
             }
             catch (DatabaseException ex)
             {

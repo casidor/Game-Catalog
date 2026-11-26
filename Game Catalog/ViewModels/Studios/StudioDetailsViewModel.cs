@@ -204,20 +204,19 @@ namespace Game_Catalog.ViewModels
             await ReloadAsync();
         }
 
-        /// <summary> Deletes the studio after confirmation unless it still has games. </summary>
+        /// <summary>
+        /// Deletes the studio after confirmation. A studio that still has games cannot be deleted,
+        /// so that is checked first and explained instead of asking.
+        /// </summary>
         [RelayCommand]
         private async Task DeleteAsync()
         {
-            var confirmed = await Dialogs.Current.ConfirmAsync(
-                "Видалення студії",
-                $"Видалити студію «{Studio.StudioName}»?\nЦю дію неможливо скасувати.",
-                "Видалити");
-            if (!confirmed) return;
+            var ids = new[] { Studio.StudioId };
 
-            bool deleted;
+            bool hasGames;
             try
             {
-                deleted = StudioRepository.Delete(Studio.StudioId);
+                hasGames = StudioRepository.GetIdsWithGames(ids).Count > 0;
             }
             catch (DatabaseException ex)
             {
@@ -225,12 +224,28 @@ namespace Game_Catalog.ViewModels
                 return;
             }
 
-            if (!deleted)
+            if (hasGames)
             {
                 await Dialogs.Current.AlertAsync(
                     "Неможливо видалити студію",
                     $"Студія «{Studio.StudioName}» має ігри в бібліотеці або архіві.\n" +
                     "Спочатку видаліть ці ігри або перепризначте їх іншій студії.");
+                return;
+            }
+
+            var confirmed = await Dialogs.Current.ConfirmAsync(
+                "Видалення студії",
+                $"Видалити студію «{Studio.StudioName}»?\nЦю дію неможливо скасувати.",
+                "Видалити");
+            if (!confirmed) return;
+
+            try
+            {
+                StudioRepository.Delete(ids);
+            }
+            catch (DatabaseException ex)
+            {
+                await ShowErrorAsync("Помилка видалення студії", ex);
                 return;
             }
 

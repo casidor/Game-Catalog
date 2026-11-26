@@ -95,6 +95,20 @@ namespace Game_Catalog.Data.Repositories
                     new { gameId });
             });
 
+        /// <summary> Returns the sessions still running in the given games, oldest first. </summary>
+        public static List<PlaySession> GetActive(IReadOnlyCollection<int> gameIds) =>
+            Db.Run("Не вдалося завантажити поточні сесії", () =>
+            {
+                using var connection = Db.Open();
+                return connection.Query<PlaySession>(@"
+                    SELECT play_session_id, game_id, game_title, start_time, end_time,
+                           duration_seconds, entry_method, note
+                    FROM v_play_session
+                    WHERE game_id IN @gameIds AND end_time IS NULL
+                    ORDER BY start_time",
+                    new { gameIds }).AsList();
+            });
+
         /// <summary> Returns the open sessions of all games, oldest first. </summary>
         public static List<PlaySession> GetAllActive() =>
             Db.Run("Не вдалося завантажити поточні сесії", () =>

@@ -189,15 +189,6 @@ namespace Game_Catalog.Data.Repositories
                 SaveLinks(connection, tx, game);
             });
 
-        /// <summary> Moves the game to the archive or back. </summary>
-        public static void SetArchived(int gameId, bool archived) =>
-            Db.Run("Не вдалося змінити архівацію гри", () =>
-            {
-                using var connection = Db.Open();
-                connection.Execute("UPDATE Game SET is_archived = @value WHERE game_id = @gameId",
-                    new { value = archived ? 1 : 0, gameId });
-            });
-
         /// <summary> Sets only the image paths of the game. Empty paths are stored as NULL. </summary>
         public static void UpdateImages(int gameId, string coverImagePath, string backgroundImagePath, string iconPath) =>
             Db.Run("Не вдалося зберегти зображення гри", () =>
@@ -212,26 +203,40 @@ namespace Game_Catalog.Data.Repositories
                     new { gameId, coverImagePath, backgroundImagePath, iconPath });
             });
 
-        /// <summary> Ends the session in progress now and moves the game to the archive, both or neither. </summary>
-        public static void ArchiveEndingSession(int gameId) =>
-            Db.InTransaction("Не вдалося завершити сесію й архівувати гру", (connection, tx) =>
+        /// <summary>
+        /// Deletes the games with one statement, so all of them or none.
+        /// Their sessions, goals, achievements, DLC and links are removed by the database (ON DELETE CASCADE).
+        /// </summary>
+        public static void Delete(IReadOnlyCollection<int> gameIds) =>
+            Db.Run("Не вдалося видалити ігри", () =>
+            {
+                using var connection = Db.Open();
+                connection.Execute("DELETE FROM Game WHERE game_id IN @gameIds", new { gameIds });
+            });
+
+        /// <summary>
+        /// Moves the games to the archive in one transaction. A running session would stop archiving
+        /// (trigger game_has_active_session), so the sessions still running in these games are ended first.
+        /// </summary>
+        public static void Archive(IReadOnlyCollection<int> gameIds) =>
+            Db.InTransaction("Не вдалося перенести ігри в архів", (connection, tx) =>
             {
                 connection.Execute(@"
                     UPDATE PlaySession
                     SET end_time = strftime('%Y-%m-%d %H:%M:%S', 'now', 'localtime')
-                    WHERE game_id = @gameId AND end_time IS NULL",
-                    new { gameId }, tx);
+                    WHERE game_id IN @gameIds AND end_time IS NULL",
+                    new { gameIds }, tx);
 
-                connection.Execute("UPDATE Game SET is_archived = 1 WHERE game_id = @gameId",
-                    new { gameId }, tx);
+                connection.Execute("UPDATE Game SET is_archived = 1 WHERE game_id IN @gameIds",
+                    new { gameIds }, tx);
             });
 
-        /// <summary> Deletes the game; sessions, goals, DLC and links are removed by the database. </summary>
-        public static void Delete(int gameId) =>
-            Db.Run("Не вдалося видалити гру", () =>
+        /// <summary> Returns the games from the archive to the library with one statement. </summary>
+        public static void Restore(IReadOnlyCollection<int> gameIds) =>
+            Db.Run("Не вдалося відновити ігри", () =>
             {
                 using var connection = Db.Open();
-                connection.Execute("DELETE FROM Game WHERE game_id = @gameId", new { gameId });
+                connection.Execute("UPDATE Game SET is_archived = 0 WHERE game_id IN @gameIds", new { gameIds });
             });
 
         /// <summary> Deletes the DLC in one transaction. Rows that are not DLC are left alone. </summary>

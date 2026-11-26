@@ -166,22 +166,6 @@ namespace Game_Catalog.Data.Repositories
                     WHERE studio_id = @StudioId", studio);
             });
 
-        /// <summary> Returns false if the studio still has games (ON DELETE RESTRICT). </summary>
-        public static bool Delete(int studioId) =>
-            Db.Run("Не вдалося видалити студію", () =>
-            {
-                try
-                {
-                    using var connection = Db.Open();
-                    connection.Execute("DELETE FROM Studio WHERE studio_id = @studioId", new { studioId });
-                    return true;
-                }
-                catch (SqliteException ex) when (ex.SqliteErrorCode == 19)
-                {
-                    return false;
-                }
-            });
-
         /// <summary>
         /// Deletes the studios with one statement, so all of them or none: a studio that still has games
         /// stops the whole statement (ON DELETE RESTRICT).
