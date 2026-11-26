@@ -124,7 +124,7 @@ namespace Game_Catalog.Data.Repositories
                 // p is the main game of a DLC; for a standalone game it has no row, so all its columns are NULL.
                 return connection.Query<StudioGame>(@"
                     SELECT g.game_id, g.parent_game_id, g.game_title, g.release_year,
-                           g.game_status, g.personal_rating,
+                           g.game_status, g.personal_rating, g.icon_path,
                            COALESCE(p.is_archived, g.is_archived) AS is_archived,
                            p.game_title AS parent_title,
                            COALESCE(p.developer_id = g.developer_id, 0) AS is_nested

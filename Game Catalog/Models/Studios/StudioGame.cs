@@ -16,6 +16,9 @@
 
         public int? PersonalRating { get; set; }
 
+        /// <summary> Path of the game icon in the media folder; null when it has none (a DLC never has one). </summary>
+        public string? IconPath { get; set; }
+
         /// <summary> True when the game is archived; for a DLC, when its main game is archived. </summary>
         public bool IsArchived { get; set; }
 

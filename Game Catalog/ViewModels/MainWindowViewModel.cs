@@ -260,6 +260,7 @@ namespace Game_Catalog.ViewModels
         {
             var detailVm = new StudioDetailsViewModel(studio);
             detailVm.BackRequested += () => CurrentPage = backPage;
+            detailVm.GameSelected += gameId => OpenGame(gameId, detailVm);
             CurrentPage = detailVm;
         }
     }
