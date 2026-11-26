@@ -113,6 +113,28 @@ namespace Game_Catalog.Data.Repositories
                     new { studioIds }).ToHashSet();
             });
 
+        /// <summary>
+        /// Returns the games and DLC of the studio, newest first, games without a year last.
+        /// A DLC takes the archive state of its main game, since it has none of its own.
+        /// </summary>
+        public static List<StudioGame> GetGames(int studioId) =>
+            Db.Run("Не вдалося завантажити ігри студії", () =>
+            {
+                using var connection = Db.Open();
+                // p is the main game of a DLC; for a standalone game it has no row, so all its columns are NULL.
+                return connection.Query<StudioGame>(@"
+                    SELECT g.game_id, g.parent_game_id, g.game_title, g.release_year,
+                           g.game_status, g.personal_rating,
+                           COALESCE(p.is_archived, g.is_archived) AS is_archived,
+                           p.game_title AS parent_title,
+                           COALESCE(p.developer_id = g.developer_id, 0) AS is_nested
+                    FROM Game g
+                    LEFT JOIN Game p ON p.game_id = g.parent_game_id
+                    WHERE g.developer_id = @studioId
+                    ORDER BY g.release_year DESC NULLS LAST, g.game_title COLLATE UKR_NOCASE ASC, g.game_id ASC",
+                    new { studioId }).AsList();
+            });
+
         /// <summary> Inserts the studio and sets its generated id. </summary>
         public static void Insert(Studio studio) =>
             Db.Run("Не вдалося зберегти студію", () =>
