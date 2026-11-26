@@ -23,6 +23,9 @@
 			<CheckBox Content="Дозволити зміни (INSERT/UPDATE/DELETE)"
 					  IsChecked="{Binding AllowModify}"
 					  VerticalAlignment="Center"/>
+			<Button Content="Заповнити демо-даними"
+					ToolTip.Tip="Додає демо-бібліотеку з seed.sql, лише якщо в базі ще немає ігор"
+					Command="{Binding FillDemoDataCommand}"/>
 		</StackPanel>
 
 		<TextBlock Grid.Row="2"

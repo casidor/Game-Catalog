@@ -62,6 +62,21 @@ namespace Game_Catalog.ViewModels
             ResultChanged?.Invoke();
         }
 
+        /// <summary> Fills an empty library with the demo data from seed.sql. </summary>
+        [RelayCommand]
+        private void FillDemoData()
+        {
+            try
+            {
+                DemoData.Fill();
+                Message = "Демо-дані додано. Відкрийте розділ ще раз, щоб побачити їх.";
+            }
+            catch (DatabaseException ex)
+            {
+                Message = $"Помилка: {ex.Message}";
+            }
+        }
+
         /// <summary>Resets the editor text and the result.</summary>
         [RelayCommand]
         private void Clear()
