@@ -46,12 +46,12 @@ public partial class GamesListView : UserControl
             vm.CancelFiltersCommand.Execute(null);
     }
 
-    /// <summary> Opens the game whose card was double-clicked. A single click only selects it. </summary>
+    /// <summary> Opens the game whose card was double-clicked; a double click on its checkbox only selects. </summary>
     private void OnCardDoubleTapped(object? sender, TappedEventArgs e)
     {
         if (e.Source is not Visual source) return;
-        if (source.FindAncestorOfType<Button>(includeSelf: true) is not { DataContext: GameRow row } button) return;
-        if (!button.Classes.Contains("card")) return;
+        if (source.FindAncestorOfType<CheckBox>(includeSelf: true) != null) return;
+        if (source.FindAncestorOfType<ListBoxItem>(includeSelf: true) is not { DataContext: GameRow row }) return;
 
         if (DataContext is GamesListViewModel vm)
             vm.OpenGameCommand.Execute(row);

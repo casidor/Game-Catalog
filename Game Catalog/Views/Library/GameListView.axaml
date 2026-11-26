@@ -9,13 +9,52 @@
 			 x:DataType="vm:GamesListViewModel">
 
 	<UserControl.Styles>
-		<!-- Game card frame: visible only on the selected card -->
+		<!-- Card items: only the card itself, without the list item visuals of the theme -->
+		<Style Selector="ListBox.cards ListBoxItem">
+			<Setter Property="Margin" Value="0,0,12,12"/>
+			<Setter Property="Padding" Value="0"/>
+			<Setter Property="ClipToBounds" Value="False"/>
+			<Setter Property="RenderTransform" Value="scale(1)"/>
+			<Setter Property="Transitions">
+				<Transitions>
+					<TransformOperationsTransition Property="RenderTransform" Duration="0:0:0.12"/>
+				</Transitions>
+			</Setter>
+			<Setter Property="Template">
+				<ControlTemplate>
+					<ContentPresenter Name="PART_ContentPresenter"
+									  ClipToBounds="False"
+									  Background="Transparent"
+									  Content="{TemplateBinding Content}"
+									  ContentTemplate="{TemplateBinding ContentTemplate}"/>
+				</ControlTemplate>
+			</Setter>
+		</Style>
+
+		<!-- The card under the pointer grows over its neighbours: it is scaled as a whole and drawn above them -->
+		<Style Selector="ListBox.cards ListBoxItem:pointerover">
+			<Setter Property="RenderTransform" Value="scale(1.05)"/>
+			<Setter Property="ZIndex" Value="1"/>
+		</Style>
+
+		<!-- Game card frame: visible only on the selected cards -->
 		<Style Selector="Border.gameCard">
 			<Setter Property="BorderThickness" Value="2"/>
 			<Setter Property="BorderBrush" Value="Transparent"/>
 		</Style>
-		<Style Selector="Border.gameCard.selected">
+		<Style Selector="ListBox.cards ListBoxItem:selected Border.gameCard">
 			<Setter Property="BorderBrush" Value="{DynamicResource NavForeground}"/>
+		</Style>
+
+		<!-- Selection checkbox of a card: shown on hover and on the selected cards -->
+		<Style Selector="ListBox.cards ListBoxItem Border.pick">
+			<Setter Property="IsVisible" Value="False"/>
+		</Style>
+		<Style Selector="ListBox.cards ListBoxItem:pointerover Border.pick">
+			<Setter Property="IsVisible" Value="True"/>
+		</Style>
+		<Style Selector="ListBox.cards ListBoxItem:selected Border.pick">
+			<Setter Property="IsVisible" Value="True"/>
 		</Style>
 	</UserControl.Styles>
 
@@ -108,58 +147,83 @@
 		<!-- Content: the list on the left, the preview panel on the right -->
 		<Grid Grid.Row="1" ColumnDefinitions="*,Auto">
 
-			<!-- Grid view -->
+			<!-- Grid view: several cards can be selected with Ctrl and Shift or with the checkbox of a card -->
 			<ScrollViewer IsVisible="{Binding ShowGrid}">
-				<ItemsControl ItemsSource="{Binding Rows}" DoubleTapped="OnCardDoubleTapped">
-					<ItemsControl.ItemsPanel>
+				<ListBox Classes="cards"
+						 ItemsSource="{Binding Rows}"
+						 SelectionMode="Multiple"
+						 SelectedItems="{Binding SelectedRows}"
+						 Background="Transparent"
+						 DoubleTapped="OnCardDoubleTapped">
+					<ListBox.KeyBindings>
+						<KeyBinding Gesture="Delete" Command="{Binding DeleteSelectedCommand}"/>
+						<KeyBinding Gesture="Escape" Command="{Binding ClearSelectionCommand}"/>
+					</ListBox.KeyBindings>
+
+					<!-- Same actions as the table menu -->
+					<ListBox.ContextMenu>
+						<ContextMenu>
+							<MenuItem Header="{Binding ArchiveSelectedHeader}"
+									  Command="{Binding ArchiveSelectedCommand}"
+									  IsVisible="{Binding !IsArchive}"/>
+							<MenuItem Header="{Binding RestoreSelectedHeader}"
+									  Command="{Binding RestoreSelectedCommand}"
+									  IsVisible="{Binding IsArchive}"/>
+							<Separator/>
+							<MenuItem Header="Редагувати"
+									  Command="{Binding EditSelectedCommand}"/>
+							<Separator/>
+							<MenuItem Header="{Binding DeleteSelectedHeader}"
+									  Command="{Binding DeleteSelectedCommand}"
+									  InputGesture="Delete"/>
+						</ContextMenu>
+					</ListBox.ContextMenu>
+
+					<ListBox.ItemsPanel>
 						<ItemsPanelTemplate>
 							<WrapPanel Orientation="Horizontal" Margin="16"/>
 						</ItemsPanelTemplate>
-					</ItemsControl.ItemsPanel>
-					<ItemsControl.ItemTemplate>
+					</ListBox.ItemsPanel>
+					<ListBox.ItemTemplate>
 						<DataTemplate x:DataType="vm:GameRow">
-							<!-- One click selects the game for the preview, a double click opens it -->
-							<Button Classes="card" Padding="0" Margin="0,0,12,12" Background="Transparent"
-									Command="{Binding $parent[ItemsControl].((vm:GamesListViewModel)DataContext).SelectRowCommand}"
-									CommandParameter="{Binding}">
-								<Border Classes="gameCard" Classes.selected="{Binding IsSelected}"
-										Width="160" Height="245" CornerRadius="8" ClipToBounds="True"
-										Background="{DynamicResource CardBackground}">
-									<Grid RowDefinitions="*,Auto">
-										<Panel Grid.Row="0">
-											<Image Width="160" Height="215" Stretch="UniformToFill"
-												   Source="{Binding CoverImagePath, Converter={x:Static conv:PathToBitmapConverter.Instance}, ConverterParameter=640}"
-												   IsVisible="{Binding CoverImagePath, Converter={x:Static StringConverters.IsNotNullOrEmpty}}"/>
-											<TextBlock Text="🎮" FontSize="48"
-													   HorizontalAlignment="Center" VerticalAlignment="Center"
-													   IsVisible="{Binding CoverImagePath, Converter={x:Static StringConverters.IsNullOrEmpty}}"/>
-											<Button Content="✏"
-													HorizontalAlignment="Right" VerticalAlignment="Top"
-													Margin="6" Padding="8,4"
-													Background="{DynamicResource ButtonBackground}"
-													ToolTip.Tip="Редагувати"
-													IsVisible="{Binding $parent[Button].IsPointerOver}"
-													Command="{Binding $parent[ItemsControl].((vm:GamesListViewModel)DataContext).EditCommand}"
-													CommandParameter="{Binding Game}"/>
-										</Panel>
-										<Border Grid.Row="1" Padding="8,6"
-												Background="{Binding IsMatch, Converter={x:Static conv:SearchMatchBrushConverter.Instance}}">
-											<TextBlock Text="{Binding Title}" FontWeight="SemiBold" FontSize="12"
-													   TextWrapping="Wrap" MaxLines="2"
-													   TextTrimming="CharacterEllipsis"/>
+							<Border Classes="gameCard"
+									Width="160" Height="245" CornerRadius="8" ClipToBounds="True"
+									Background="{DynamicResource CardBackground}">
+								<Grid RowDefinitions="*,Auto">
+									<Panel Grid.Row="0">
+										<Image Width="160" Height="215" Stretch="UniformToFill"
+											   Source="{Binding CoverImagePath, Converter={x:Static conv:PathToBitmapConverter.Instance}, ConverterParameter=640}"
+											   IsVisible="{Binding CoverImagePath, Converter={x:Static StringConverters.IsNotNullOrEmpty}}"/>
+										<!-- Quiet placeholder: marks a missing cover without drawing attention -->
+										<TextBlock Text="🎮" FontSize="32" Opacity="0.25"
+												   HorizontalAlignment="Center" VerticalAlignment="Center"
+												   IsVisible="{Binding CoverImagePath, Converter={x:Static StringConverters.IsNullOrEmpty}}"/>
+										<!-- Adds the card to the selection or takes it out, keeping the other cards selected -->
+										<Border Classes="pick"
+												HorizontalAlignment="Left" VerticalAlignment="Top"
+												Margin="6" Padding="4,0" CornerRadius="4"
+												Background="#99000000">
+											<CheckBox MinWidth="0" Padding="0"
+													  ToolTip.Tip="Вибрати"
+													  IsChecked="{Binding $parent[ListBoxItem].IsSelected}"/>
 										</Border>
-									</Grid>
-								</Border>
-							</Button>
+									</Panel>
+									<Border Grid.Row="1" Padding="8,6"
+											Background="{Binding IsMatch, Converter={x:Static conv:SearchMatchBrushConverter.Instance}}">
+										<TextBlock Text="{Binding Title}" FontWeight="SemiBold" FontSize="12"
+												   TextWrapping="Wrap" MaxLines="2"
+												   TextTrimming="CharacterEllipsis"/>
+									</Border>
+								</Grid>
+							</Border>
 						</DataTemplate>
-					</ItemsControl.ItemTemplate>
-				</ItemsControl>
+					</ListBox.ItemTemplate>
+				</ListBox>
 			</ScrollViewer>
 
 			<!-- Table view -->
 			<DataGrid ItemsSource="{Binding Rows}"
 					  Classes="table searchable dbSort"
-					  SelectedItem="{Binding SelectedRow, Mode=TwoWay}"
 					  IsVisible="{Binding ShowList}"
 					  CanUserSortColumns="True"
 					  SelectionMode="Extended"

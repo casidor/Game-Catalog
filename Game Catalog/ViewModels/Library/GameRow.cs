@@ -5,7 +5,7 @@ using System.Linq;
 
 namespace Game_Catalog.ViewModels
 {
-    /// <summary> One row of the games list: a game plus display texts, the search-match flag and the selection flag. </summary>
+    /// <summary> One row of the games list: a game plus display texts and the search-match flag. </summary>
     public partial class GameRow : ObservableObject
     {
         /// <summary> The game shown in this row. </summary>
@@ -37,9 +37,6 @@ namespace Game_Catalog.ViewModels
 
         /// <summary> True when the row matches the current search text. </summary>
         [ObservableProperty] private bool _isMatch;
-
-        /// <summary> True when the row is selected and shown in the preview panel. </summary>
-        [ObservableProperty] private bool _isSelected;
 
         public GameRow(Game game) => Game = game;
     }

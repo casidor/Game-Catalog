@@ -34,7 +34,10 @@ namespace Game_Catalog.ViewModels
         /// <summary> Rows shown in the grid and in the list. </summary>
         public ObservableCollection<GameRow> Rows { get; } = new();
 
-        /// <summary> Rows selected in the table, mirrored by DataGridBehavior; the menu actions work with them. </summary>
+        /// <summary>
+        /// Selected games, shared by the cards and the table: the cards bind to it directly, the table through
+        /// DataGridBehavior, so the selection stays when the view is switched. The menu actions work with it.
+        /// </summary>
         public ObservableCollection<GameRow> SelectedRows { get; } = new();
 
         public ObservableCollection<FilterOption> GenreOptions { get; } = new();
@@ -67,10 +70,11 @@ namespace Game_Catalog.ViewModels
         /// <summary> True when the preview panel is shown on the right of the list. </summary>
         [ObservableProperty] private bool _isPreviewOpen = true;
 
-        /// <summary> Row whose game is shown in the preview panel; null when nothing is selected. </summary>
-        [ObservableProperty]
-        [NotifyPropertyChangedFor(nameof(HasSelection))]
-        private GameRow? _selectedRow;
+        /// <summary>
+        /// Row whose game is shown in the preview panel: the first selected one, null when nothing is selected.
+        /// Worked out from SelectedRows, so the selection has a single source.
+        /// </summary>
+        public GameRow? SelectedRow => SelectedRows.Count > 0 ? SelectedRows[0] : null;
 
         /// <summary> True when a game is selected. </summary>
         public bool HasSelection => SelectedRow != null;
@@ -163,6 +167,8 @@ namespace Game_Catalog.ViewModels
         /// <summary> Refreshes the menu captions and the commands that depend on the selection. </summary>
         private void OnSelectionChanged()
         {
+            OnPropertyChanged(nameof(SelectedRow));
+            OnPropertyChanged(nameof(HasSelection));
             OnPropertyChanged(nameof(ArchiveSelectedHeader));
             OnPropertyChanged(nameof(RestoreSelectedHeader));
             OnPropertyChanged(nameof(DeleteSelectedHeader));
@@ -173,13 +179,6 @@ namespace Game_Catalog.ViewModels
         }
 
         partial void OnSearchTextChanged(string value) => UpdateMatches();
-
-        /// <summary> Moves the selection mark from the previous row to the new one. </summary>
-        partial void OnSelectedRowChanged(GameRow? oldValue, GameRow? newValue)
-        {
-            if (oldValue != null) oldValue.IsSelected = false;
-            if (newValue != null) newValue.IsSelected = true;
-        }
 
         /// <summary> Loads the page data when the page is shown. </summary>
         public override void OnNavigatedTo() => Load();
@@ -250,14 +249,15 @@ namespace Game_Catalog.ViewModels
         /// <summary> Rebuilds the rows from the loaded games, keeping the order returned by the database. </summary>
         private void Rebuild()
         {
-            var selectedId = SelectedRow?.Game.GameId;
+            var selectedIds = SelectedRows.Select(r => r.Game.GameId).ToHashSet();
 
             Rows.Clear();
             foreach (var game in _loaded)
                 Rows.Add(new GameRow(game));
 
-            // Keep the preview on the same game if it is still in the list.
-            SelectedRow = selectedId is { } id ? Rows.FirstOrDefault(r => r.Game.GameId == id) : null;
+            // Keep the same games selected if they are still in the list.
+            foreach (var row in Rows.Where(r => selectedIds.Contains(r.Game.GameId)))
+                SelectedRows.Add(row);
 
             UpdateMatches();
 
@@ -426,9 +426,9 @@ namespace Game_Catalog.ViewModels
             if (edited == null) return;
             Load();
         }
-        /// <summary> Selects the game shown in the preview panel. </summary>
+        /// <summary> Clears the selection of the cards with Escape; the table clears its own. </summary>
         [RelayCommand]
-        private void SelectRow(GameRow row) => SelectedRow = row;
+        private void ClearSelection() => SelectedRows.Clear();
 
         /// <summary> Shows or hides the preview panel. </summary>
         [RelayCommand]
