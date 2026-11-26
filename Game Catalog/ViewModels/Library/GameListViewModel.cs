@@ -79,6 +79,20 @@ namespace Game_Catalog.ViewModels
         /// <summary> True when a game is selected. </summary>
         public bool HasSelection => SelectedRow != null;
 
+        /// <summary> True when exactly one game is selected: the preview shows its data. </summary>
+        public bool IsSingleSelected => SelectedRows.Count == 1;
+
+        /// <summary> True when several games are selected: the preview shows a stack of their covers and the count. </summary>
+        public bool IsMultiSelected => SelectedRows.Count > 1;
+
+        /// <summary> Count shown in the preview when several games are selected. </summary>
+        public string SelectionCountText => $"Вибрано ігор: {SelectedRows.Count}";
+
+        // Games whose covers make the stack in the preview: the first three selected, front to back.
+        public GameRow? StackFront => SelectedRows.Count > 0 ? SelectedRows[0] : null;
+        public GameRow? StackMiddle => SelectedRows.Count > 1 ? SelectedRows[1] : null;
+        public GameRow? StackBack => SelectedRows.Count > 2 ? SelectedRows[2] : null;
+
         [ObservableProperty] private int? _draftYearFrom;
         [ObservableProperty] private int? _draftYearTo;
         [ObservableProperty] private int? _draftRatingFrom;
@@ -169,6 +183,12 @@ namespace Game_Catalog.ViewModels
         {
             OnPropertyChanged(nameof(SelectedRow));
             OnPropertyChanged(nameof(HasSelection));
+            OnPropertyChanged(nameof(IsSingleSelected));
+            OnPropertyChanged(nameof(IsMultiSelected));
+            OnPropertyChanged(nameof(SelectionCountText));
+            OnPropertyChanged(nameof(StackFront));
+            OnPropertyChanged(nameof(StackMiddle));
+            OnPropertyChanged(nameof(StackBack));
             OnPropertyChanged(nameof(ArchiveSelectedHeader));
             OnPropertyChanged(nameof(RestoreSelectedHeader));
             OnPropertyChanged(nameof(DeleteSelectedHeader));
@@ -419,7 +439,6 @@ namespace Game_Catalog.ViewModels
         }
 
         /// <summary> Opens the editor for the given game; the editor saves it, then the page reloads. </summary>
-        [RelayCommand]
         private async Task EditAsync(Game game)
         {
             var edited = await Dialogs.Current.ShowGameEditorAsync(game);

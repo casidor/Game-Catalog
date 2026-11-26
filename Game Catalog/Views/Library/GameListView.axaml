@@ -37,6 +37,19 @@
 			<Setter Property="ZIndex" Value="1"/>
 		</Style>
 
+		<!-- One cover of the stack in the preview; a game without a cover leaves an empty card -->
+		<Style Selector="Border.stackCard">
+			<Setter Property="Width" Value="120"/>
+			<Setter Property="Height" Value="160"/>
+			<Setter Property="HorizontalAlignment" Value="Left"/>
+			<Setter Property="VerticalAlignment" Value="Top"/>
+			<Setter Property="CornerRadius" Value="8"/>
+			<Setter Property="ClipToBounds" Value="True"/>
+			<Setter Property="BorderThickness" Value="2"/>
+			<Setter Property="BorderBrush" Value="{DynamicResource SidebarBackground}"/>
+			<Setter Property="Background" Value="{DynamicResource CardBackground}"/>
+		</Style>
+
 		<!-- Game card frame: visible only on the selected cards -->
 		<Style Selector="Border.gameCard">
 			<Setter Property="BorderThickness" Value="2"/>
@@ -275,7 +288,7 @@
 				</DataGrid.Columns>
 			</DataGrid>
 
-			<!-- Preview panel: a compact version of the game page for the selected game -->
+			<!-- Preview panel: a compact version of the game page for one selected game, a stack of covers for several -->
 			<Border Grid.Column="1" Width="300" IsVisible="{Binding IsPreviewOpen}"
 					Background="{DynamicResource SidebarBackground}"
 					BorderBrush="{DynamicResource SidebarBorder}" BorderThickness="1,0,0,0">
@@ -285,7 +298,38 @@
 							   HorizontalAlignment="Center" VerticalAlignment="Center"
 							   IsVisible="{Binding !HasSelection}"/>
 
-					<ScrollViewer IsVisible="{Binding HasSelection}">
+					<!-- Several games: covers of the first three stacked, the count and a hint, like a file manager -->
+					<StackPanel IsVisible="{Binding IsMultiSelected}" Margin="16" Spacing="16">
+						<Panel Width="168" Height="200" HorizontalAlignment="Center">
+							<Border Classes="stackCard" Margin="48,0,0,0"
+									IsVisible="{Binding StackBack, Converter={x:Static ObjectConverters.IsNotNull}}">
+								<Image Stretch="UniformToFill"
+									   Source="{Binding StackBack.CoverImagePath, Converter={x:Static conv:PathToBitmapConverter.Instance}, ConverterParameter=320}"/>
+							</Border>
+							<Border Classes="stackCard" Margin="24,20,0,0"
+									IsVisible="{Binding StackMiddle, Converter={x:Static ObjectConverters.IsNotNull}}">
+								<Image Stretch="UniformToFill"
+									   Source="{Binding StackMiddle.CoverImagePath, Converter={x:Static conv:PathToBitmapConverter.Instance}, ConverterParameter=320}"/>
+							</Border>
+							<Border Classes="stackCard" Margin="0,40,0,0">
+								<Image Stretch="UniformToFill"
+									   Source="{Binding StackFront.CoverImagePath, Converter={x:Static conv:PathToBitmapConverter.Instance}, ConverterParameter=320}"/>
+							</Border>
+						</Panel>
+
+						<TextBlock Text="{Binding SelectionCountText}" FontSize="16" FontWeight="SemiBold"/>
+
+						<Border CornerRadius="8" Padding="12"
+								BorderBrush="{DynamicResource SidebarBorder}" BorderThickness="1">
+							<Grid ColumnDefinitions="Auto,10,*">
+								<TextBlock Grid.Column="0" Text="ⓘ" Opacity="0.6"/>
+								<TextBlock Grid.Column="2" Text="Оберіть одну гру, щоб побачити її дані."
+										   TextWrapping="Wrap"/>
+							</Grid>
+						</Border>
+					</StackPanel>
+
+					<ScrollViewer IsVisible="{Binding IsSingleSelected}">
 						<StackPanel Margin="16" Spacing="8">
 							<Border Width="180" Height="240" CornerRadius="8" ClipToBounds="True"
 									HorizontalAlignment="Center"
@@ -377,11 +421,6 @@
 							</ItemsControl>
 							<TextBlock Text="Тегів немає" Opacity="0.5"
 									   IsVisible="{Binding !SelectedRow.HasTags}"/>
-
-							<Button Content="✏ Редагувати" Margin="0,12,0,0"
-									HorizontalAlignment="Stretch" HorizontalContentAlignment="Center"
-									Command="{Binding EditCommand}"
-									CommandParameter="{Binding SelectedRow.Game}"/>
 						</StackPanel>
 					</ScrollViewer>
 				</Panel>
