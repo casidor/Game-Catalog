@@ -34,6 +34,9 @@ namespace Game_Catalog.ViewModels
         /// <summary> Rows shown in the grid and in the list. </summary>
         public ObservableCollection<GameRow> Rows { get; } = new();
 
+        /// <summary> Rows selected in the table, mirrored by DataGridBehavior; the menu actions work with them. </summary>
+        public ObservableCollection<GameRow> SelectedRows { get; } = new();
+
         public ObservableCollection<FilterOption> GenreOptions { get; } = new();
         public ObservableCollection<FilterOption> PlatformOptions { get; } = new();
         public ObservableCollection<FilterOption> TagOptions { get; } = new();
@@ -129,6 +132,14 @@ namespace Game_Catalog.ViewModels
         public bool ShowGrid => IsGridView && Rows.Count > 0;
         public bool ShowList => !IsGridView && Rows.Count > 0;
 
+        /// <summary> True on the archive page: the menu offers restoring instead of archiving. </summary>
+        public bool IsArchive => _isArchive;
+
+        /// <summary> Context menu captions with the number of selected games. </summary>
+        public string ArchiveSelectedHeader => $"В архів ({SelectedRows.Count})";
+        public string RestoreSelectedHeader => $"Відновити ({SelectedRows.Count})";
+        public string DeleteSelectedHeader => $"Видалити ({SelectedRows.Count})";
+
         /// <summary> Raised when the user opens a game. </summary>
         public event Action<Game>? GameSelected;
 
@@ -145,6 +156,20 @@ namespace Game_Catalog.ViewModels
                     .Convert(status, typeof(string), null, CultureInfo.InvariantCulture) as string;
                 StatusOptions.Add(new FilterOption(name ?? status.ToString(), (int)status));
             }
+
+            SelectedRows.CollectionChanged += (_, _) => OnSelectionChanged();
+        }
+
+        /// <summary> Refreshes the menu captions and the commands that depend on the selection. </summary>
+        private void OnSelectionChanged()
+        {
+            OnPropertyChanged(nameof(ArchiveSelectedHeader));
+            OnPropertyChanged(nameof(RestoreSelectedHeader));
+            OnPropertyChanged(nameof(DeleteSelectedHeader));
+            EditSelectedCommand.NotifyCanExecuteChanged();
+            ArchiveSelectedCommand.NotifyCanExecuteChanged();
+            RestoreSelectedCommand.NotifyCanExecuteChanged();
+            DeleteSelectedCommand.NotifyCanExecuteChanged();
         }
 
         partial void OnSearchTextChanged(string value) => UpdateMatches();
@@ -409,9 +434,136 @@ namespace Game_Catalog.ViewModels
         [RelayCommand]
         private void TogglePreview() => IsPreviewOpen = !IsPreviewOpen;
 
-        /// <summary> Opens the game. The details page arrives in a later commit. </summary>
+        /// <summary> Opens the game of a double-clicked row or card. </summary>
         [RelayCommand]
-        private void OpenGame(Game game) => GameSelected?.Invoke(game);
+        private void OpenGame(GameRow row) => GameSelected?.Invoke(row.Game);
+
+        /// <summary> Opens the editor for the only selected game. </summary>
+        [RelayCommand(CanExecute = nameof(HasSingleSelection))]
+        private Task EditSelectedAsync() => EditAsync(SelectedRows[0].Game);
+
+        private bool HasSingleSelection() => SelectedRows.Count == 1;
+
+        private bool HasLibrarySelection() => !_isArchive && SelectedRows.Count > 0;
+
+        private bool HasArchiveSelection() => _isArchive && SelectedRows.Count > 0;
+
+        private bool HasAnySelection() => SelectedRows.Count > 0;
+
+        /// <summary>
+        /// Moves the selected games to the archive after one confirmation. Sessions still running in them
+        /// would stop archiving, so they are named in the confirmation and ended in the same transaction.
+        /// </summary>
+        [RelayCommand(CanExecute = nameof(HasLibrarySelection))]
+        private async Task ArchiveSelectedAsync()
+        {
+            var rows = SelectedRows.ToList();
+            var ids = rows.Select(r => r.Game.GameId).ToList();
+
+            List<PlaySession> running;
+            try
+            {
+                running = SessionRepository.GetActive(ids);
+            }
+            catch (DatabaseException ex)
+            {
+                await ShowErrorAsync("Помилка архівації ігор", ex);
+                return;
+            }
+
+            var one = rows.Count == 1;
+            var question = one
+                ? $"Перенести «{rows[0].Title}» в архів?"
+                : $"Перенести {Plural.Count(rows.Count, "гру", "гри", "ігор")} в архів?";
+            var sessions = running.Count == 0
+                ? string.Empty
+                : one
+                    ? $"\nУ грі триває сесія (з {running[0].StartTime:dd.MM.yyyy HH:mm}), її буде завершено зараз."
+                    : "\nУ цих іграх триває сесія, її буде завершено зараз:\n" +
+                      string.Join("\n", running.Select(r => $"• {r.GameTitle} (з {r.StartTime:dd.MM.yyyy HH:mm})"));
+            var note = one
+                ? "Гра зникне з бібліотеки та статистики, але її можна відновити в розділі «Архів»."
+                : "Ігри зникнуть з бібліотеки та статистики, але їх можна відновити в розділі «Архів».";
+
+            var confirmed = await Dialogs.Current.ConfirmAsync(
+                one ? "Архівування гри" : "Архівування ігор",
+                $"{question}{sessions}\n\n{note}",
+                running.Count == 0 ? "В архів" : "Завершити й архівувати");
+            if (!confirmed) return;
+
+            try
+            {
+                GameRepository.Archive(ids);
+            }
+            catch (DatabaseException ex)
+            {
+                await ShowErrorAsync("Помилка архівації ігор", ex);
+                return;
+            }
+            Load();
+        }
+
+        /// <summary> Returns the selected games from the archive to the library after confirmation. </summary>
+        [RelayCommand(CanExecute = nameof(HasArchiveSelection))]
+        private async Task RestoreSelectedAsync()
+        {
+            var rows = SelectedRows.ToList();
+            var one = rows.Count == 1;
+
+            var confirmed = await Dialogs.Current.ConfirmAsync(
+                one ? "Відновлення гри" : "Відновлення ігор",
+                one
+                    ? $"Повернути «{rows[0].Title}» в бібліотеку?\nГра знову з'явиться в бібліотеці та статистиці."
+                    : $"Повернути {Plural.Count(rows.Count, "гру", "гри", "ігор")} в бібліотеку?\n" +
+                      "Ігри знову з'являться в бібліотеці та статистиці.",
+                "Відновити");
+            if (!confirmed) return;
+
+            try
+            {
+                GameRepository.Restore(rows.Select(r => r.Game.GameId).ToList());
+            }
+            catch (DatabaseException ex)
+            {
+                await ShowErrorAsync("Помилка відновлення ігор", ex);
+                return;
+            }
+            Load();
+        }
+
+        /// <summary>
+        /// Deletes the selected games after confirmation. Their sessions, goals, achievements and DLC
+        /// are deleted by the database with them, and the confirmation says so.
+        /// </summary>
+        [RelayCommand(CanExecute = nameof(HasAnySelection))]
+        private async Task DeleteSelectedAsync()
+        {
+            var rows = SelectedRows.ToList();
+            var one = rows.Count == 1;
+
+            var confirmed = await Dialogs.Current.ConfirmAsync(
+                one ? "Видалення гри" : "Видалення ігор",
+                one
+                    ? $"Видалити «{rows[0].Title}»?\n" +
+                      "Разом із грою буде видалено її сесії, цілі, досягнення та доповнення.\n" +
+                      "Цю дію неможливо скасувати."
+                    : $"Видалити {Plural.Count(rows.Count, "гру", "гри", "ігор")}?\n" +
+                      "Разом з іграми буде видалено їхні сесії, цілі, досягнення та доповнення.\n" +
+                      "Цю дію неможливо скасувати.",
+                "Видалити");
+            if (!confirmed) return;
+
+            try
+            {
+                GameRepository.Delete(rows.Select(r => r.Game.GameId).ToList());
+            }
+            catch (DatabaseException ex)
+            {
+                await ShowErrorAsync("Помилка видалення ігор", ex);
+                return;
+            }
+            Load();
+        }
 
         private static Task ShowErrorAsync(string title, DatabaseException ex) =>
             ex.InnerException == null

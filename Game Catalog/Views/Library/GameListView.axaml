@@ -162,8 +162,30 @@
 					  SelectedItem="{Binding SelectedRow, Mode=TwoWay}"
 					  IsVisible="{Binding ShowList}"
 					  CanUserSortColumns="True"
-					  DoubleTapped="OnRowDoubleTapped"
+					  SelectionMode="Extended"
+					  v:DataGridBehavior.SelectedItems="{Binding SelectedRows}"
+					  v:DataGridBehavior.RowDoubleTapCommand="{Binding OpenGameCommand}"
+					  v:DataGridBehavior.DeleteCommand="{Binding DeleteSelectedCommand}"
 					  x:Name="GamesGrid">
+
+				<!-- Archive on the library page, restore on the archive page -->
+				<DataGrid.ContextMenu>
+					<ContextMenu>
+						<MenuItem Header="{Binding ArchiveSelectedHeader}"
+								  Command="{Binding ArchiveSelectedCommand}"
+								  IsVisible="{Binding !IsArchive}"/>
+						<MenuItem Header="{Binding RestoreSelectedHeader}"
+								  Command="{Binding RestoreSelectedCommand}"
+								  IsVisible="{Binding IsArchive}"/>
+						<Separator/>
+						<MenuItem Header="Редагувати"
+								  Command="{Binding EditSelectedCommand}"/>
+						<Separator/>
+						<MenuItem Header="{Binding DeleteSelectedHeader}"
+								  Command="{Binding DeleteSelectedCommand}"
+								  InputGesture="Delete"/>
+					</ContextMenu>
+				</DataGrid.ContextMenu>
 
 				<DataGrid.Columns>
 					<DataGridTextColumn Header="Назва" Width="2*" Binding="{ReflectionBinding Title}"
@@ -186,17 +208,6 @@
 										Tag="{x:Static models:GameSortField.Hours}"/>
 					<DataGridTextColumn Header="Розмір" Width="110" Binding="{ReflectionBinding SizeText, TargetNullValue={StaticResource NoValue}}"
 										Tag="{x:Static models:GameSortField.Size}"/>
-					<DataGridTemplateColumn Header="" Width="70" CanUserSort="False" CanUserResize="False">
-						<DataGridTemplateColumn.CellTemplate>
-							<DataTemplate x:DataType="vm:GameRow">
-								<StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
-									<Button Content="✏" ToolTip.Tip="Редагувати"
-											Command="{Binding $parent[DataGrid].((vm:GamesListViewModel)DataContext).EditCommand}"
-											CommandParameter="{Binding Game}"/>
-								</StackPanel>
-							</DataTemplate>
-						</DataGridTemplateColumn.CellTemplate>
-					</DataGridTemplateColumn>
 				</DataGrid.Columns>
 			</DataGrid>
 

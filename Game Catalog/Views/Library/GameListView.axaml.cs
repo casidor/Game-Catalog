@@ -54,17 +54,6 @@ public partial class GamesListView : UserControl
         if (!button.Classes.Contains("card")) return;
 
         if (DataContext is GamesListViewModel vm)
-            vm.OpenGameCommand.Execute(row.Game);
-    }
-
-    /// <summary> Opens the game whose table row was double-clicked. </summary>
-    private void OnRowDoubleTapped(object? sender, TappedEventArgs e)
-    {
-        if (e.Source is not Visual source) return;
-        if (source.FindAncestorOfType<DataGridRow>(includeSelf: true) is not { DataContext: GameRow row }) return;
-        if (source.FindAncestorOfType<Button>(includeSelf: true) != null) return;
-
-        if (DataContext is GamesListViewModel vm)
-            vm.OpenGameCommand.Execute(row.Game);
+            vm.OpenGameCommand.Execute(row);
     }
 }
