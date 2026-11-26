@@ -4,7 +4,10 @@ using System.IO;
 
 namespace Game_Catalog.Data
 {
-    /// <summary> Creates the database file and applies schema.sql on first run. </summary>
+    /// <summary>
+    /// Creates the database file on first run: applies schema.sql, then fills the dictionaries
+    /// with their initial data from genres.sql, all in one transaction.
+    /// </summary>
     public static class DatabaseInitializer
     {
         /// <summary> Does nothing if the database file already exists. </summary>
@@ -16,18 +19,15 @@ namespace Game_Catalog.Data
 
             try
             {
-                var schemaPath = Path.Combine(AppContext.BaseDirectory, "Data", "schema.sql");
-                if (!File.Exists(schemaPath))
-                    throw new FileNotFoundException("Database schema file not found.", schemaPath);
-
-                var schemaSql = File.ReadAllText(schemaPath);
-
                 using var connection = Db.Open();
                 using var transaction = connection.BeginTransaction();
-                using var cmd = connection.CreateCommand();
-                cmd.Transaction = transaction;
-                cmd.CommandText = schemaSql;
-                cmd.ExecuteNonQuery();
+                foreach (var file in new[] { "schema.sql", "genres.sql" })
+                {
+                    using var cmd = connection.CreateCommand();
+                    cmd.Transaction = transaction;
+                    cmd.CommandText = ReadSqlFile(file);
+                    cmd.ExecuteNonQuery();
+                }
                 transaction.Commit();
 
                 using var walCmd = connection.CreateCommand();
@@ -43,6 +43,15 @@ namespace Game_Catalog.Data
                     throw Db.Translate(se, "Не вдалося створити базу даних");
                 throw;
             }
+        }
+
+        /// <summary> Reads an SQL file shipped next to the application in the Data folder. </summary>
+        private static string ReadSqlFile(string name)
+        {
+            var path = Path.Combine(AppContext.BaseDirectory, "Data", name);
+            if (!File.Exists(path))
+                throw new FileNotFoundException($"Database file {name} not found.", path);
+            return File.ReadAllText(path);
         }
     }
 }
