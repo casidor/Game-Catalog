@@ -239,7 +239,10 @@ namespace Game_Catalog.ViewModels
         private List<int> SelectedIds(Func<GoalRow, bool> applies) =>
             SelectedRows.Where(applies).Select(r => r.Goal.GoalId).ToList();
 
-        /// <summary> Changes the status of the goals in one transaction and lets the owner reload. </summary>
+        /// <summary>
+        /// Changes the status of the goals in one transaction and lets the owner reload.
+        /// The changed goals stay selected afterwards, unless the applied filter now hides them.
+        /// </summary>
         private async Task ChangeStatusAsync(Action<IReadOnlyCollection<int>> change, IReadOnlyCollection<int> goalIds)
         {
             if (goalIds.Count == 0) return;
@@ -254,6 +257,9 @@ namespace Game_Catalog.ViewModels
                 return;
             }
             DataChanged?.Invoke();
+
+            foreach (var row in Rows.Where(r => goalIds.Contains(r.Goal.GoalId)))
+                SelectedRows.Add(row);
         }
 
         /// <summary> Shows a plain alert for our own errors and a detailed one for database failures. </summary>

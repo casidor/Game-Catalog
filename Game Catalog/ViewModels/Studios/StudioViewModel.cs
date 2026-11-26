@@ -373,6 +373,11 @@ namespace Game_Catalog.ViewModels
                 return;
             }
             Load();
+
+            // The skipped studios stay selected, so it is clear which ones are left.
+            var skippedIds = blocked.Select(r => r.Studio.StudioId).ToHashSet();
+            foreach (var row in Rows.Where(r => skippedIds.Contains(r.Studio.StudioId)))
+                SelectedRows.Add(row);
         }
 
         private bool HasSelection() => SelectedRows.Count > 0;

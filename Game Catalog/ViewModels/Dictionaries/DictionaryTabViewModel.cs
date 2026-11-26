@@ -291,6 +291,11 @@ namespace Game_Catalog.ViewModels
                 return;
             }
             Reload();
+
+            // The skipped items stay selected, so it is clear which ones are left.
+            var skippedIds = blocked.Select(r => GetId(r.Item)).ToHashSet();
+            foreach (var row in Rows.Where(r => skippedIds.Contains(GetId(r.Item))))
+                SelectedRows.Add(row);
         }
 
         private bool HasSelection() => SelectedRows.Count > 0;
