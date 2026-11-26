@@ -74,14 +74,6 @@ namespace Game_Catalog.Data.Repositories
                     WHERE tag_id = @TagId", tag);
             });
 
-        /// <summary> Deletes the tag; its links with games are removed by the database, the games stay. </summary>
-        public static void Delete(int tagId) =>
-            Db.Run("Не вдалося видалити тег", () =>
-            {
-                using var connection = Db.Open();
-                connection.Execute("DELETE FROM Tag WHERE tag_id = @tagId", new { tagId });
-            });
-
         /// <summary>
         /// Deletes the tags with one statement. A tag never blocks deleting:
         /// its links with games are removed by the database (ON DELETE CASCADE), the games stay.

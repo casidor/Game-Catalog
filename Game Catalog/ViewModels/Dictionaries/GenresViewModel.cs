@@ -13,17 +13,26 @@ namespace Game_Catalog.ViewModels
             LoadError: "Помилка завантаження жанрів",
             SearchError: "Помилка пошуку жанрів",
             SaveError: "Помилка збереження жанру",
-            DeleteError: "Помилка видалення жанру",
-            DeleteTitle: "Видалення жанру",
-            DeleteMessage: name => $"Видалити жанр «{name}»? Цю дію не можна скасувати.",
-            BlockedTitle: "Неможливо видалити жанр",
-            BlockedMessage: name => $"Жанр «{name}» використовується в іграх або студіях.\n" +
-                                    "Спершу відв'яжіть його від них.");
+            DeleteError: "Помилка видалення жанрів",
+            SearchPlaceholder: "🔍 Пошук жанру...",
+            AddTip: "Додати жанр",
+            ItemOne: "жанр",
+            ItemFew: "жанри",
+            ItemMany: "жанрів",
+            DeleteTitleOne: "Видалення жанру",
+            DeleteTitleMany: "Видалення жанрів",
+            BlockedOne: name => $"Жанр «{name}» використовується в іграх або студіях.\n" +
+                                "Спершу відв'яжіть його від них.",
+            BlockedManyIntro: "Усі вибрані жанри використовуються в іграх або студіях:",
+            BlockedManyHint: "Спершу відв'яжіть їх від цих ігор і студій.",
+            SkippedIntro: "Ці жанри використовуються в іграх або студіях, тому їх буде пропущено:");
 
         protected override List<Genre> LoadItems(DictionarySortField field, bool descending) =>
             GenreRepository.GetAll(descending);
 
         protected override HashSet<int> LoadMatchIds(string search) => GenreRepository.GetMatchIds(search);
+
+        protected override HashSet<int> LoadIdsInUse(IReadOnlyCollection<int> ids) => GenreRepository.GetIdsInUse(ids);
 
         protected override int GetId(Genre item) => item.GenreId;
 
@@ -36,7 +45,7 @@ namespace Game_Catalog.ViewModels
 
         protected override void UpdateItem(Genre item) => GenreRepository.Update(item);
 
-        protected override bool DeleteItem(Genre item) => GenreRepository.Delete(item.GenreId);
+        protected override void DeleteItems(IReadOnlyCollection<int> ids) => GenreRepository.Delete(ids);
 
         protected override string GetName(Genre item) => item.GenreName;
     }

@@ -74,22 +74,6 @@ namespace Game_Catalog.Data.Repositories
                     WHERE genre_id = @GenreId", genre);
             });
 
-        /// <summary> Returns false if the genre is still referenced by a game or a studio. </summary>
-        public static bool Delete(int genreId) =>
-            Db.Run("Не вдалося видалити жанр", () =>
-            {
-                try
-                {
-                    using var connection = Db.Open();
-                    connection.Execute("DELETE FROM Genre WHERE genre_id = @genreId", new { genreId });
-                    return true;
-                }
-                catch (SqliteException ex) when (ex.SqliteErrorCode == 19)
-                {
-                    return false;
-                }
-            });
-
         /// <summary>
         /// Returns which of the given genres are still in use, linked to a game or set as the main genre of a studio,
         /// that is, which of them the database would refuse to delete.

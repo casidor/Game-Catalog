@@ -13,16 +13,23 @@ namespace Game_Catalog.ViewModels
             LoadError: "Помилка завантаження тегів",
             SearchError: "Помилка пошуку тегів",
             SaveError: "Помилка збереження тегу",
-            DeleteError: "Помилка видалення тегу",
-            DeleteTitle: "Видалення тегу",
-            DeleteMessage: name => $"Видалити тег «{name}»? Його буде знято з усіх ігор, самі ігри залишаться.",
-            BlockedTitle: "Неможливо видалити тег",
-            BlockedMessage: name => $"Тег «{name}» неможливо видалити.");
+            DeleteError: "Помилка видалення тегів",
+            SearchPlaceholder: "🔍 Пошук тегу...",
+            AddTip: "Додати тег",
+            ItemOne: "тег",
+            ItemFew: "теги",
+            ItemMany: "тегів",
+            DeleteTitleOne: "Видалення тегу",
+            DeleteTitleMany: "Видалення тегів",
+            DeleteNote: "Зв'язки з іграми буде знято, самі ігри залишаться.");
 
         protected override List<Tag> LoadItems(DictionarySortField field, bool descending) =>
             TagRepository.GetAll(descending);
 
         protected override HashSet<int> LoadMatchIds(string search) => TagRepository.GetMatchIds(search);
+
+        /// <summary> A tag is never in use in the blocking sense: deleting it only removes its links with games. </summary>
+        protected override HashSet<int> LoadIdsInUse(IReadOnlyCollection<int> ids) => new();
 
         protected override int GetId(Tag item) => item.TagId;
 
@@ -33,11 +40,7 @@ namespace Game_Catalog.ViewModels
 
         protected override void UpdateItem(Tag item) => TagRepository.Update(item);
 
-        protected override bool DeleteItem(Tag item)
-        {
-            TagRepository.Delete(item.TagId);
-            return true;
-        }
+        protected override void DeleteItems(IReadOnlyCollection<int> ids) => TagRepository.Delete(ids);
 
         protected override string GetName(Tag item) => item.TagName;
     }

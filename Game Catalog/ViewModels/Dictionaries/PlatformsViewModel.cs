@@ -13,17 +13,26 @@ namespace Game_Catalog.ViewModels
             LoadError: "Помилка завантаження платформ",
             SearchError: "Помилка пошуку платформ",
             SaveError: "Помилка збереження платформи",
-            DeleteError: "Помилка видалення платформи",
-            DeleteTitle: "Видалення платформи",
-            DeleteMessage: name => $"Видалити платформу «{name}»? Цю дію не можна скасувати.",
-            BlockedTitle: "Неможливо видалити платформу",
-            BlockedMessage: name => $"Платформа «{name}» використовується в іграх.\n" +
-                                    "Спершу відв'яжіть її від них.");
+            DeleteError: "Помилка видалення платформ",
+            SearchPlaceholder: "🔍 Пошук платформи...",
+            AddTip: "Додати платформу",
+            ItemOne: "платформу",
+            ItemFew: "платформи",
+            ItemMany: "платформ",
+            DeleteTitleOne: "Видалення платформи",
+            DeleteTitleMany: "Видалення платформ",
+            BlockedOne: name => $"Платформа «{name}» використовується в іграх.\n" +
+                                "Спершу відв'яжіть її від них.",
+            BlockedManyIntro: "Усі вибрані платформи використовуються в іграх:",
+            BlockedManyHint: "Спершу відв'яжіть їх від цих ігор.",
+            SkippedIntro: "Ці платформи використовуються в іграх, тому їх буде пропущено:");
 
         protected override List<Platform> LoadItems(DictionarySortField field, bool descending) =>
             PlatformRepository.GetAll(field, descending);
 
         protected override HashSet<int> LoadMatchIds(string search) => PlatformRepository.GetMatchIds(search);
+
+        protected override HashSet<int> LoadIdsInUse(IReadOnlyCollection<int> ids) => PlatformRepository.GetIdsInUse(ids);
 
         protected override int GetId(Platform item) => item.PlatformId;
 
@@ -36,7 +45,7 @@ namespace Game_Catalog.ViewModels
 
         protected override void UpdateItem(Platform item) => PlatformRepository.Update(item);
 
-        protected override bool DeleteItem(Platform item) => PlatformRepository.Delete(item.PlatformId);
+        protected override void DeleteItems(IReadOnlyCollection<int> ids) => PlatformRepository.Delete(ids);
 
         protected override string GetName(Platform item) => item.PlatformName;
     }

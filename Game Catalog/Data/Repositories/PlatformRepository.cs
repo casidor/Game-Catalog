@@ -85,22 +85,6 @@ namespace Game_Catalog.Data.Repositories
                     WHERE platform_id = @PlatformId", platform);
             });
 
-        /// <summary> Returns false if the platform is still referenced by a game. </summary>
-        public static bool Delete(int platformId) =>
-            Db.Run("Не вдалося видалити платформу", () =>
-            {
-                try
-                {
-                    using var connection = Db.Open();
-                    connection.Execute("DELETE FROM Platform WHERE platform_id = @platformId", new { platformId });
-                    return true;
-                }
-                catch (SqliteException ex) when (ex.SqliteErrorCode == 19)
-                {
-                    return false;
-                }
-            });
-
         /// <summary>
         /// Returns which of the given platforms are still linked to a game,
         /// that is, which of them the database would refuse to delete.
