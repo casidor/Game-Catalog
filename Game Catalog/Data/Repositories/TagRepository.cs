@@ -82,6 +82,17 @@ namespace Game_Catalog.Data.Repositories
                 connection.Execute("DELETE FROM Tag WHERE tag_id = @tagId", new { tagId });
             });
 
+        /// <summary>
+        /// Deletes the tags with one statement. A tag never blocks deleting:
+        /// its links with games are removed by the database (ON DELETE CASCADE), the games stay.
+        /// </summary>
+        public static void Delete(IReadOnlyCollection<int> tagIds) =>
+            Db.Run("Не вдалося видалити теги", () =>
+            {
+                using var connection = Db.Open();
+                connection.Execute("DELETE FROM Tag WHERE tag_id IN @tagIds", new { tagIds });
+            });
+
         /// <summary> Throws a duplicate error if another tag has the same name, ignoring case and edge spaces. </summary>
         private static void EnsureNameUnique(SqliteConnection connection, Tag tag)
         {

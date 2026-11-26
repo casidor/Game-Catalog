@@ -101,6 +101,33 @@ namespace Game_Catalog.Data.Repositories
                 }
             });
 
+        /// <summary>
+        /// Returns which of the given platforms are still linked to a game,
+        /// that is, which of them the database would refuse to delete.
+        /// </summary>
+        public static HashSet<int> GetIdsInUse(IReadOnlyCollection<int> platformIds) =>
+            Db.Run("Не вдалося перевірити використання платформ", () =>
+            {
+                using var connection = Db.Open();
+                return connection.Query<int>(@"
+                    SELECT DISTINCT platform_id
+                    FROM GamePlatform
+                    WHERE platform_id IN @platformIds",
+                    new { platformIds }).ToHashSet();
+            });
+
+        /// <summary>
+        /// Deletes the platforms with one statement, so all of them or none: a platform still linked to a game
+        /// stops the whole statement (ON DELETE RESTRICT).
+        /// So platforms in use must be left out first, see <see cref="GetIdsInUse"/>.
+        /// </summary>
+        public static void Delete(IReadOnlyCollection<int> platformIds) =>
+            Db.Run("Не вдалося видалити платформи", () =>
+            {
+                using var connection = Db.Open();
+                connection.Execute("DELETE FROM Platform WHERE platform_id IN @platformIds", new { platformIds });
+            });
+
         /// <summary> Throws a duplicate error if another platform has the same name, ignoring case and edge spaces. </summary>
         private static void EnsureNameUnique(SqliteConnection connection, Platform platform)
         {

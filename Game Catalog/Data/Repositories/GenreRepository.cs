@@ -90,6 +90,34 @@ namespace Game_Catalog.Data.Repositories
                 }
             });
 
+        /// <summary>
+        /// Returns which of the given genres are still in use, linked to a game or set as the main genre of a studio,
+        /// that is, which of them the database would refuse to delete.
+        /// </summary>
+        public static HashSet<int> GetIdsInUse(IReadOnlyCollection<int> genreIds) =>
+            Db.Run("Не вдалося перевірити використання жанрів", () =>
+            {
+                using var connection = Db.Open();
+                // UNION also removes the duplicates: a genre used both ways is returned once.
+                return connection.Query<int>(@"
+                    SELECT genre_id FROM GameGenre WHERE genre_id IN @genreIds
+                    UNION
+                    SELECT main_genre FROM Studio WHERE main_genre IN @genreIds",
+                    new { genreIds }).ToHashSet();
+            });
+
+        /// <summary>
+        /// Deletes the genres with one statement, so all of them or none: a genre still in use
+        /// stops the whole statement (ON DELETE RESTRICT).
+        /// So genres in use must be left out first, see <see cref="GetIdsInUse"/>.
+        /// </summary>
+        public static void Delete(IReadOnlyCollection<int> genreIds) =>
+            Db.Run("Не вдалося видалити жанри", () =>
+            {
+                using var connection = Db.Open();
+                connection.Execute("DELETE FROM Genre WHERE genre_id IN @genreIds", new { genreIds });
+            });
+
         /// <summary> Throws a duplicate error if another genre has the same name, ignoring case and edge spaces. </summary>
         private static void EnsureNameUnique(SqliteConnection connection, Genre genre)
         {
