@@ -31,6 +31,26 @@
 			</Setter>
 		</Style>
 
+		<!-- The theme paints the presenter of a selected or hovered item; the card shows those states itself -->
+		<Style Selector="ListBox.cards ListBoxItem /template/ ContentPresenter#PART_ContentPresenter">
+			<Setter Property="Background" Value="Transparent"/>
+		</Style>
+		<Style Selector="ListBox.cards ListBoxItem:pointerover /template/ ContentPresenter#PART_ContentPresenter">
+			<Setter Property="Background" Value="Transparent"/>
+		</Style>
+		<Style Selector="ListBox.cards ListBoxItem:pressed /template/ ContentPresenter#PART_ContentPresenter">
+			<Setter Property="Background" Value="Transparent"/>
+		</Style>
+		<Style Selector="ListBox.cards ListBoxItem:selected /template/ ContentPresenter#PART_ContentPresenter">
+			<Setter Property="Background" Value="Transparent"/>
+		</Style>
+		<Style Selector="ListBox.cards ListBoxItem:selected:pointerover /template/ ContentPresenter#PART_ContentPresenter">
+			<Setter Property="Background" Value="Transparent"/>
+		</Style>
+		<Style Selector="ListBox.cards ListBoxItem:selected:pressed /template/ ContentPresenter#PART_ContentPresenter">
+			<Setter Property="Background" Value="Transparent"/>
+		</Style>
+
 		<!-- The card under the pointer grows over its neighbours: it is scaled as a whole and drawn above them -->
 		<Style Selector="ListBox.cards ListBoxItem:pointerover">
 			<Setter Property="RenderTransform" Value="scale(1.05)"/>
@@ -50,13 +70,15 @@
 			<Setter Property="Background" Value="{DynamicResource CardBackground}"/>
 		</Style>
 
-		<!-- Game card frame: visible only on the selected cards -->
-		<Style Selector="Border.gameCard">
-			<Setter Property="BorderThickness" Value="2"/>
+		<!-- Selection frame of a card: a separate layer over the cover, in the accent color, only on the selected cards -->
+		<Style Selector="Border.selectionFrame">
+			<Setter Property="CornerRadius" Value="8"/>
+			<Setter Property="BorderThickness" Value="3"/>
 			<Setter Property="BorderBrush" Value="Transparent"/>
+			<Setter Property="IsHitTestVisible" Value="False"/>
 		</Style>
-		<Style Selector="ListBox.cards ListBoxItem:selected Border.gameCard">
-			<Setter Property="BorderBrush" Value="{DynamicResource NavForeground}"/>
+		<Style Selector="ListBox.cards ListBoxItem:selected Border.selectionFrame">
+			<Setter Property="BorderBrush" Value="{DynamicResource SystemControlHighlightAccentBrush}"/>
 		</Style>
 
 		<!-- Selection checkbox of a card: shown on hover and on the selected cards -->
@@ -199,36 +221,45 @@
 					</ListBox.ItemsPanel>
 					<ListBox.ItemTemplate>
 						<DataTemplate x:DataType="vm:GameRow">
-							<Border Classes="gameCard"
-									Width="160" Height="245" CornerRadius="8" ClipToBounds="True"
-									Background="{DynamicResource CardBackground}">
-								<Grid RowDefinitions="*,Auto">
-									<Panel Grid.Row="0">
-										<Image Width="160" Height="215" Stretch="UniformToFill"
-											   Source="{Binding CoverImagePath, Converter={x:Static conv:PathToBitmapConverter.Instance}, ConverterParameter=640}"
-											   IsVisible="{Binding CoverImagePath, Converter={x:Static StringConverters.IsNotNullOrEmpty}}"/>
-										<!-- Quiet placeholder: marks a missing cover without drawing attention -->
-										<TextBlock Text="🎮" FontSize="32" Opacity="0.25"
-												   HorizontalAlignment="Center" VerticalAlignment="Center"
-												   IsVisible="{Binding CoverImagePath, Converter={x:Static StringConverters.IsNullOrEmpty}}"/>
-										<!-- Adds the card to the selection or takes it out, keeping the other cards selected -->
-										<Border Classes="pick"
-												HorizontalAlignment="Left" VerticalAlignment="Top"
-												Margin="6" Padding="4,0" CornerRadius="4"
-												Background="#99000000">
-											<CheckBox MinWidth="0" Padding="0"
-													  ToolTip.Tip="Вибрати"
-													  IsChecked="{Binding $parent[ListBoxItem].IsSelected}"/>
+							<!-- The card in three layers: the content clipped to the rounded shape, the selection frame over it, the checkbox on top -->
+							<Panel Width="160" Height="245">
+								<Border Background="{DynamicResource CardBackground}">
+									<Border.Clip>
+										<RectangleGeometry Rect="0,0,160,245" RadiusX="8" RadiusY="8"/>
+									</Border.Clip>
+									<Grid RowDefinitions="*,Auto">
+										<Panel Grid.Row="0">
+											<Image Width="160" Height="215" Stretch="UniformToFill"
+												   Source="{Binding CoverImagePath, Converter={x:Static conv:PathToBitmapConverter.Instance}, ConverterParameter=640}"
+												   IsVisible="{Binding CoverImagePath, Converter={x:Static StringConverters.IsNotNullOrEmpty}}"/>
+											<!-- Quiet placeholder: marks a missing cover without drawing attention -->
+											<TextBlock Text="🎮" FontSize="32" Opacity="0.25"
+													   HorizontalAlignment="Center" VerticalAlignment="Center"
+													   IsVisible="{Binding CoverImagePath, Converter={x:Static StringConverters.IsNullOrEmpty}}"/>
+										</Panel>
+										<Border Grid.Row="1" Padding="8,6"
+												Background="{Binding IsMatch, Converter={x:Static conv:SearchMatchBrushConverter.Instance}}">
+											<TextBlock Text="{Binding Title}" FontWeight="SemiBold" FontSize="12"
+													   TextWrapping="Wrap" MaxLines="2"
+													   TextTrimming="CharacterEllipsis"/>
 										</Border>
-									</Panel>
-									<Border Grid.Row="1" Padding="8,6"
-											Background="{Binding IsMatch, Converter={x:Static conv:SearchMatchBrushConverter.Instance}}">
-										<TextBlock Text="{Binding Title}" FontWeight="SemiBold" FontSize="12"
-												   TextWrapping="Wrap" MaxLines="2"
-												   TextTrimming="CharacterEllipsis"/>
-									</Border>
-								</Grid>
-							</Border>
+									</Grid>
+								</Border>
+
+								<Border Classes="selectionFrame"/>
+
+								<!-- Adds the card to the selection or takes it out, keeping the other cards selected.
+									 The backing follows the theme, so the checkbox stands out on any cover -->
+								<Border Classes="pick"
+										HorizontalAlignment="Left" VerticalAlignment="Top"
+										Margin="8" Padding="4,0" CornerRadius="4"
+										Background="{DynamicResource CardBackground}"
+										BorderBrush="{DynamicResource SidebarBorder}" BorderThickness="1">
+									<CheckBox MinWidth="0" Padding="0"
+											  ToolTip.Tip="Вибрати"
+											  IsChecked="{Binding $parent[ListBoxItem].IsSelected}"/>
+								</Border>
+							</Panel>
 						</DataTemplate>
 					</ListBox.ItemTemplate>
 				</ListBox>
