@@ -19,7 +19,7 @@ INSERT INTO Tag (tag_name, color) VALUES
 
 -- Studios
 
-INSERT INTO Studio (studio_name, country, foundation_year, main_genre, website)
+INSERT INTO Studio (studio_name, country, foundation_year, main_genre_id, website)
 SELECT v.column1, v.column2, v.column3, g.genre_id, v.column5
 FROM (VALUES
     ('HoYoverse', 'Китай', 2012, 'Рольова гра (RPG)', 'https://www.hoyoverse.com'),

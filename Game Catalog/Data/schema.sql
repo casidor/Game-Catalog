@@ -16,14 +16,14 @@ CREATE TABLE Studio (
     studio_name     TEXT NOT NULL COLLATE NOCASE UNIQUE,
     country         TEXT,
     foundation_year INTEGER,
-    main_genre      INTEGER,
+    main_genre_id   INTEGER,
     website         TEXT,
     CHECK (length(trim(studio_name)) > 0),
     CHECK (studio_name = trim(studio_name)),
     CHECK (country IS NULL OR length(trim(country)) > 0),
     CHECK (foundation_year IS NULL OR foundation_year BETWEEN 1800 AND 2100),
     CHECK (website IS NULL OR length(trim(website)) > 0),
-    FOREIGN KEY (main_genre) REFERENCES Genre(genre_id) ON DELETE RESTRICT ON UPDATE CASCADE
+    FOREIGN KEY (main_genre_id) REFERENCES Genre(genre_id) ON DELETE RESTRICT ON UPDATE CASCADE
 ) STRICT;
 
 CREATE TABLE Platform (
@@ -226,7 +226,7 @@ CREATE UNIQUE INDEX ux_game_identity
 
 CREATE UNIQUE INDEX ux_game_install_path ON Game (install_path);
 
-CREATE INDEX ix_studio_main_genre  ON Studio (main_genre);
+CREATE INDEX ix_studio_main_genre  ON Studio (main_genre_id);
 CREATE INDEX ix_game_developer     ON Game (developer_id);
 CREATE INDEX ix_game_parent        ON Game (parent_game_id);
 CREATE INDEX ix_game_archived      ON Game (is_archived);

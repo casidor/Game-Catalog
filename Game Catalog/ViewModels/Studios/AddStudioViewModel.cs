@@ -93,7 +93,7 @@ namespace Game_Catalog.ViewModels
             StudioName = studio.StudioName;
             SelectedCountry = studio.Country;
             FoundationYear = studio.FoundationYear;
-            SelectedGenre = GenreOptions.FirstOrDefault(g => g?.GenreId == studio.MainGenre);
+            SelectedGenre = GenreOptions.FirstOrDefault(g => g?.GenreId == studio.MainGenreId);
             Website = studio.Website;
         }
 
@@ -104,7 +104,7 @@ namespace Game_Catalog.ViewModels
             StudioName = StudioName,
             Country = SelectedCountry,
             FoundationYear = FoundationYear,
-            MainGenre = SelectedGenre?.GenreId,
+            MainGenreId = SelectedGenre?.GenreId,
             Website = Website
         };
 

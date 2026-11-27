@@ -86,7 +86,7 @@ namespace Game_Catalog.Data.Repositories
                 return connection.Query<int>(@"
                     SELECT genre_id FROM GameGenre WHERE genre_id IN @genreIds
                     UNION
-                    SELECT main_genre FROM Studio WHERE main_genre IN @genreIds",
+                    SELECT main_genre_id FROM Studio WHERE main_genre_id IN @genreIds",
                     new { genreIds }).ToHashSet();
             });
 

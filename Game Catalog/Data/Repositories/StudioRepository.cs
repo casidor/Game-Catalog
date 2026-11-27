@@ -31,11 +31,11 @@ namespace Game_Catalog.Data.Repositories
                 using var connection = Db.Open();
                 return connection.Query<Studio>($@"
                     SELECT s.studio_id, s.studio_name, s.country, s.foundation_year,
-                           s.main_genre, g.genre_name AS main_genre_name, s.website
+                           s.main_genre_id, g.genre_name AS main_genre_name, s.website
                     FROM Studio s
-                    LEFT JOIN Genre g ON g.genre_id = s.main_genre
+                    LEFT JOIN Genre g ON g.genre_id = s.main_genre_id
                     WHERE (@CountryCount = 0 OR s.country    IN @Countries)
-                      AND (@GenreCount   = 0 OR s.main_genre IN @GenreIds)
+                      AND (@GenreCount   = 0 OR s.main_genre_id IN @GenreIds)
                       AND (@YearFrom IS NULL OR s.foundation_year >= @YearFrom)
                       AND (@YearTo   IS NULL OR s.foundation_year <= @YearTo)
                     ORDER BY {orderBy}",
@@ -79,9 +79,9 @@ namespace Game_Catalog.Data.Repositories
                 using var connection = Db.Open();
                 return connection.QuerySingleOrDefault<Studio>(@"
             SELECT s.studio_id, s.studio_name, s.country, s.foundation_year,
-                   s.main_genre, g.genre_name AS main_genre_name, s.website
+                   s.main_genre_id, g.genre_name AS main_genre_name, s.website
             FROM Studio s
-            LEFT JOIN Genre g ON g.genre_id = s.main_genre
+            LEFT JOIN Genre g ON g.genre_id = s.main_genre_id
             WHERE s.studio_id = @studioId",
                     new { studioId });
             });
@@ -143,9 +143,9 @@ namespace Game_Catalog.Data.Repositories
                 EnsureNameUnique(connection, studio);
 
                 studio.StudioId = connection.ExecuteScalar<int>(@"
-                    INSERT INTO Studio (studio_name, country, foundation_year, main_genre, website)
+                    INSERT INTO Studio (studio_name, country, foundation_year, main_genre_id, website)
                     VALUES (trim(@StudioName), NULLIF(trim(@Country), ''), @FoundationYear,
-                            @MainGenre, NULLIF(trim(@Website), ''));
+                            @MainGenreId, NULLIF(trim(@Website), ''));
                     SELECT last_insert_rowid();", studio);
             });
 
@@ -161,7 +161,7 @@ namespace Game_Catalog.Data.Repositories
                     SET studio_name = trim(@StudioName),
                         country = NULLIF(trim(@Country), ''),
                         foundation_year = @FoundationYear,
-                        main_genre = @MainGenre,
+                        main_genre_id = @MainGenreId,
                         website = NULLIF(trim(@Website), '')
                     WHERE studio_id = @StudioId", studio);
             });

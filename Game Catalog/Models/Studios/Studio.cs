@@ -26,7 +26,7 @@
         public int? FoundationYear { get; set; }
 
         /// <summary> Identifier of the main genre. Null if not set. </summary>
-        public int? MainGenre { get; set; }
+        public int? MainGenreId { get; set; }
 
         private string _mainGenreName = string.Empty;
         /// <summary> Name of the main genre, loaded together with the studio. </summary>
