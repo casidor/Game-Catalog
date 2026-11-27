@@ -1,8 +1,11 @@
 ﻿using Game_Catalog.Data.Repositories;
 using Game_Catalog.Models;
 using Game_Catalog.Services;
+using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Threading.Tasks;
+using DatabaseException = Game_Catalog.Data.DatabaseException;
 
 namespace Game_Catalog.ViewModels
 {
@@ -44,6 +47,29 @@ namespace Game_Catalog.ViewModels
         protected override void InsertItem(Platform item) => PlatformRepository.Insert(item);
 
         protected override void UpdateItem(Platform item) => PlatformRepository.Update(item);
+
+        /// <summary>
+        /// Writes the icon after the platform is saved (a new platform gets its id only then).
+        /// A picked file is first imported into the platform folder. The platform stays saved on failure,
+        /// and the database keeps the previous icon.
+        /// </summary>
+        protected override async Task AfterSaveAsync(Platform item)
+        {
+            try
+            {
+                var icon = item.PlatformIconPath.Length > 0 && !MediaStore.IsStored(item.PlatformIconPath)
+                    ? MediaStore.ImportPlatformIcon(item.PlatformIconPath, item.PlatformId)
+                    : item.PlatformIconPath;
+
+                PlatformRepository.UpdateIcon(item.PlatformId, icon);
+                item.PlatformIconPath = icon;
+            }
+            catch (Exception ex) when (ex is IOException or UnauthorizedAccessException or DatabaseException)
+            {
+                await Dialogs.Current.ErrorAsync("Іконку не збережено",
+                    "Платформу збережено, але іконку не вдалося скопіювати.", ex);
+            }
+        }
 
         protected override void DeleteItems(IReadOnlyCollection<int> ids) => PlatformRepository.Delete(ids);
 

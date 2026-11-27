@@ -49,15 +49,31 @@ namespace Game_Catalog.Services
                 _ => "icons"
             });
 
+        /// <summary> Absolute folder for the icon of the platform. </summary>
+        public static string PlatformFolder(int platformId) =>
+            Path.Combine(Folder, "platforms", platformId.ToString(CultureInfo.InvariantCulture));
+
         /// <summary>
         /// Puts the image into the game folder and returns its stored path.
-        /// A file already in that folder is reused without copying; a downloaded temporary file is removed after copying.
         /// Throws <see cref="IOException"/> or <see cref="UnauthorizedAccessException"/> on failure.
         /// </summary>
-        public static string ImportGameImage(string source, int gameId, ImageKind kind)
+        public static string ImportGameImage(string source, int gameId, ImageKind kind) =>
+            Import(source, GameFolder(gameId, kind));
+
+        /// <summary>
+        /// Puts the icon into the platform folder and returns its stored path.
+        /// Throws <see cref="IOException"/> or <see cref="UnauthorizedAccessException"/> on failure.
+        /// </summary>
+        public static string ImportPlatformIcon(string source, int platformId) =>
+            Import(source, PlatformFolder(platformId));
+
+        /// <summary>
+        /// Copies the file into the folder under a new unique name and returns its stored path.
+        /// A file already in that folder is reused without copying; a downloaded temporary file is removed after copying.
+        /// </summary>
+        private static string Import(string source, string folder)
         {
             var fullSource = Path.GetFullPath(source);
-            var folder = GameFolder(gameId, kind);
 
             if (string.Equals(Path.GetDirectoryName(fullSource), Path.GetFullPath(folder), PathComparison))
                 return ToStored(fullSource);

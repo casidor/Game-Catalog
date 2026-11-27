@@ -58,7 +58,7 @@ namespace Game_Catalog.Data.Repositories
             });
         }
 
-        /// <summary> Inserts the platform and sets its generated id. </summary>
+        /// <summary> Inserts the platform and sets its generated id. The icon is written separately, see <see cref="UpdateIcon"/>. </summary>
         public static void Insert(Platform platform) =>
             Db.Run("Не вдалося зберегти платформу", () =>
             {
@@ -71,7 +71,7 @@ namespace Game_Catalog.Data.Repositories
                     SELECT last_insert_rowid();", platform);
             });
 
-        /// <summary> Updates name and manufacturer of an existing platform. </summary>
+        /// <summary> Updates name and manufacturer of an existing platform. The icon is written separately, see <see cref="UpdateIcon"/>. </summary>
         public static void Update(Platform platform) =>
             Db.Run("Не вдалося оновити платформу", () =>
             {
@@ -83,6 +83,18 @@ namespace Game_Catalog.Data.Repositories
                     SET platform_name = trim(@PlatformName),
                         manufacturer = NULLIF(trim(@Manufacturer), '')
                     WHERE platform_id = @PlatformId", platform);
+            });
+
+        /// <summary> Writes the stored icon path of the platform; an empty path removes the icon. </summary>
+        public static void UpdateIcon(int platformId, string iconPath) =>
+            Db.Run("Не вдалося зберегти іконку платформи", () =>
+            {
+                using var connection = Db.Open();
+                connection.Execute(@"
+                    UPDATE Platform
+                    SET platform_icon_path = NULLIF(trim(@iconPath), '')
+                    WHERE platform_id = @platformId",
+                    new { platformId, iconPath });
             });
 
         /// <summary>

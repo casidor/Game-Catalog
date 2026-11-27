@@ -1,9 +1,11 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using Game_Catalog.Models;
+using Game_Catalog.Services;
 using Game_Catalog.Validation;
 using System;
 using System.ComponentModel.DataAnnotations;
+using System.Threading.Tasks;
 
 namespace Game_Catalog.ViewModels
 {
@@ -26,6 +28,21 @@ namespace Game_Catalog.ViewModels
         [ObservableProperty]
         private string _manufacturer = string.Empty;
 
+        /// <summary>
+        /// Icon of the platform: a stored path, a picked file not imported yet (absolute path), or empty for no icon.
+        /// A picked file is imported into the media folder only after the platform is saved.
+        /// </summary>
+        [ObservableProperty]
+        [NotifyPropertyChangedFor(nameof(HasIcon))]
+        private string _platformIconPath = string.Empty;
+
+        /// <summary> Size info and warnings about the chosen icon. </summary>
+        [ObservableProperty]
+        private ImageReport _iconReport = ImageReport.Empty;
+
+        /// <summary> True when an icon is chosen, so it can be removed. </summary>
+        public bool HasIcon => PlatformIconPath.Length > 0;
+
         /// <summary> Indicates whether the user confirmed the dialog. </summary>
         public bool Confirmed { get; private set; }
 
@@ -36,7 +53,6 @@ namespace Game_Catalog.ViewModels
         public string WindowTitle { get; }
 
         private readonly int _platformId;
-        private readonly string _platformIconPath = string.Empty;
 
         /// <summary> Initializes the dialog for adding a new platform. </summary>
         public AddPlatformViewModel()
@@ -49,7 +65,7 @@ namespace Game_Catalog.ViewModels
         {
             WindowTitle = "Редагувати платформу";
             _platformId = platform.PlatformId;
-            _platformIconPath = platform.PlatformIconPath;
+            PlatformIconPath = platform.PlatformIconPath;
             PlatformName = platform.PlatformName;
             Manufacturer = platform.Manufacturer;
         }
@@ -60,8 +76,42 @@ namespace Game_Catalog.ViewModels
             PlatformId = _platformId,
             PlatformName = PlatformName,
             Manufacturer = Manufacturer,
-            PlatformIconPath = _platformIconPath
+            PlatformIconPath = PlatformIconPath
         };
+
+        partial void OnPlatformIconPathChanged(string value) =>
+            IconReport = ImageInspector.Inspect(value, ImageKind.Icon);
+
+        /// <summary> Lets the user pick an icon file. </summary>
+        [RelayCommand]
+        private async Task PickIconAsync()
+        {
+            // An existing platform opens its own folder, so a previously used icon can be picked again.
+            var startFolder = _platformId != 0 ? MediaStore.PlatformFolder(_platformId) : null;
+            var path = await Dialogs.Current.PickImageAsync("Оберіть іконку платформи", startFolder);
+            if (path != null)
+                SetIcon(path);
+        }
+
+        /// <summary> Downloads an icon by URL. </summary>
+        [RelayCommand]
+        private async Task DownloadIconAsync()
+        {
+            var path = await Dialogs.Current.DownloadImageAsync();
+            if (path != null)
+                SetIcon(path);
+        }
+
+        /// <summary> Removes the icon. </summary>
+        [RelayCommand]
+        private void ClearIcon() => SetIcon(string.Empty);
+
+        /// <summary> Assigns the icon path and drops the cached bitmap of the old file. </summary>
+        private void SetIcon(string path)
+        {
+            ImageCache.Invalidate(PlatformIconPath);
+            PlatformIconPath = path;
+        }
 
         /// <summary> Validates the form and closes the dialog. </summary>
         [RelayCommand]

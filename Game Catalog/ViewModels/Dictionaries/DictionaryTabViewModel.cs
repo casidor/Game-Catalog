@@ -100,6 +100,12 @@ namespace Game_Catalog.ViewModels
         /// <summary> Updates an existing item in the repository. </summary>
         protected abstract void UpdateItem(T item);
 
+        /// <summary>
+        /// Saves what the insert or update does not cover, such as files of the item.
+        /// Called after a successful save; the item already has its id.
+        /// </summary>
+        protected virtual Task AfterSaveAsync(T item) => Task.CompletedTask;
+
         /// <summary> Deletes the items with the given ids, all or none. </summary>
         protected abstract void DeleteItems(IReadOnlyCollection<int> ids);
 
@@ -198,6 +204,7 @@ namespace Game_Catalog.ViewModels
                 await ShowErrorAsync(Texts.SaveError, ex);
                 return;
             }
+            await AfterSaveAsync(item);
             Reload();
         }
 
@@ -217,6 +224,7 @@ namespace Game_Catalog.ViewModels
                 await ShowErrorAsync(Texts.SaveError, ex);
                 return;
             }
+            await AfterSaveAsync(edited);
             Reload();
 
             var id = GetId(row.Item);
