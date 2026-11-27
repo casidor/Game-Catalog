@@ -295,7 +295,7 @@ namespace Game_Catalog.ViewModels
             try
             {
                 Platforms.Refill(
-                    PlatformRepository.GetAll().Select(p => new FilterOption(p.PlatformName, p.PlatformId)), alsoCheckId);
+                    PlatformRepository.GetAll().Select(p => new FilterOption(p.PlatformName, p.PlatformId, p.PlatformIconPath)), alsoCheckId);
             }
             catch (DatabaseException ex)
             {

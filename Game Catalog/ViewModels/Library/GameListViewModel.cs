@@ -224,7 +224,7 @@ namespace Game_Catalog.ViewModels
                 };
 
                 Fill(GenreOptions, genres.Select(x => new FilterOption(x.GenreName, x.GenreId)));
-                Fill(PlatformOptions, platforms.Select(x => new FilterOption(x.PlatformName, x.PlatformId)));
+                Fill(PlatformOptions, platforms.Select(x => new FilterOption(x.PlatformName, x.PlatformId, x.PlatformIconPath)));
                 Fill(TagOptions, tags.Select(x => new FilterOption(x.TagName, x.TagId)));
                 Fill(DeveloperOptions, studios.Select(x => new FilterOption(x.StudioName, x.StudioId)));
 

@@ -294,6 +294,9 @@ namespace Game_Catalog.Data.Repositories
             public int ItemId { get; set; }
             public string ItemName { get; set; } = string.Empty;
             public string? ItemExtra { get; set; }
+
+            /// <summary> Stored icon path of the item; only platforms have one. </summary>
+            public string? ItemIcon { get; set; }
         }
 
         /// <summary> Fills genres, platforms and tags of the given games with three queries. </summary>
@@ -308,7 +311,8 @@ namespace Game_Catalog.Data.Repositories
                 WHERE l.game_id IN @ids ORDER BY x.genre_name COLLATE UKR_NOCASE", new { ids }).ToLookup(r => r.GameId);
 
             var platforms = connection.Query<LinkRow>(@"
-                SELECT l.game_id, x.platform_id AS item_id, x.platform_name AS item_name, x.manufacturer AS item_extra
+                SELECT l.game_id, x.platform_id AS item_id, x.platform_name AS item_name, x.manufacturer AS item_extra,
+                       x.platform_icon_path AS item_icon
                 FROM GamePlatform l JOIN Platform x ON x.platform_id = l.platform_id
                 WHERE l.game_id IN @ids ORDER BY x.platform_name COLLATE UKR_NOCASE", new { ids }).ToLookup(r => r.GameId);
 
@@ -322,7 +326,13 @@ namespace Game_Catalog.Data.Repositories
                 game.Genres = genres[game.GameId]
                     .Select(r => new Genre { GenreId = r.ItemId, GenreName = r.ItemName }).ToList();
                 game.Platforms = platforms[game.GameId]
-                    .Select(r => new Platform { PlatformId = r.ItemId, PlatformName = r.ItemName, Manufacturer = r.ItemExtra ?? string.Empty }).ToList();
+                    .Select(r => new Platform
+                    {
+                        PlatformId = r.ItemId,
+                        PlatformName = r.ItemName,
+                        Manufacturer = r.ItemExtra ?? string.Empty,
+                        PlatformIconPath = r.ItemIcon ?? string.Empty
+                    }).ToList();
                 game.Tags = tags[game.GameId]
                     .Select(r => new Tag { TagId = r.ItemId, TagName = r.ItemName, Color = r.ItemExtra ?? string.Empty }).ToList();
             }
