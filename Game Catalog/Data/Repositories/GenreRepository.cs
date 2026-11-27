@@ -28,6 +28,40 @@ namespace Game_Catalog.Data.Repositories
         }
 
         /// <summary>
+        /// Returns genres that at least one standalone game (DLC excluded) of the library or the archive has,
+        /// for the games filter.
+        /// </summary>
+        public static List<Genre> GetUsedInGames(bool isArchived) =>
+            Db.Run("Не вдалося завантажити жанри", () =>
+            {
+                using var connection = Db.Open();
+                return connection.Query<Genre>(@"
+                    SELECT g.genre_id, g.genre_name, g.genre_description
+                    FROM Genre g
+                    WHERE EXISTS (
+                        SELECT 1
+                        FROM GameGenre l
+                        JOIN Game x ON x.game_id = l.game_id
+                        WHERE l.genre_id = g.genre_id
+                          AND x.parent_game_id IS NULL
+                          AND x.is_archived = @isArchived)
+                    ORDER BY g.genre_name COLLATE UKR_NOCASE ASC, g.genre_id ASC",
+                    new { isArchived }).AsList();
+            });
+
+        /// <summary> Returns genres that are the main genre of at least one studio, for the studios filter. </summary>
+        public static List<Genre> GetUsedByStudios() =>
+            Db.Run("Не вдалося завантажити жанри", () =>
+            {
+                using var connection = Db.Open();
+                return connection.Query<Genre>(@"
+                    SELECT g.genre_id, g.genre_name, g.genre_description
+                    FROM Genre g
+                    WHERE EXISTS (SELECT 1 FROM Studio s WHERE s.main_genre_id = g.genre_id)
+                    ORDER BY g.genre_name COLLATE UKR_NOCASE ASC, g.genre_id ASC").AsList();
+            });
+
+        /// <summary>
         /// Returns ids of the genres whose name contains the search text, ignoring case.
         /// The match is decided by the database; an empty text matches nothing.
         /// </summary>

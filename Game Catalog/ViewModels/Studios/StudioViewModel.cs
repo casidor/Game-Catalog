@@ -120,7 +120,7 @@ namespace Game_Catalog.ViewModels
             try
             {
                 var countries = StudioRepository.GetCountries();
-                var genres = GenreRepository.GetAll();
+                var genres = GenreRepository.GetUsedByStudios();
 
                 _applied = _applied with
                 {

@@ -209,12 +209,12 @@ namespace Game_Catalog.ViewModels
             IsFilterPanelOpen = false;
             try
             {
-                var genres = GenreRepository.GetAll();
-                var platforms = PlatformRepository.GetAll();
-                var tags = TagRepository.GetAll();
-                var studios = StudioRepository.GetAll(new StudioFilter());
+                var genres = GenreRepository.GetUsedInGames(_isArchive);
+                var platforms = PlatformRepository.GetUsedInGames(_isArchive);
+                var tags = TagRepository.GetUsedInGames(_isArchive);
+                var studios = StudioRepository.GetUsedInGames(_isArchive);
 
-                // Drop selections whose dictionary item was deleted meanwhile.
+                // Drop selections that are no longer offered: the item was deleted or no game on this page has it now.
                 _applied = _applied with
                 {
                     GenreIds = _applied.GenreIds.Where(id => genres.Any(x => x.GenreId == id)).ToList(),

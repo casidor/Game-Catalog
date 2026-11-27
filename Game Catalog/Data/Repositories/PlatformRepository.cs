@@ -38,6 +38,28 @@ namespace Game_Catalog.Data.Repositories
         }
 
         /// <summary>
+        /// Returns platforms that at least one standalone game (DLC excluded) of the library or the archive has,
+        /// for the games filter.
+        /// </summary>
+        public static List<Platform> GetUsedInGames(bool isArchived) =>
+            Db.Run("Не вдалося завантажити платформи", () =>
+            {
+                using var connection = Db.Open();
+                return connection.Query<Platform>(@"
+                    SELECT p.platform_id, p.platform_name, p.manufacturer, p.platform_icon_path
+                    FROM Platform p
+                    WHERE EXISTS (
+                        SELECT 1
+                        FROM GamePlatform l
+                        JOIN Game x ON x.game_id = l.game_id
+                        WHERE l.platform_id = p.platform_id
+                          AND x.parent_game_id IS NULL
+                          AND x.is_archived = @isArchived)
+                    ORDER BY p.platform_name COLLATE UKR_NOCASE ASC, p.platform_id ASC",
+                    new { isArchived }).AsList();
+            });
+
+        /// <summary>
         /// Returns ids of the platforms whose name or manufacturer contains the search text, ignoring case.
         /// The match is decided by the database; an empty text matches nothing.
         /// </summary>

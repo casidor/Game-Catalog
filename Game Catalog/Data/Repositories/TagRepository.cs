@@ -28,6 +28,28 @@ namespace Game_Catalog.Data.Repositories
         }
 
         /// <summary>
+        /// Returns tags that at least one standalone game (DLC excluded) of the library or the archive has,
+        /// for the games filter.
+        /// </summary>
+        public static List<Tag> GetUsedInGames(bool isArchived) =>
+            Db.Run("Не вдалося завантажити теги", () =>
+            {
+                using var connection = Db.Open();
+                return connection.Query<Tag>(@"
+                    SELECT t.tag_id, t.tag_name, t.color
+                    FROM Tag t
+                    WHERE EXISTS (
+                        SELECT 1
+                        FROM GameTag l
+                        JOIN Game x ON x.game_id = l.game_id
+                        WHERE l.tag_id = t.tag_id
+                          AND x.parent_game_id IS NULL
+                          AND x.is_archived = @isArchived)
+                    ORDER BY t.tag_name COLLATE UKR_NOCASE ASC, t.tag_id ASC",
+                    new { isArchived }).AsList();
+            });
+
+        /// <summary>
         /// Returns ids of the tags whose name contains the search text, ignoring case.
         /// The match is decided by the database; an empty text matches nothing.
         /// </summary>

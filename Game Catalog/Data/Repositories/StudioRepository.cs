@@ -52,6 +52,28 @@ namespace Game_Catalog.Data.Repositories
         }
 
         /// <summary>
+        /// Returns studios that developed at least one standalone game (DLC excluded) of the library or the archive,
+        /// for the games filter.
+        /// </summary>
+        public static List<Studio> GetUsedInGames(bool isArchived) =>
+            Db.Run("Не вдалося завантажити студії", () =>
+            {
+                using var connection = Db.Open();
+                return connection.Query<Studio>(@"
+                    SELECT s.studio_id, s.studio_name, s.country, s.foundation_year,
+                           s.main_genre_id, g.genre_name AS main_genre_name, s.website
+                    FROM Studio s
+                    LEFT JOIN Genre g ON g.genre_id = s.main_genre_id
+                    WHERE EXISTS (
+                        SELECT 1 FROM Game x
+                        WHERE x.developer_id = s.studio_id
+                          AND x.parent_game_id IS NULL
+                          AND x.is_archived = @isArchived)
+                    ORDER BY s.studio_name COLLATE UKR_NOCASE ASC, s.studio_id ASC",
+                    new { isArchived }).AsList();
+            });
+
+        /// <summary>
         /// Returns ids of the studios whose name or country contains the search text, ignoring case.
         /// The match is decided by the database; an empty text matches nothing.
         /// </summary>
