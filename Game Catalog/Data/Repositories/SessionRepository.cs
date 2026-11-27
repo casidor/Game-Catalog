@@ -122,7 +122,10 @@ namespace Game_Catalog.Data.Repositories
                     ORDER BY start_time ASC, play_session_id ASC").AsList();
             });
 
-        /// <summary> Ends all open sessions now in one statement. </summary>
+        /// <summary>
+        /// Ends the open sessions now in one statement. Sessions started more than 7 days ago are left open:
+        /// ending them now would break the length limit, so their real end has to be entered by hand.
+        /// </summary>
         public static void StopAll() =>
             Db.Run("Не вдалося завершити сесії", () =>
             {
@@ -130,7 +133,8 @@ namespace Game_Catalog.Data.Repositories
                 connection.Execute(@"
                     UPDATE PlaySession
                     SET end_time = strftime('%Y-%m-%d %H:%M:%S', 'now', 'localtime')
-                    WHERE end_time IS NULL");
+                    WHERE end_time IS NULL
+                      AND start_time >= strftime('%Y-%m-%d %H:%M:%S', 'now', 'localtime', '-7 days')");
             });
 
         /// <summary> Inserts the session and sets its generated id. </summary>

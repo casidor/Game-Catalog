@@ -94,7 +94,11 @@ namespace Game_Catalog.ViewModels
         /// <summary> Initializes the dialog for a new session or, if a session is given, for editing it. </summary>
         /// <param name="session"> Session to edit, or null to add a new one. </param>
         /// <param name="presetGameId"> Game selected for a new session, or null. </param>
-        public SessionEditorViewModel(PlaySession? session = null, int? presetGameId = null)
+        /// <param name="askForEnd">
+        /// True for an ongoing session that cannot be ended now (it has run longer than allowed):
+        /// the session is marked as ended, the end day is preset to the start day and the end time is left empty.
+        /// </param>
+        public SessionEditorViewModel(PlaySession? session = null, int? presetGameId = null, bool askForEnd = false)
         {
             _source = session;
             IsGameLocked = presetGameId != null;
@@ -126,6 +130,14 @@ namespace Game_Catalog.ViewModels
                 var end = TrimToMinute(finish);
                 EndDate = end.Date;
                 EndTime = end.TimeOfDay;
+            }
+            else if (askForEnd)
+            {
+                // The end day is set first, so unticking "ongoing" does not fill in the current time.
+                EndDate = begin.Date;
+                EndTime = null;
+                IsOngoing = false;
+                ErrorMessage = $"Сесія триває понад {PlaySession.MaxDuration.Days} діб і не може завершитися зараз. Вкажіть фактичний час завершення.";
             }
             else
             {

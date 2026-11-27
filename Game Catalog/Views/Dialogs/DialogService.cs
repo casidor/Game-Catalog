@@ -279,11 +279,11 @@ public sealed class DialogService : IDialogService
     }
 
     /// <inheritdoc/>
-    public async Task<PlaySession?> ShowSessionEditorAsync(PlaySession? session = null, int? presetGameId = null)
+    public async Task<PlaySession?> ShowSessionEditorAsync(PlaySession? session = null, int? presetGameId = null, bool askForEnd = false)
     {
         if (Owner is not { } owner) return null;
 
-        var vm = new SessionEditorViewModel(session, presetGameId);
+        var vm = new SessionEditorViewModel(session, presetGameId, askForEnd);
         await new SessionEditorWindow { DataContext = vm }.ShowDialog(owner);
         return vm.SavedSession;
     }

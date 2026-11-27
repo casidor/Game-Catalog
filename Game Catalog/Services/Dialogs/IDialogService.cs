@@ -67,7 +67,8 @@ public interface IDialogService
     /// <summary> Shows the session editor. The editor saves the session itself; returns the saved session, or null if cancelled. </summary>
     /// <param name="session"> Session to edit, or null to add a new one. </param>
     /// <param name="presetGameId"> Game preselected for a new session, or null. </param>
-    Task<PlaySession?> ShowSessionEditorAsync(PlaySession? session = null, int? presetGameId = null);
+    /// <param name="askForEnd"> True to open an ongoing session marked as ended with an empty end time, asking for its real end. </param>
+    Task<PlaySession?> ShowSessionEditorAsync(PlaySession? session = null, int? presetGameId = null, bool askForEnd = false);
 
     /// <summary> Shows the goal editor. The editor saves the goal itself; returns the saved goal, or null if cancelled. </summary>
     /// <param name="goal"> Goal to edit, or null to add a new one. </param>

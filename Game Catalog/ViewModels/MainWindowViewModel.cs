@@ -124,13 +124,23 @@ namespace Game_Catalog.ViewModels
             try
             {
                 SessionRepository.StopAll();
-                return true;
             }
             catch (DatabaseException ex)
             {
                 await Dialogs.Current.AlertAsync("Не вдалося завершити сесію", ex.Message);
                 return false;
             }
+
+            // StopAll leaves sessions longer than the limit open: their real end has to be entered by hand.
+            var tooLong = active.Where(s => DateTime.Now - s.StartTime > PlaySession.MaxDuration).ToList();
+            if (tooLong.Count > 0)
+            {
+                var longList = string.Join("\n", tooLong.Select(s => $"• {s.GameTitle} (з {s.StartTime:dd.MM HH:mm})"));
+                await Dialogs.Current.AlertAsync("Деякі сесії не завершено",
+                    $"Ці сесії тривають понад {PlaySession.MaxDuration.Days} діб, тому завершити їх зараз не можна:\n{longList}\n\n" +
+                    "Вкажіть фактичний час завершення кнопкою «Завершити» на сторінці гри.");
+            }
+            return true;
         }
 
         public void Start()

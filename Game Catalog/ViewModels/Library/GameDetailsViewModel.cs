@@ -250,11 +250,21 @@ namespace Game_Catalog.ViewModels
         [RelayCommand]
         private Task StartSessionAsync() => BeginSessionAsync("Не вдалося розпочати сесію");
 
-        /// <summary> Ends the running session now. </summary>
+        /// <summary>
+        /// Ends the running session now. A session that has run longer than allowed cannot end now,
+        /// so the editor opens instead to enter its real end.
+        /// </summary>
         [RelayCommand]
         private async Task StopSessionAsync()
         {
             if (ActiveSession is not { } session) return;
+
+            if (DateTime.Now - session.StartTime > PlaySession.MaxDuration)
+            {
+                if (await Dialogs.Current.ShowSessionEditorAsync(session, session.GameId, askForEnd: true) != null)
+                    await AfterSessionChangeAsync();
+                return;
+            }
 
             try
             {
