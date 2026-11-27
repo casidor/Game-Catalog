@@ -142,9 +142,7 @@ namespace Game_Catalog.ViewModels
             try
             {
                 var items = LoadItems(SortField, SortDescending);
-                Rows.Clear();
-                foreach (var item in items)
-                    Rows.Add(CreateRow(item));
+                Rows.SyncWith(items.Select(CreateRow).ToList(), r => GetId(r.Item), SelectedRows);
             }
             catch (DatabaseException ex)
             {

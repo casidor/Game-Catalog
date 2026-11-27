@@ -60,9 +60,7 @@ namespace Game_Catalog.ViewModels
             try
             {
                 var dlcs = GameRepository.GetDlcs(_game.GameId);
-                Rows.Clear();
-                foreach (var dlc in dlcs)
-                    Rows.Add(new DlcRow(dlc));
+                Rows.SyncWith(dlcs.Select(d => new DlcRow(d)).ToList(), r => r.Dlc.GameId, SelectedRows);
             }
             catch (DatabaseException ex)
             {

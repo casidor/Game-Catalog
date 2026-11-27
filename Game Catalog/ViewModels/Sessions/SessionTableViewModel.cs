@@ -86,9 +86,7 @@ namespace Game_Catalog.ViewModels
             try
             {
                 var sessions = _loadSessions(SortField, SortDescending);
-                Rows.Clear();
-                foreach (var session in sessions)
-                    Rows.Add(session);
+                Rows.SyncWith(sessions, s => s.PlaySessionId, SelectedRows);
             }
             catch (DatabaseException ex)
             {

@@ -121,9 +121,7 @@ namespace Game_Catalog.ViewModels
             try
             {
                 var goals = _loadGoals(SortField, SortDescending);
-                Rows.Clear();
-                foreach (var goal in goals)
-                    Rows.Add(new GoalRow(goal));
+                Rows.SyncWith(goals.Select(g => new GoalRow(g)).ToList(), r => r.Goal.GoalId, SelectedRows);
                 UpdateMatches();
             }
             catch (DatabaseException ex)

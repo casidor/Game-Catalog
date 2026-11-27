@@ -156,9 +156,7 @@ namespace Game_Catalog.ViewModels
                     SortField = SortField,
                     SortDescending = SortDescending
                 });
-                Rows.Clear();
-                foreach (var studio in studios)
-                    Rows.Add(new StudioRow(studio));
+                Rows.SyncWith(studios.Select(s => new StudioRow(s)).ToList(), r => r.Studio.StudioId, SelectedRows);
                 UpdateMatches();
             }
             catch (DatabaseException ex)

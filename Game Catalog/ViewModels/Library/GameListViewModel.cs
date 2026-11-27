@@ -269,15 +269,8 @@ namespace Game_Catalog.ViewModels
         /// <summary> Rebuilds the rows from the loaded games, keeping the order returned by the database. </summary>
         private void Rebuild()
         {
-            var selectedIds = SelectedRows.Select(r => r.Game.GameId).ToHashSet();
-
-            Rows.Clear();
-            foreach (var game in _loaded)
-                Rows.Add(new GameRow(game));
-
-            // Keep the same games selected if they are still in the list.
-            foreach (var row in Rows.Where(r => selectedIds.Contains(r.Game.GameId)))
-                SelectedRows.Add(row);
+            // Keeps the same games selected if they are still in the list.
+            Rows.SyncWith(_loaded.Select(g => new GameRow(g)).ToList(), r => r.Game.GameId, SelectedRows);
 
             UpdateMatches();
 
