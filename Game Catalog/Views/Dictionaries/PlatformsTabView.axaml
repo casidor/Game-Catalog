@@ -32,6 +32,15 @@
 			</DataGrid.ContextMenu>
 
 			<DataGrid.Columns>
+				<DataGridTemplateColumn Width="44" CanUserSort="False" CanUserResize="False">
+					<DataGridTemplateColumn.CellTemplate>
+						<DataTemplate x:DataType="vm:PlatformRow">
+							<views:PlatformIcon Width="20" Height="20"
+												IconPath="{Binding Item.PlatformIconPath}"
+												HorizontalAlignment="Center" VerticalAlignment="Center"/>
+						</DataTemplate>
+					</DataGridTemplateColumn.CellTemplate>
+				</DataGridTemplateColumn>
 				<DataGridTextColumn Header="Назва" Width="*"
 									Binding="{ReflectionBinding Item.PlatformName}"
 									Tag="{x:Static models:DictionarySortField.Name}"/>

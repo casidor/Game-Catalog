@@ -169,7 +169,12 @@
 											<ItemsControl ItemsSource="{Binding Platforms.FilteredOptions}">
 												<ItemsControl.ItemTemplate>
 													<DataTemplate x:DataType="vm:FilterOption">
-														<CheckBox Content="{Binding Name}" IsChecked="{Binding IsChecked}"/>
+														<CheckBox IsChecked="{Binding IsChecked}">
+															<StackPanel Orientation="Horizontal" Spacing="6">
+																<v:PlatformIcon IconPath="{Binding IconPath}" VerticalAlignment="Center"/>
+																<TextBlock Text="{Binding Name}" VerticalAlignment="Center"/>
+															</StackPanel>
+														</CheckBox>
 													</DataTemplate>
 												</ItemsControl.ItemTemplate>
 											</ItemsControl>

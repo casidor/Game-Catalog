@@ -419,10 +419,14 @@
 								</ItemsControl.ItemsPanel>
 								<ItemsControl.ItemTemplate>
 									<DataTemplate x:DataType="models:Platform">
-										<Border CornerRadius="12" Padding="10,3" Margin="0,0,6,6"
+										<Border CornerRadius="12" Padding="6,3,10,3" Margin="0,0,6,6"
 												Background="#30808080">
-											<TextBlock Text="{Binding PlatformName}"
-													   FontSize="12" FontWeight="SemiBold"/>
+											<StackPanel Orientation="Horizontal" Spacing="6">
+												<v:PlatformIcon IconPath="{Binding PlatformIconPath}" VerticalAlignment="Center"/>
+												<TextBlock Text="{Binding PlatformName}"
+														   FontSize="12" FontWeight="SemiBold"
+														   VerticalAlignment="Center"/>
+											</StackPanel>
 										</Border>
 									</DataTemplate>
 								</ItemsControl.ItemTemplate>
@@ -532,7 +536,12 @@
 								<ItemsControl ItemsSource="{Binding PlatformOptions}">
 									<ItemsControl.ItemTemplate>
 										<DataTemplate x:DataType="vm:FilterOption">
-											<CheckBox Content="{Binding Name}" IsChecked="{Binding IsChecked}"/>
+											<CheckBox IsChecked="{Binding IsChecked}">
+												<StackPanel Orientation="Horizontal" Spacing="6">
+													<v:PlatformIcon IconPath="{Binding IconPath}" VerticalAlignment="Center"/>
+													<TextBlock Text="{Binding Name}" VerticalAlignment="Center"/>
+												</StackPanel>
+											</CheckBox>
 										</DataTemplate>
 									</ItemsControl.ItemTemplate>
 								</ItemsControl>
